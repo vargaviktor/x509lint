@@ -314,6 +314,69 @@ static bool IsNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
 	return false;
 }
 
+static bool IsValidLongerThan(const gnutls_x509_crt_t cert, int months)
+{
+	time_t from = gnutls_x509_crt_get_activation_time(cert);
+	time_t to = gnutls_x509_crt_get_expiration_time(cert);
+
+	if ((from == (time_t)-1) || (to == (time_t)-1))
+	{
+		SetError(ERR_INVALID);
+		return false;
+	}
+
+	struct tm tm_from, tm_to;
+	if (gmtime_r(&from, &tm_from) == NULL || gmtime_r(&to, &tm_to) == NULL)
+	{
+		SetError(ERR_DATE_OUT_OF_RANGE);
+		return false;
+	}
+
+	int month_diff = (tm_to.tm_year - tm_from.tm_year) * 12
+		+ tm_to.tm_mon - tm_from.tm_mon;
+	if (month_diff > months)
+	{
+		return true;
+	}
+	if (month_diff < months)
+	{
+		return false;
+	}
+	if (tm_to.tm_mday < tm_from.tm_mday)
+	{
+		return false;
+	}
+	if (tm_to.tm_mday > tm_from.tm_mday)
+	{
+		return true;
+	}
+	if (tm_to.tm_hour < tm_from.tm_hour)
+	{
+		return false;
+	}
+	if (tm_to.tm_hour > tm_from.tm_hour)
+	{
+		return true;
+	}
+	if (tm_to.tm_min < tm_from.tm_min)
+	{
+		return false;
+	}
+	if (tm_to.tm_min > tm_from.tm_min)
+	{
+		return true;
+	}
+	if (tm_to.tm_sec < tm_from.tm_sec)
+	{
+		return false;
+	}
+	if (tm_to.tm_sec > tm_from.tm_sec)
+	{
+		return true;
+	}
+	return false;
+}
+
 void check(const gnutls_x509_crt_t cert, CertType type)
 {
 	gnutls_x509_dn_t issuer;
@@ -481,6 +544,19 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 		CheckValidURL(buf, size);
                 i++;
         }
+
+	if (type == SubscriberCertificate)
+	{
+		/* CAB 9.4.1 */
+		if (IsValidLongerThan(cert, 39))
+		{
+			SetWarning(WARN_LONGER_39_MONTHS);
+		}
+		if (IsValidLongerThan(cert, 60))
+		{
+			SetWarning(ERR_LONGER_60_MONTHS);
+		}
+	}
 }
 
 void check_init()

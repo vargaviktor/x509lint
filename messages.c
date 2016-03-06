@@ -20,12 +20,15 @@ static const char *error_strings[] =
 	"E: No policy extension\n",
 	"E: No Subject alternative name extension\n",
 	"E: Certificate not version 3\n",
-	"E: Error parsing URL\n"
+	"E: Error parsing URL\n",
+	"E: The certificate is valid for longer than 60 months\n",
+	"E: Date out of range\n"
 };
 
 static const char *warning_strings[] = {
 	"W: The distinguished name contains something that is not a PrintableString or UTF8String\n",
-	"W: The distinguished name makes use of an IA5String\n"
+	"W: The distinguished name makes use of an IA5String\n",
+	"W: The certificate is valid for longer than 39 months\n"
 };
 
 static const char *info_strings[] = {
@@ -46,7 +49,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_INVALID_URL; i++)
+	for (int i = 0; i <= ERR_DATE_OUT_OF_RANGE; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -54,7 +57,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_IA5; i++)
+	for (int i = 0; i <= WARN_LONGER_39_MONTHS; i++)
 	{
 		if (i == WARN_IA5)
 		{

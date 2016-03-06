@@ -23,10 +23,13 @@ typedef enum { SubscriberCertificate, IntermediateCA, RootCA } CertType;
 #define ERR_NO_SUBJECT_ALT_NAME               14
 #define ERR_NOT_VERSION3                      15
 #define ERR_INVALID_URL                       16
+#define ERR_LONGER_60_MONTHS                  17
+#define ERR_DATE_OUT_OF_RANGE                 18
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
 #define WARN_IA5                       1
+#define WARN_LONGER_39_MONTHS          2
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                 0
