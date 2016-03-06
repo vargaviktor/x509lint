@@ -3,6 +3,7 @@
 #include <string.h>
 #include <iconv.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include <gnutls/x509.h>
 
@@ -276,7 +277,7 @@ static void CheckDN(const gnutls_x509_dn_t dn)
 	while(1);
 }
 
-static int CheckNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
+static bool IsNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
 {
 	int irdn = 0;
 	do
@@ -298,7 +299,7 @@ static int CheckNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
 			}
 			if (strcmp((const char *)ava.oid.data, oid) == 0)
 			{
-				return 1;
+				return true;
 			}
 			iava++;
 		}
@@ -310,7 +311,7 @@ static int CheckNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
 		irdn++;
 	}
 	while(1);
-	return 0;
+	return false;
 }
 
 void check(const gnutls_x509_crt_t cert, CertType type)
@@ -343,13 +344,13 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 	CheckDN(issuer);
 
 	/* Required by CAB base 9.1.3 */
-	if (!CheckNameOIDPresent(issuer, GNUTLS_OID_X520_ORGANIZATION_NAME))
+	if (!IsNameOIDPresent(issuer, GNUTLS_OID_X520_ORGANIZATION_NAME))
 	{
 		SetError(ERR_ISSUER_ORG_NAME);
 	}
 
 	/* Required by CAB base 9.1.4 */
-	if (!CheckNameOIDPresent(issuer, GNUTLS_OID_X520_COUNTRY_NAME))
+	if (!IsNameOIDPresent(issuer, GNUTLS_OID_X520_COUNTRY_NAME))
 	{
 		SetError(ERR_ISSUER_COUNTRY);
 	}
@@ -359,31 +360,31 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 	CheckDN(subject);
 
 	/* Prohibited in CAB base 9.2.4b */
-	if (!CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& CheckNameOIDPresent(subject, OIDStreetAddress))
+	if (!IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+		&& IsNameOIDPresent(subject, OIDStreetAddress))
 	{
 		SetError(ERR_SUBJECT_ADDR);
 	}
 
 	/* Required in CAB base 9.2.4c and 9.2.4d */
-	if (CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& !CheckNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-		&& !CheckNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME))
+	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
+		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME))
 	{
 		SetError(ERR_SUBJECT_ORG_NO_PLACE);
 	}
 
 	/* Prohibited in CAB base 9.2.4c or 9.2.4d */
-	if (!CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& (CheckNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-			|| CheckNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)))
+	if (!IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+		&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+			|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)))
 	{
 		SetError(ERR_SUBJECT_NO_ORG_PLACE);
 	}
 
 	/* Required by CAB base 9.2.5 */
-	if (CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& !CheckNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME))
+	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME))
 	{
 		SetError(ERR_SUBJECT_COUNTRY);
 	}
@@ -404,18 +405,18 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 		}
 		/* Required by CAB base 9.3.1 */
 		if (strcmp(policy.oid, OIDCabDomainValidated) == 0
-			&& (CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-				|| CheckNameOIDPresent(subject, OIDStreetAddress)
-				|| CheckNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-				|| CheckNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-				|| CheckNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
+			&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+				|| IsNameOIDPresent(subject, OIDStreetAddress)
+				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
+				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
 		{
 			SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
 		}
 		if (strcmp(policy.oid, OIDCabIdentityValidated) == 0
-			&& !(CheckNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-				&& CheckNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-				&& CheckNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
+			&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+				&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+				&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
 		{
 			SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
 		}
@@ -448,7 +449,7 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 	}
 
 	/* Deprecated in CAB base 9.2.2 */
-	if (CheckNameOIDPresent(subject, GNUTLS_OID_X520_COMMON_NAME))
+	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_COMMON_NAME))
 	{
 		SetInfo(INF_SUBJECT_CN);
 	}
