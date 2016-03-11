@@ -1,8 +1,6 @@
 #ifndef _CHECKS_H_
 #define _CHECKS_H_
 
-#include <gnutls/x509.h>
-
 typedef enum { SubscriberCertificate, IntermediateCA, RootCA } CertType;
 typedef enum { PEM, DER } CertFormat;
 
