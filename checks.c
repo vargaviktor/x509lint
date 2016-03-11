@@ -399,7 +399,7 @@ static bool IsValidLongerThan(const gnutls_x509_crt_t cert, int months)
 	return false;
 }
 
-void check(const gnutls_x509_crt_t cert, CertType type)
+void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	gnutls_x509_dn_t issuer;
 	gnutls_x509_dn_t subject;
@@ -411,9 +411,24 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 	char buf[81920];
 	gnutls_pk_algorithm_t pk_alg;
 	unsigned int pk_bits;
+	gnutls_x509_crt_t cert;
+	gnutls_datum_t pem;
 
 	Clear();
 
+	if (gnutls_x509_crt_init(&cert) != 0)
+	{
+		exit(1);
+	}
+
+	pem.data = (unsigned char *)cert_buffer;
+	pem.size = size;
+
+	if (gnutls_x509_crt_import(cert, &pem, format == PEM ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER) != 0)
+	{
+		SetError(ERR_INVALID);
+		return;
+	}
 
 	ret = gnutls_x509_crt_get_version(cert);
 	if (ret < 0)
@@ -546,14 +561,14 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 	}
 
 	i = 0;
-        while (1)
-        {
-                size = sizeof(buf);
-                int ret = gnutls_x509_crt_get_crl_dist_points(cert, i, buf, &size, NULL, NULL);
-                if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
-                {
-                        break;
-                }
+	while (1)
+	{
+		size = sizeof(buf);
+		int ret = gnutls_x509_crt_get_crl_dist_points(cert, i, buf, &size, NULL, NULL);
+		if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
+		{
+			break;
+		}
 		if (ret < 0)
 		{
 			SetError(ERR_INVALID);
@@ -564,8 +579,8 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 			SetInfo(INF_CRL_NOT_URL);
 		}
 		CheckValidURL(buf, size);
-                i++;
-        }
+		i++;
+	}
 
 	if (type == SubscriberCertificate)
 	{
@@ -579,16 +594,18 @@ void check(const gnutls_x509_crt_t cert, CertType type)
 			SetWarning(ERR_LONGER_60_MONTHS);
 		}
 	}
+
+	gnutls_x509_crt_deinit(cert);
 }
 
 void check_init()
 {
 	int ret;
-        if ((ret = gnutls_global_init()) < 0)
+	if ((ret = gnutls_global_init()) < 0)
 	{
-                fprintf(stderr, "gnutls_global_init: %s\n", gnutls_strerror(ret));
-                exit(1);
-        }
+		fprintf(stderr, "gnutls_global_init: %s\n", gnutls_strerror(ret));
+		exit(1);
+	}
 
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");

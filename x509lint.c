@@ -26,71 +26,58 @@
 #include "checks.h"
 #include "messages.h"
 
-static int LoadCert(const char *filename, gnutls_x509_crt_t *cert)
+static int LoadCert(const char *filename, char **buffer, size_t *buflen)
 {
-        unsigned char *buffer;
-        long size;
-        FILE *f;
-        gnutls_datum_t pem;
+	long size;
+	FILE *f;
 
-        f = fopen(filename, "rb");
-        if (f == NULL)
-        {
-                return -1;
-        }
-        if (fseek(f, 0, SEEK_END) != 0)
-        {
-                return -1;
-        }
-        size = ftell(f);
-        if (size == -1)
-        {
-                return -1;
-        }
-        buffer = malloc(size);
-        if (fseek(f, 0, SEEK_SET) != 0)
-        {
-                free(buffer);
-                return -1;
-        }
-        if (fread(buffer, 1, size, f) != size)
-        {
-                free(buffer);
-                return -1;
-        }
-        fclose(f);
+	f = fopen(filename, "rb");
+	if (f == NULL)
+	{
+		return -1;
+	}
+	if (fseek(f, 0, SEEK_END) != 0)
+	{
+		return -1;
+	}
+	size = ftell(f);
+	if (size == -1)
+	{
+		return -1;
+	}
+	*buffer = malloc(size);
+	if (fseek(f, 0, SEEK_SET) != 0)
+	{
+		free(*buffer);
+		*buffer = NULL;
+		return -1;
+	}
+	if (fread(*buffer, 1, size, f) != size)
+	{
+		free(*buffer);
+		*buffer = NULL;
+		return -1;
+	}
+	fclose(f);
 
-        if (gnutls_x509_crt_init(cert) != 0)
-        {
-                free(buffer);
-                return -1;
-        }
+	*buflen = size;
 
-        pem.data = buffer;
-        pem.size = size;
-
-        if (gnutls_x509_crt_import(*cert, &pem, GNUTLS_X509_FMT_PEM) != 0)
-        {
-                free(buffer);
-                return -1;
-        }
-        free(buffer);
-
-        return 0;
+	return 0;
 }
 
 
 int main(int argc, char *argv[])
 {
-	gnutls_x509_crt_t cert;
+	char *buffer;
+	size_t buflen;
 
-        if (argc != 2)
-        {
-                printf("Usage: x509lint file\n");
-                exit(1);
-        }
+	if (argc != 2)
+	{
+		printf("Usage: x509lint file\n");
+		exit(1);
+	}
 
-	if (LoadCert(argv[1], &cert) != 0)
+	if (LoadCert(argv[1], &buffer, &buflen) != 0)
 	{
 		fprintf(stderr, "Unable to read certificate\n");
 		exit(1);
@@ -98,13 +85,13 @@ int main(int argc, char *argv[])
 
 	check_init();
 	
-	check(cert, SubscriberCertificate);
+	check(buffer, buflen, PEM, SubscriberCertificate);
 
 	char *m = get_messages();
 	printf("%s", m);
 	free(m);
 
-        gnutls_x509_crt_deinit(cert);
+	free(buffer);
 
 	check_finish();
 

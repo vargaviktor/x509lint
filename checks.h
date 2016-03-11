@@ -4,6 +4,7 @@
 #include <gnutls/x509.h>
 
 typedef enum { SubscriberCertificate, IntermediateCA, RootCA } CertType;
+typedef enum { PEM, DER } CertFormat;
 
 /* This should never happen in certificates, and violates a MUST */
 #define ERR_INVALID                            0
@@ -41,7 +42,7 @@ extern unsigned int warnings[1];
 extern unsigned int info[1];
 
 void check_init();
-void check(const gnutls_x509_crt_t cert, CertType type);
+void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
 int GetBit(unsigned int *val, int bit);
 void check_finish();
 
