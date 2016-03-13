@@ -428,12 +428,71 @@ static bool IsValidLongerThan(const gnutls_x509_crt_t cert, int months)
 	return false;
 }
 
-void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
+static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
+{
+	int idx = -1;
+	bool bPolicyFound = false;
+	do
+	{
+		int critical = -1;
+
+		CERTIFICATEPOLICIES *policy = X509_get_ext_d2i(x509, NID_certificate_policies, &critical, &idx);
+
+		if (policy == NULL)
+		{
+			if (critical >= 0)
+			{
+				/* Found but fails to parse */
+				SetError(ERR_INVALID);
+				bPolicyFound = true;
+				continue;
+			}
+			/* Not found */
+			break;
+		}
+		bPolicyFound = true;
+
+		for (int pi = 0; pi < sk_POLICYINFO_num(policy); pi++)
+		{
+			POLICYINFO *info = sk_POLICYINFO_value(policy, pi);
+
+			char oid[80];
+			OBJ_obj2txt(oid, sizeof(oid), info->policyid, 1);
+
+			/* Required by CAB base 9.3.1 */
+			if (strcmp(oid, OIDCabDomainValidated) == 0
+				&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+					|| IsNameOIDPresent(subject, OIDStreetAddress)
+					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
+					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
+			{
+				SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
+			}
+
+			if (strcmp(oid, OIDCabIdentityValidated) == 0
+				&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+					&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+					&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
+			{
+				SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+			}
+		}
+		CERTIFICATEPOLICIES_free(policy);
+	}
+	while(1);
+
+	if (!bPolicyFound && type == SubscriberCertificate)
+	{
+		/* Required by CAB 9.3.4 */
+		SetError(ERR_NO_POLICY);
+	}
+}
+
+void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	gnutls_x509_dn_t issuer;
 	gnutls_x509_dn_t subject;
-	struct gnutls_x509_policy_st policy;
-	unsigned int critical;
 	int i;
 	int ret;
 	size_t size = 81920;
@@ -526,52 +585,12 @@ void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType
 		SetError(ERR_SUBJECT_COUNTRY);
 	}
 
-	i = 0;
-	do
-	{
-		int ret = gnutls_x509_crt_get_policy(cert, i, &policy, &critical);
-		if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
-		{
-			break;
-		}
-		else if (ret != 0)
-		{
-			/* TODO: Re-enable when library fixed */
-//			SetError(ERR_INVALID);
-			break;
-		}
-		/* Required by CAB base 9.3.1 */
-		if (strcmp(policy.oid, OIDCabDomainValidated) == 0
-			&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-				|| IsNameOIDPresent(subject, OIDStreetAddress)
-				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-				|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
-		{
-			SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
-		}
-		if (strcmp(policy.oid, OIDCabIdentityValidated) == 0
-			&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-				&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-				&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
-		{
-			SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
-		}
-		/* TODO: function isn't exported, this causes a memory leak */
-		gnutls_x509_policy_release(&policy);
-		i++;
-	}
-	while(1);
-
-	if (i == 0 && type == SubscriberCertificate)
-	{
-		/* Required by CAB 9.3.4 */
-		SetError(ERR_NO_POLICY);
-	}
+	CheckPolicy(x509, type, subject);
 
 	/* Required by CAB base 9.2.1 */
 	/* It's not clear if this should also apply to CAs, the CAB base
 	 * document doesn't exclude them, but I think it shouldn't apply to CAs. */
+	unsigned int critical;
 	ret = gnutls_x509_crt_get_extension_by_oid(cert, OIDSubjectAltName, 0, NULL, &size, &critical);
 	if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
 	{
