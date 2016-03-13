@@ -3,7 +3,7 @@ LD = $(CC)
 RM = rm
 
 CFLAGS = -g -Wall -O2 -std=c99 -D_POSIX_SOURCE
-LIBS = -lgnutls
+LIBS = -lgnutls -lcrypto
 
 OBJECTS = x509lint.o checks.o messages.o
 

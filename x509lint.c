@@ -26,7 +26,7 @@
 #include "checks.h"
 #include "messages.h"
 
-static int LoadCert(const char *filename, char **buffer, size_t *buflen)
+static int LoadCert(const char *filename, unsigned char **buffer, size_t *buflen)
 {
 	long size;
 	FILE *f;
@@ -68,7 +68,7 @@ static int LoadCert(const char *filename, char **buffer, size_t *buflen)
 
 int main(int argc, char *argv[])
 {
-	char *buffer;
+	unsigned char *buffer;
 	size_t buflen;
 
 	if (argc != 2)

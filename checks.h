@@ -40,7 +40,7 @@ extern unsigned int warnings[1];
 extern unsigned int info[1];
 
 void check_init();
-void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
+void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
 int GetBit(unsigned int *val, int bit);
 void check_finish();
 

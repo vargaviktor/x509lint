@@ -29,6 +29,11 @@
 
 #include <gnutls/x509.h>
 
+#include <openssl/x509.h>
+#include <openssl/x509v3.h>
+#include <openssl/pem.h>
+#include <openssl/evp.h>
+
 #include "checks.h"
 
 static iconv_t iconv_utf8;
@@ -57,6 +62,30 @@ int GetBit(unsigned int *val, int bit)
 #define SetError(bit) SetBit(errors, bit)
 #define SetWarning(bit) SetBit(warnings, bit)
 #define SetInfo(bit) SetBit(info, bit)
+
+static X509 *LoadCert(const unsigned char *data, size_t len, CertFormat format)
+{
+	X509 *x509;
+	BIO *bio = BIO_new_mem_buf(data, len);
+
+	if (bio == NULL)
+	{
+		exit(1);
+	}
+
+	if (format == PEM)
+	{
+		x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+	}
+	else
+	{
+		x509 = d2i_X509_bio(bio, NULL);
+	}
+
+	BIO_free(bio);
+
+	return x509;
+}
 
 static void Clear()
 {
@@ -413,6 +442,7 @@ void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType
 	unsigned int pk_bits;
 	gnutls_x509_crt_t cert;
 	gnutls_datum_t pem;
+	X509 *x509;
 
 	Clear();
 
@@ -425,6 +455,13 @@ void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType
 	pem.size = size;
 
 	if (gnutls_x509_crt_import(cert, &pem, format == PEM ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER) != 0)
+	{
+		SetError(ERR_INVALID);
+		return;
+	}
+
+	x509 = LoadCert(cert_buffer, cert_len, format);
+	if (x509 == NULL)
 	{
 		SetError(ERR_INVALID);
 		return;
@@ -596,6 +633,7 @@ void check(const char *cert_buffer, size_t cert_len, CertFormat format, CertType
 	}
 
 	gnutls_x509_crt_deinit(cert);
+	X509_free(x509);
 }
 
 void check_init()
@@ -606,6 +644,7 @@ void check_init()
 		fprintf(stderr, "gnutls_global_init: %s\n", gnutls_strerror(ret));
 		exit(1);
 	}
+	OpenSSL_add_all_algorithms();
 
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");
@@ -618,5 +657,7 @@ void check_finish()
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
 	gnutls_global_deinit();
+	EVP_cleanup();
+	CRYPTO_cleanup_all_ex_data();
 }
 
