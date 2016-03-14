@@ -616,7 +616,7 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 
 	CheckPolicy(x509, type, subject);
 
-	/* Required by CAB base 9.2.1 */
+	/* Required by CAB base 7.1.4.2.1 */
 	/* It's not clear if this should also apply to CAs, the CAB base
 	 * document doesn't exclude them, but I think it shouldn't apply to CAs. */
 	unsigned int critical;
@@ -633,10 +633,13 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 		SetError(ERR_INVALID);
 	}
 
-	/* Deprecated in CAB base 9.2.2 */
+	/* Deprecated in CAB base 7.1.4.2.2 */
 	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_COMMON_NAME))
 	{
-		SetInfo(INF_SUBJECT_CN);
+		if (type == SubscriberCertificate)
+		{
+			SetInfo(INF_SUBJECT_CN);
+		}
 	}
 
 	pk_alg = gnutls_x509_crt_get_pk_algorithm(cert, &pk_bits);
