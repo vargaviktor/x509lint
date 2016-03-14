@@ -511,7 +511,7 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 	}
 
 	pem.data = (unsigned char *)cert_buffer;
-	pem.size = size;
+	pem.size = cert_len;
 
 	if (gnutls_x509_crt_import(cert, &pem, format == PEM ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER) != 0)
 	{
