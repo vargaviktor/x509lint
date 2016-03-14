@@ -459,23 +459,26 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 			char oid[80];
 			OBJ_obj2txt(oid, sizeof(oid), info->policyid, 1);
 
-			/* Required by CAB base 9.3.1 */
-			if (strcmp(oid, OIDCabDomainValidated) == 0
-				&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-					|| IsNameOIDPresent(subject, OIDStreetAddress)
-					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-					|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
+			if (type == SubscriberCertificate)
 			{
-				SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
-			}
+				/* Required by CAB base 9.3.1 */
+				if (strcmp(oid, OIDCabDomainValidated) == 0
+					&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+						|| IsNameOIDPresent(subject, OIDStreetAddress)
+						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
+						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
+				{
+					SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
+				}
 
-			if (strcmp(oid, OIDCabIdentityValidated) == 0
-				&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-					&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-					&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
-			{
-				SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+				if (strcmp(oid, OIDCabIdentityValidated) == 0
+					&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
+						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
+				{
+					SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+				}
 			}
 		}
 		CERTIFICATEPOLICIES_free(policy);
