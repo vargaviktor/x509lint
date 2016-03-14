@@ -666,7 +666,10 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 		{
 			SetInfo(INF_CRL_NOT_URL);
 		}
-		CheckValidURL(buf, size);
+		else
+		{
+			CheckValidURL(buf, size);
+		}
 		i++;
 	}
 
