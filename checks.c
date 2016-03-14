@@ -520,6 +520,7 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 	gnutls_x509_crt_t cert;
 	gnutls_datum_t pem;
 	X509 *x509;
+	int ca;
 
 	Clear();
 
@@ -542,6 +543,16 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 	{
 		SetError(ERR_INVALID);
 		return;
+	}
+
+	ca = X509_check_ca(x509);
+	if (ca > 0 && type == SubscriberCertificate)
+	{
+		SetWarning(WARN_CHECKED_AS_SUBSCRIBER);
+	}
+	else if (ca == 0 && type != SubscriberCertificate)
+	{
+		SetWarning(WARN_CHECKED_AS_CA);
 	}
 
 	ret = gnutls_x509_crt_get_version(cert);

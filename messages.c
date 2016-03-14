@@ -51,7 +51,9 @@ static const char *error_strings[] =
 static const char *warning_strings[] = {
 	"W: The distinguished name contains something that is not a PrintableString or UTF8String\n",
 	"W: The distinguished name makes use of an IA5String\n",
-	"W: The certificate is valid for longer than 39 months\n"
+	"W: The certificate is valid for longer than 39 months\n",
+	"W: CA certificate checked as if it was a subscriber certificate\n",
+	"W: Subscriber certificate checked as if it was a CA certificate\n"
 };
 
 static const char *info_strings[] = {
@@ -80,7 +82,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_LONGER_39_MONTHS; i++)
+	for (int i = 0; i <= WARN_CHECKED_AS_CA; i++)
 	{
 		if (i == WARN_IA5)
 		{
