@@ -41,9 +41,18 @@ static iconv_t iconv_ucs2;
 static iconv_t iconv_t61;
 
 static const char *OIDStreetAddress = "2.5.4.9";
+static const char *OIDpostalCode = "2.5.4.17";
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabIdentityValidated = "2.23.140.1.2.2";
 static const char *OIDSubjectAltName = "2.5.29.17";
+
+static ASN1_OBJECT *obj_organizationName;
+static ASN1_OBJECT *obj_StreetAddress;
+static ASN1_OBJECT *obj_localityName;
+static ASN1_OBJECT *obj_stateOrProvinceName;
+static ASN1_OBJECT *obj_postalCode;
+static ASN1_OBJECT *obj_countryName;
+static ASN1_OBJECT *obj_commonName;
 
 unsigned int errors[1];
 unsigned int warnings[1];
@@ -148,15 +157,17 @@ static void CheckPrintableChars(const char *s, int n)
 	}
 }
 
-static void CheckNameEntryValid(const gnutls_x509_ava_st *ne)
+static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 {
 	int i;
 
-	if (ne->value_tag == 12) /* UTF8String */
+	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+
+	if (data->type == V_ASN1_UTF8STRING)
 	{
-		size_t n1 = ne->value.size;
-		size_t n2 = ne->value.size;
-		char *s1 = (char *)ne->value.data;
+		size_t n1 = data->length;
+		size_t n2 = data->length;
+		char *s1 = (char *)data->data;
 		char *s2 = malloc(n2);
 		char *ps2 = s2;
 
@@ -168,15 +179,15 @@ static void CheckNameEntryValid(const gnutls_x509_ava_st *ne)
 			SetError(ERR_INVALID_ENCODING);
 		}
 
-		CheckPrintableChars((const char *)ne->value.data, ne->value.size);
+		CheckPrintableChars((const char *)data->data, data->length);
 
 		free(s2);
 	}
-	else if (ne->value_tag == 30) /* BMPString */
+	else if (data->type == V_ASN1_BMPSTRING)
 	{
-		size_t n1 = ne->value.size;
-		size_t n2 = ne->value.size*3;		/* U+FFFF is represented with 3 UTF-8 chars */
-		char *s1 = (char *)ne->value.data;
+		size_t n1 = data->length;
+		size_t n2 = data->length*3;		/* U+FFFF is represented with 3 UTF-8 chars */
+		char *s1 = (char *)data->data;
 		char *s2 = malloc(n2);
 		char *ps2 = s2;
 
@@ -192,62 +203,62 @@ static void CheckNameEntryValid(const gnutls_x509_ava_st *ne)
 
 		free(s2);
 	}
-	else if (ne->value_tag == 19) /* PrintableString */
+	else if (data->type == V_ASN1_PRINTABLESTRING)
 	{
 		int i;
-		for (i = 0; i < ne->value.size; i++)
+		for (i = 0; i < data->length; i++)
 		{
-			if (ne->value.data[i] == '\0')
+			if (data->data[i] == '\0')
 			{
 				SetError(ERR_STRING_WITH_NUL);
 			}
-			else if ((unsigned char)ne->value.data[i] < 32)
+			else if (data->data[i] < 32)
 			{
 				SetError(ERR_NON_PRINTABLE);
 			}
-			else if (!((ne->value.data[i] >= 'A' && ne->value.data[i] <= 'Z') ||
-				(ne->value.data[i] >= 'a' && ne->value.data[i] <= 'z') ||
-				(ne->value.data[i] >= '0' && ne->value.data[i] <= '9') ||
-				(ne->value.data[i] == '\'') ||
-				(ne->value.data[i] == '(') ||
-				(ne->value.data[i] == ')') ||
-				(ne->value.data[i] == '+') ||
-				(ne->value.data[i] == ',') ||
-				(ne->value.data[i] == '-') ||
-				(ne->value.data[i] == '.') ||
-				(ne->value.data[i] == '/') ||
-				(ne->value.data[i] == ':') ||
-				(ne->value.data[i] == '?') ||
-				(ne->value.data[i] == ' ')))
+			else if (!((data->data[i] >= 'A' && data->data[i] <= 'Z') ||
+				(data->data[i] >= 'a' && data->data[i] <= 'z') ||
+				(data->data[i] >= '0' && data->data[i] <= '9') ||
+				(data->data[i] == '\'') ||
+				(data->data[i] == '(') ||
+				(data->data[i] == ')') ||
+				(data->data[i] == '+') ||
+				(data->data[i] == ',') ||
+				(data->data[i] == '-') ||
+				(data->data[i] == '.') ||
+				(data->data[i] == '/') ||
+				(data->data[i] == ':') ||
+				(data->data[i] == '?') ||
+				(data->data[i] == ' ')))
 			{
 				SetError(ERR_INVALID_ENCODING);
 			}
 		}
 	}
-	else if (ne->value_tag == 22)    /* IA5String */
+	else if (data->type == V_ASN1_IA5STRING)
 	{
-		for (i = 0; i < ne->value.size; i++)
+		for (i = 0; i < data->length; i++)
 		{
-			if (ne->value.data[i] == '\0')
+			if (data->data[i] == '\0')
 			{
 				SetError(ERR_STRING_WITH_NUL);
 			}
-			else if ((unsigned char)ne->value.data[i] < 32)
+			else if (data->data[i] < 32)
 			{
 				SetError(ERR_NON_PRINTABLE);
 			}
-			else if (((unsigned char)ne->value.data[i]) >= 128)
+			else if (data->data[i] >= 128)
 			{
 				SetError(ERR_INVALID_ENCODING);
 			}
 		}
 		SetWarning(WARN_IA5);
 	}
-	else if (ne->value_tag == 20)  /* TeletexString, T61String */
+	else if (data->type == V_ASN1_T61STRING)  /* TeletexString, T61String */
 	{
-		size_t n1 = ne->value.size;
-		size_t n2 = ne->value.size*2;
-		char *s1 = (char *)ne->value.data;
+		size_t n1 = data->length;
+		size_t n2 = data->length*2;
+		char *s1 = (char *)data->data;
 		char *s2 = malloc(n2);
 		char *ps2 = s2;
 
@@ -269,15 +280,15 @@ static void CheckNameEntryValid(const gnutls_x509_ava_st *ne)
 	}
 
 	/* It should be a DirectoryString, which is one of the below */
-	if ((ne->value_tag != 19) &&      /* PrintableString */
-		(ne->value_tag != 12) &&  /* UTF8String */
-		(ne->value_tag != 20) &&  /* TeletexString, T61String */
-		(ne->value_tag != 28) &&  /* UniversalString */
-		(ne->value_tag != 30))    /* BMPString */
+	if ((data->type != V_ASN1_PRINTABLESTRING) &&
+		(data->type != V_ASN1_UTF8STRING) &&
+		(data->type != V_ASN1_T61STRING) &&
+		(data->type != V_ASN1_UNIVERSALSTRING) &&
+		(data->type != V_ASN1_BMPSTRING))
 	{
 		SetError(ERR_INVALID_TAG_TYPE);
 	}
-	else if ((ne->value_tag != 19) && (ne->value_tag != 12))
+	else if ((data->type != V_ASN1_PRINTABLESTRING) && (data->type != V_ASN1_UTF8STRING))
 	{
 		/* RFC5280 says it MUST be PrintableString or UTF8String, with exceptions. */
 		SetWarning(WARN_NON_PRINTABLE_STRING);
@@ -286,83 +297,28 @@ static void CheckNameEntryValid(const gnutls_x509_ava_st *ne)
 	return;
 }
 
-static void CheckDN(const gnutls_x509_dn_t dn)
+static void CheckDN(X509_NAME *dn)
 {
-	int irdn = 0;
-	do
+	for (int i = 0; i < X509_NAME_entry_count(dn); i++)
 	{
-		int iava = 0;
-		gnutls_x509_ava_st ava;
+		X509_NAME_ENTRY *ne = X509_NAME_get_entry(dn, i);
+		ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
 
-		do
+		if (data->type != V_ASN1_SEQUENCE)
 		{
-			int ret = gnutls_x509_dn_get_rdn_ava(dn, irdn, iava, &ava);
-			if (ret == GNUTLS_E_ASN1_ELEMENT_NOT_FOUND)
-			{
-				break;
-			}
-			if (ret != 0)
-			{
-				SetError(ERR_INVALID);
-				iava++;
-				continue;
-			}
-			if (ava.value_tag != 16)
-			{
-				CheckNameEntryValid(&ava);
-			}
-			else
-			{
-				/* TODO: It's a sequence, we should go over it's members */
-				SetInfo(INF_STRING_NOT_CHECKED);
-			}
-			iava++;
+			CheckNameEntryValid(ne);
 		}
-		while(1);
-		if (iava == 0)
+		else
 		{
-			break;
+			/* TODO: It's a sequence, we should go over it's members */
+			SetInfo(INF_STRING_NOT_CHECKED);
 		}
-		irdn++;
 	}
-	while(1);
 }
 
-static bool IsNameOIDPresent(const gnutls_x509_dn_t dn, const char *oid)
+static bool IsNameObjPresent(X509_NAME *dn, ASN1_OBJECT *obj)
 {
-	int irdn = 0;
-	do
-	{
-		int iava = 0;
-		gnutls_x509_ava_st ava;
-
-		do
-		{
-			int ret = gnutls_x509_dn_get_rdn_ava(dn, irdn, iava, &ava);
-			if (ret == GNUTLS_E_ASN1_ELEMENT_NOT_FOUND)
-			{
-				break;
-			}
-			if (ret != 0)
-			{
-				iava++;
-				continue;
-			}
-			if (strcmp((const char *)ava.oid.data, oid) == 0)
-			{
-				return true;
-			}
-			iava++;
-		}
-		while(1);
-		if (iava == 0)
-		{
-			break;
-		}
-		irdn++;
-	}
-	while(1);
-	return false;
+	return X509_NAME_get_index_by_OBJ(dn, obj, -1) >= 0;
 }
 
 static bool IsValidLongerThan(const gnutls_x509_crt_t cert, int months)
@@ -428,7 +384,7 @@ static bool IsValidLongerThan(const gnutls_x509_crt_t cert, int months)
 	return false;
 }
 
-static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
+static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 {
 	int idx = -1;
 	bool bPolicyFound = false;
@@ -477,11 +433,11 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 				if (strcmp(oid, OIDCabDomainValidated) == 0)
 				{
 					DomainValidated = true;
-					if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-						|| IsNameOIDPresent(subject, OIDStreetAddress)
-						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE))
+					if (IsNameObjPresent(subject, obj_organizationName)
+						|| IsNameObjPresent(subject, obj_StreetAddress)
+						|| IsNameObjPresent(subject, obj_localityName)
+						|| IsNameObjPresent(subject, obj_stateOrProvinceName)
+						|| IsNameObjPresent(subject, obj_postalCode))
 					{
 						SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
 					}
@@ -490,9 +446,9 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 				if (strcmp(oid, OIDCabIdentityValidated) == 0)
 				{
 					IdentityValidated = true;
-					if (!(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
+					if (!(IsNameObjPresent(subject, obj_organizationName)
+						&& IsNameObjPresent(subject, obj_localityName)
+						&& IsNameObjPresent(subject, obj_countryName)))
 					{
 						SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
 					}
@@ -522,8 +478,8 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 
 void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
-	gnutls_x509_dn_t issuer;
-	gnutls_x509_dn_t subject;
+	X509_NAME *issuer;
+	X509_NAME *subject;
 	int i;
 	int ret;
 	size_t size = 81920;
@@ -578,51 +534,51 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 		SetError(ERR_NOT_VERSION3);
 	}
 
-	gnutls_x509_crt_get_issuer(cert, &issuer);
+	issuer = X509_get_issuer_name(x509);
 	CheckDN(issuer);
 
 	/* Required by CAB base 9.1.3 */
-	if (!IsNameOIDPresent(issuer, GNUTLS_OID_X520_ORGANIZATION_NAME))
+	if (!IsNameObjPresent(issuer, obj_organizationName))
 	{
 		SetError(ERR_ISSUER_ORG_NAME);
 	}
 
 	/* Required by CAB base 9.1.4 */
-	if (!IsNameOIDPresent(issuer, GNUTLS_OID_X520_COUNTRY_NAME))
+	if (!IsNameObjPresent(issuer, obj_countryName))
 	{
 		SetError(ERR_ISSUER_COUNTRY);
 	}
 
 	
-	gnutls_x509_crt_get_subject(cert, &subject);
+	subject = X509_get_subject_name(x509);
 	CheckDN(subject);
 
 	/* Prohibited in CAB base 9.2.4b */
-	if (!IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& IsNameOIDPresent(subject, OIDStreetAddress))
+	if (!IsNameObjPresent(subject, obj_organizationName)
+		&& IsNameObjPresent(subject, obj_StreetAddress))
 	{
 		SetError(ERR_SUBJECT_ADDR);
 	}
 
 	/* Required in CAB base 9.2.4c and 9.2.4d */
-	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME))
+	if (IsNameObjPresent(subject, obj_organizationName)
+		&& !IsNameObjPresent(subject, obj_stateOrProvinceName)
+		&& !IsNameObjPresent(subject, obj_localityName))
 	{
 		SetError(ERR_SUBJECT_ORG_NO_PLACE);
 	}
 
 	/* Prohibited in CAB base 9.2.4c or 9.2.4d */
-	if (!IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
-			|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)))
+	if (!IsNameObjPresent(subject, obj_organizationName)
+		&& (IsNameObjPresent(subject, obj_localityName)
+			|| IsNameObjPresent(subject, obj_stateOrProvinceName)))
 	{
 		SetError(ERR_SUBJECT_NO_ORG_PLACE);
 	}
 
 	/* Required by CAB base 9.2.5 */
-	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
-		&& !IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME))
+	if (IsNameObjPresent(subject, obj_organizationName)
+		&& !IsNameObjPresent(subject, obj_countryName))
 	{
 		SetError(ERR_SUBJECT_COUNTRY);
 	}
@@ -647,7 +603,7 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 	}
 
 	/* Deprecated in CAB base 7.1.4.2.2 */
-	if (IsNameOIDPresent(subject, GNUTLS_OID_X520_COMMON_NAME))
+	if (IsNameObjPresent(subject, obj_commonName))
 	{
 		if (type == SubscriberCertificate)
 		{
@@ -716,6 +672,16 @@ void check_init()
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");
 	iconv_t61 = iconv_open("utf-8", "CSISO103T618BIT");
+
+	obj_organizationName = OBJ_nid2obj(NID_organizationName);
+	obj_localityName = OBJ_nid2obj(NID_localityName);
+	obj_stateOrProvinceName = OBJ_nid2obj(NID_stateOrProvinceName);
+	obj_countryName = OBJ_nid2obj(NID_countryName);
+	obj_commonName = OBJ_nid2obj(NID_commonName);
+
+	/* Those get leaked, unsure how to clean them up. */
+	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
+	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
 }
 
 void check_finish()
