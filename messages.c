@@ -26,42 +26,42 @@
 
 static const char *error_strings[] =
 {
-	"E: Error parsing certificate\n",
-	"E: Issuer without organization name\n",
-	"E: Issuer without country name\n",
-	"E: Subject without OrganizationName but with StreetAddress\n",
-	"E: Subject with OrganizationName but without StateOrProvince or LocalityName\n",
-	"E: Subject without OrganizationName but with StateOrProvince or LocalityName\n",
-	"E: Fails decoding the characterset\n",
-	"E: Contains a null character in the distinguished name\n",
-	"E: Distinguished name contains invalid DirectoryString type\n",
-	"E: The distinguished name contains non-printable control characters\n",
-	"E: Subject with OrganizationName but without country name\n",
-	"E: Domain validated certificate but with organization name or address\n",
-	"E: Identity validated certificate but without organization name or address\n",
-	"E: No policy extension\n",
-	"E: No Subject alternative name extension\n",
-	"E: Certificate not version 3\n",
-	"E: Error parsing URL\n",
-	"E: The certificate is valid for longer than 60 months\n",
-	"E: Date out of range\n",
-	"E: Combining anyPolicy with an other policy\n",
-	"E: countryName not 2 characters long.\n"
+	"E: Error parsing certificate\n", /* ERR_INVALID*/
+	"E: Issuer without organization name\n", /* ERR_ISSUER_ORG_NAME*/
+	"E: Issuer without country name\n", /* ERR_ISSUER_COUNTRY */
+	"E: Subject without OrganizationName but with StreetAddress\n", /* ERR_SUBJECT_ADDR */
+	"E: Subject with OrganizationName but without StateOrProvince or LocalityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
+	"E: Subject without OrganizationName but with StateOrProvince or LocalityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
+	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
+	"E: Contains a null character in the distinguished name\n", /* ERR_STRING_WITH_NUL */
+	"E: Distinguished name contains invalid DirectoryString type\n", /* ERR_INVALID_TAG_TYPE */
+	"E: The distinguished name contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
+	"E: Subject with OrganizationName but without country name\n", /* ERR_SUBJECT_COUNTRY */
+	"E: Domain validated certificate but with organization name or address\n", /* ERR_DOMAIN_WITH_ORG_OR_ADDRESS */
+	"E: Identity validated certificate but without organization name or address\n", /* ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS */
+	"E: No policy extension\n", /* ERR_NO_POLICY */
+	"E: No Subject alternative name extension\n", /* ERR_NO_SUBJECT_ALT_NAME */
+	"E: Certificate not version 3\n", /* ERR_NOT_VERSION3 */
+	"E: Error parsing URL\n", /* ERR_INVALID_URL */
+	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
+	"E: Date out of range\n", /* ERR_DATE_OUT_OF_RANGE */
+	"E: Combining anyPolicy with an other policy\n", /* ERR_ANY_POLICY_WITH_OTHER */
+	"E: countryName not 2 characters long.\n" /* ERR_COUNTRY_SIZE */
 };
 
 static const char *warning_strings[] = {
-	"W: The distinguished name contains something that is not a PrintableString or UTF8String\n",
-	"W: The distinguished name makes use of an IA5String\n",
-	"W: The certificate is valid for longer than 39 months\n",
-	"W: CA certificate checked as if it was a subscriber certificate\n",
-	"W: Subscriber certificate checked as if it was a CA certificate\n"
+	"W: The distinguished name contains something that is not a PrintableString or UTF8String\n", /* WARN_NON_PRINTABLE_STRING */
+	"W: The distinguished name makes use of an IA5String\n", /* WARN_IA5 */
+	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
+	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
+	"W: Subscriber certificate checked as if it was a CA certificate\n" /* WARN_CHECKED_AS_CA */
 };
 
 static const char *info_strings[] = {
-	"I: Subject has a deprecated CommonName\n",
-	"I: String not checked\n",
-	"I: CRL is not a URL\n",
-	"I: Unknown validation policy\n"
+	"I: Subject has a deprecated CommonName\n", /* INF_SUBJECT_CN */
+	"I: String not checked\n", /* INF_STRING_NOT_CHECKED */
+	"I: CRL is not a URL\n", /* INF_CRL_NOT_URL */
+	"I: Unknown validation policy\n" /* INF_UNKNOWN_VALIDATION */
 };
 
 /* 
