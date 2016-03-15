@@ -37,6 +37,7 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_SUBJECT_CN                 0
 #define INF_STRING_NOT_CHECKED         1	/* Software doesn't know how to check it yet. */
 #define INF_CRL_NOT_URL                2
+#define INF_UNKNOWN_VALIDATION         3	/* Software doesn't know OID yet. */
 
 extern unsigned int errors[1];
 extern unsigned int warnings[1];

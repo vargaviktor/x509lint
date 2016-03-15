@@ -434,6 +434,8 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 	bool bPolicyFound = false;
 	bool bHaveAnyPolicy = false;
 	size_t policies = 0;
+	bool DomainValidated = false;
+	bool IdentityValidated = false;
 
 	do
 	{
@@ -472,22 +474,28 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 			if (type == SubscriberCertificate)
 			{
 				/* Required by CAB base 9.3.1 */
-				if (strcmp(oid, OIDCabDomainValidated) == 0
-					&& (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+				if (strcmp(oid, OIDCabDomainValidated) == 0)
+				{
+					DomainValidated = true;
+					if (IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
 						|| IsNameOIDPresent(subject, OIDStreetAddress)
 						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
 						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_STATE_OR_PROVINCE_NAME)
-						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE)))
-				{
-					SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
+						|| IsNameOIDPresent(subject, GNUTLS_OID_X520_POSTALCODE))
+					{
+						SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
+					}
 				}
 
-				if (strcmp(oid, OIDCabIdentityValidated) == 0
-					&& !(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
+				if (strcmp(oid, OIDCabIdentityValidated) == 0)
+				{
+					IdentityValidated = true;
+					if (!(IsNameOIDPresent(subject, GNUTLS_OID_X520_ORGANIZATION_NAME)
 						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_LOCALITY_NAME)
 						&& IsNameOIDPresent(subject, GNUTLS_OID_X520_COUNTRY_NAME)))
-				{
-					SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+					{
+						SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+					}
 				}
 			}
 		}
@@ -504,6 +512,11 @@ static void CheckPolicy(X509 *x509, CertType type, gnutls_x509_dn_t subject)
 	if (bHaveAnyPolicy && policies > 1)
 	{
 		SetError(ERR_ANY_POLICY_WITH_OTHER);
+	}
+
+	if (type == SubscriberCertificate && !DomainValidated && !IdentityValidated)
+	{
+		SetInfo(INF_UNKNOWN_VALIDATION);
 	}
 }
 

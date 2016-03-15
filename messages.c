@@ -59,7 +59,8 @@ static const char *warning_strings[] = {
 static const char *info_strings[] = {
 	"I: Subject has a deprecated CommonName\n",
 	"I: String not checked\n",
-	"I: CRL is not a URL\n"
+	"I: CRL is not a URL\n",
+	"I: Unknown validation policy\n"
 };
 
 /* 
@@ -94,7 +95,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= INF_CRL_NOT_URL; i++)
+	for (int i = 0; i <= INF_UNKNOWN_VALIDATION; i++)
 	{
 		if (i == INF_STRING_NOT_CHECKED)
 		{
