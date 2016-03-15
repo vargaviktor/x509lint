@@ -559,6 +559,11 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 	}
 
 	issuer = X509_get_issuer_name(x509);
+	if (issuer == NULL)
+	{
+		SetError(ERR_INVALID);
+		return;
+	}
 	CheckDN(issuer);
 
 	/* Required by CAB base 9.1.3 */
@@ -575,6 +580,11 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 
 	
 	subject = X509_get_subject_name(x509);
+	if (subject == NULL)
+	{
+		SetError(ERR_INVALID);
+		return;
+	}
 	CheckDN(subject);
 
 	/* Prohibited in CAB base 9.2.4b */
