@@ -500,6 +500,171 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	}
 }
 
+static char *asn1_time_as_string(ASN1_TIME *time)
+{
+	char *s = malloc(time->length+1);
+	if (s == NULL)
+	{
+		exit(1);
+	}
+	strncpy(s, (char *)time->data, time->length);
+	s[time->length] = '\0';
+	if (strlen(s) != time->length)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	return s;
+}
+
+static void time_str_to_tm(char *s, bool general, struct tm *tm)
+{
+	for (int i = 0; i < strlen(s)-1; i++)
+	{
+		if (isdigit(s[i]) == 0)
+		{
+			SetError(ERR_INVALID_TIME_FORMAT);
+			return;
+		}
+	}
+	int i = 0;
+	if (general)
+	{
+		tm->tm_year = (s[0] - '0') * 1000 + (s[1] - '0') * 100 + (s[2] - '0') * 10 + s[3] - '0' - 1900;
+		i += 4;
+	}
+	else
+	{
+		int year = (s[2] - '0') * 10 + s[3] - '0';
+		if (year < 50)
+		{
+			tm->tm_year = 100 + year;
+		}
+		else
+		{
+			tm->tm_year = year;
+		}
+		i += 2;
+	}
+	tm->tm_mon = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	i += 2;
+	if (tm->tm_mon > 11)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	tm->tm_mday = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	i += 2;
+	if (tm->tm_mday == 0 || tm->tm_mday > 31)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+
+	if ((tm->tm_mon == 3 || tm->tm_mon == 5 || tm->tm_mon == 8 || tm->tm_mon == 10)
+		&& tm->tm_mday > 30)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	if (tm->tm_mon == 1)
+	{
+		if (((tm->tm_year % 4) == 0 && (tm->tm_year % 100) != 0)
+			|| (((tm->tm_year + 1900) % 400) == 0))
+		{
+			if (tm->tm_mday > 29)
+			{
+				SetError(ERR_INVALID_TIME_FORMAT);
+			}
+		}
+		else
+		{
+			if (tm->tm_mday > 28)
+			{
+				SetError(ERR_INVALID_TIME_FORMAT);
+			}
+		}
+	}
+
+	tm->tm_hour = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	i += 2;
+	if (tm->tm_hour > 23)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	tm->tm_min = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	i += 2;
+	if (tm->tm_min > 59)
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	tm->tm_sec = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	if (tm->tm_sec > 60) /* including leap seconds */
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+}
+
+static void asn1_time_to_tm(ASN1_TIME *time, bool general, struct tm *tm)
+{
+	char *s = asn1_time_as_string(time);
+	if (general)
+	{
+		if (strlen(s) != 15)
+		{
+			SetError(ERR_INVALID_TIME_FORMAT);
+		}
+	}
+	else
+	{
+		if (strlen(s) != 13)
+		{
+			SetError(ERR_INVALID_TIME_FORMAT);
+		}
+	}
+	if (s[strlen(s)-1] != 'Z')
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+	time_str_to_tm(s, general, tm);
+	free(s);
+}
+
+static void CheckTime(X509 *x509)
+{
+	ASN1_TIME *before = X509_get_notBefore(x509);
+	ASN1_TIME *after = X509_get_notAfter(x509);
+	struct tm tm_before;
+	struct tm tm_after;
+
+	if (before->type == V_ASN1_GENERALIZEDTIME)
+	{
+		asn1_time_to_tm(before, true, &tm_before);
+	}
+	else if (before->type == V_ASN1_UTCTIME)
+	{
+		asn1_time_to_tm(before, false, &tm_before);
+	}
+	else
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+
+	if (after->type == V_ASN1_GENERALIZEDTIME)
+	{
+		asn1_time_to_tm(after, true, &tm_after);
+	}
+	else if (after->type == V_ASN1_UTCTIME)
+	{
+		asn1_time_to_tm(after, false, &tm_after);
+	}
+	else
+	{
+		SetError(ERR_INVALID_TIME_FORMAT);
+	}
+
+	if (GetBit(errors, ERR_INVALID_TIME_FORMAT))
+	{
+		return;
+	}
+}
+
 void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -675,6 +840,8 @@ void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format,
 		}
 		i++;
 	}
+
+	CheckTime(x509);
 
 	if (type == SubscriberCertificate)
 	{

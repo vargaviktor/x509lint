@@ -26,6 +26,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_DATE_OUT_OF_RANGE                 18
 #define ERR_ANY_POLICY_WITH_OTHER             19
 #define ERR_COUNTRY_SIZE                      20
+#define ERR_INVALID_TIME_FORMAT               21
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -36,9 +37,9 @@ typedef enum { PEM, DER } CertFormat;
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                 0
-#define INF_STRING_NOT_CHECKED         1	/* Software doesn't know how to check it yet. */
+#define INF_STRING_NOT_CHECKED         1        /* Software doesn't know how to check it yet. */
 #define INF_CRL_NOT_URL                2
-#define INF_UNKNOWN_VALIDATION         3	/* Software doesn't know OID yet. */
+#define INF_UNKNOWN_VALIDATION         3        /* Software doesn't know OID yet. */
 
 extern unsigned int errors[1];
 extern unsigned int warnings[1];

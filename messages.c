@@ -46,7 +46,8 @@ static const char *error_strings[] =
 	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
 	"E: Date out of range\n", /* ERR_DATE_OUT_OF_RANGE */
 	"E: Combining anyPolicy with an other policy\n", /* ERR_ANY_POLICY_WITH_OTHER */
-	"E: countryName not 2 characters long.\n" /* ERR_COUNTRY_SIZE */
+	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
+	"E: Invalid time format\n" /* ERR_INVALID_TIME_FORMAT */
 };
 
 static const char *warning_strings[] = {
@@ -76,7 +77,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_COUNTRY_SIZE; i++)
+	for (int i = 0; i <= ERR_INVALID_TIME_FORMAT; i++)
 	{
 		if (GetBit(errors, i))
 		{
