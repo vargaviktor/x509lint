@@ -137,6 +137,10 @@ static void CheckValidURL(const char *s, int n)
 	/* TODO: Check the rest of URL, like starting with "http://" */
 }
 
+/*
+ * Check that the string contains pritable characters.
+ * The input is a valid UTF-8 string.
+ */
 static void CheckPrintableChars(const char *s, int n)
 {
 	int i;
@@ -178,8 +182,10 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-
-		CheckPrintableChars((const char *)data->data, data->length);
+		else
+		{
+			CheckPrintableChars((const char *)data->data, data->length);
+		}
 
 		free(s2);
 	}
@@ -198,8 +204,10 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-
-		CheckPrintableChars(s2, ps2-s2);
+		else
+		{
+			CheckPrintableChars(s2, ps2-s2);
+		}
 
 		free(s2);
 	}
@@ -269,8 +277,10 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-
-		CheckPrintableChars(s2, ps2-s2);
+		else
+		{
+			CheckPrintableChars(s2, ps2-s2);
+		}
 
 		free(s2);
 	}
