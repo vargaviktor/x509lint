@@ -45,7 +45,8 @@ static const char *error_strings[] =
 	"E: Error parsing URL\n",
 	"E: The certificate is valid for longer than 60 months\n",
 	"E: Date out of range\n",
-	"E: Combining anyPolicy with an other policy\n"
+	"E: Combining anyPolicy with an other policy\n",
+	"E: countryName not 2 characters long.\n"
 };
 
 static const char *warning_strings[] = {
@@ -75,7 +76,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_ANY_POLICY_WITH_OTHER; i++)
+	for (int i = 0; i <= ERR_COUNTRY_SIZE; i++)
 	{
 		if (GetBit(errors, i))
 		{

@@ -166,6 +166,8 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	int i;
 
 	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+	ASN1_OBJECT *obj = X509_NAME_ENTRY_get_object(ne);
+	int nid = OBJ_obj2nid(obj);
 
 	if (data->type == V_ASN1_UTF8STRING)
 	{
@@ -302,6 +304,18 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	{
 		/* RFC5280 says it MUST be PrintableString or UTF8String, with exceptions. */
 		SetWarning(WARN_NON_PRINTABLE_STRING);
+	}
+
+	if (nid == NID_countryName)
+	{
+		if (data->type != V_ASN1_PRINTABLESTRING)
+		{
+			SetError(ERR_INVALID_TAG_TYPE);
+		}
+		if (data->length != 2)
+		{
+			SetError(ERR_COUNTRY_SIZE);
+		}
 	}
 
 	return;
