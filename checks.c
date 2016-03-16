@@ -548,7 +548,7 @@ static void time_str_to_tm(char *s, bool general, struct tm *tm)
 	}
 	else
 	{
-		int year = (s[2] - '0') * 10 + s[3] - '0';
+		int year = (s[0] - '0') * 10 + s[1] - '0';
 		if (year < 50)
 		{
 			tm->tm_year = 100 + year;
@@ -565,7 +565,7 @@ static void time_str_to_tm(char *s, bool general, struct tm *tm)
 	{
 		SetError(ERR_INVALID_TIME_FORMAT);
 	}
-	tm->tm_mday = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	tm->tm_mday = (s[i] - '0') * 10 + s[i+1] - '0';
 	i += 2;
 	if (tm->tm_mday == 0 || tm->tm_mday > 31)
 	{
@@ -596,19 +596,19 @@ static void time_str_to_tm(char *s, bool general, struct tm *tm)
 		}
 	}
 
-	tm->tm_hour = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	tm->tm_hour = (s[i] - '0') * 10 + s[i+1] - '0';
 	i += 2;
 	if (tm->tm_hour > 23)
 	{
 		SetError(ERR_INVALID_TIME_FORMAT);
 	}
-	tm->tm_min = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	tm->tm_min = (s[i] - '0') * 10 + s[i+1] - '0';
 	i += 2;
 	if (tm->tm_min > 59)
 	{
 		SetError(ERR_INVALID_TIME_FORMAT);
 	}
-	tm->tm_sec = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
+	tm->tm_sec = (s[i] - '0') * 10 + s[i+1] - '0';
 	if (tm->tm_sec > 60) /* including leap seconds */
 	{
 		SetError(ERR_INVALID_TIME_FORMAT);
