@@ -617,20 +617,18 @@ static void asn1_time_to_tm(ASN1_TIME *time, bool general, struct tm *tm)
 	free(s);
 }
 
-static void CheckTime(X509 *x509)
+static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after)
 {
 	ASN1_TIME *before = X509_get_notBefore(x509);
 	ASN1_TIME *after = X509_get_notAfter(x509);
-	struct tm tm_before;
-	struct tm tm_after;
 
 	if (before->type == V_ASN1_GENERALIZEDTIME)
 	{
-		asn1_time_to_tm(before, true, &tm_before);
+		asn1_time_to_tm(before, true, tm_before);
 	}
 	else if (before->type == V_ASN1_UTCTIME)
 	{
-		asn1_time_to_tm(before, false, &tm_before);
+		asn1_time_to_tm(before, false, tm_before);
 	}
 	else
 	{
@@ -639,11 +637,11 @@ static void CheckTime(X509 *x509)
 
 	if (after->type == V_ASN1_GENERALIZEDTIME)
 	{
-		asn1_time_to_tm(after, true, &tm_after);
+		asn1_time_to_tm(after, true, tm_after);
 	}
 	else if (after->type == V_ASN1_UTCTIME)
 	{
-		asn1_time_to_tm(after, false, &tm_after);
+		asn1_time_to_tm(after, false, tm_after);
 	}
 	else
 	{
@@ -670,6 +668,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	gnutls_datum_t pem;
 	X509 *x509;
 	int ca;
+	struct tm tm_before;
+	struct tm tm_after;
 
 	Clear();
 
@@ -832,7 +832,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		i++;
 	}
 
-	CheckTime(x509);
+	CheckTime(x509, &tm_before, &tm_after);
 
 	if (type == SubscriberCertificate)
 	{
