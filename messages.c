@@ -44,7 +44,6 @@ static const char *error_strings[] =
 	"E: Certificate not version 3\n", /* ERR_NOT_VERSION3 */
 	"E: Error parsing URL\n", /* ERR_INVALID_URL */
 	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
-	"E: Date out of range\n", /* ERR_DATE_OUT_OF_RANGE */
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
 	"E: Invalid time format\n" /* ERR_INVALID_TIME_FORMAT */
 };
