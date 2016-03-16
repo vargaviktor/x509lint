@@ -72,7 +72,7 @@ int GetBit(unsigned int *val, int bit)
 #define SetWarning(bit) SetBit(warnings, bit)
 #define SetInfo(bit) SetBit(info, bit)
 
-static X509 *LoadCert(const unsigned char *data, size_t len, CertFormat format)
+static X509 *LoadCert(unsigned char *data, size_t len, CertFormat format)
 {
 	X509 *x509;
 	BIO *bio = BIO_new_mem_buf(data, len);
@@ -670,7 +670,7 @@ static void CheckTime(X509 *x509)
 	}
 }
 
-void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
+void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
 	X509_NAME *subject;
