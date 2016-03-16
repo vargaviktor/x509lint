@@ -652,6 +652,35 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 
 }
 
+static int obj_cmp(const ASN1_OBJECT **a, const ASN1_OBJECT **b)
+{
+	return OBJ_cmp(*a, *b);
+}
+
+static void CheckDuplicateExtentions(X509 *x509)
+{
+	STACK_OF(ASN1_OBJECT) *stack = sk_ASN1_OBJECT_new(obj_cmp);
+
+	for (int i = 0; i < X509_get_ext_count(x509); i++)
+	{
+		X509_EXTENSION *ext = X509_get_ext(x509, i);
+		if (ext == NULL)
+		{
+			SetError(ERR_INVALID);
+			continue;
+		}
+		if (sk_ASN1_OBJECT_find(stack, ext->object) >= 0)
+		{
+			SetError(ERR_DUPLICATE_EXTENTION);
+		}
+		else
+		{
+			sk_ASN1_OBJECT_push(stack, ext->object);
+		}
+	}
+	sk_ASN1_OBJECT_free(stack);
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -736,6 +765,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		return;
 	}
 	CheckDN(subject);
+
+	CheckDuplicateExtentions(x509);
 
 	/* Prohibited in CAB base 9.2.4b */
 	if (!IsNameObjPresent(subject, obj_organizationName)

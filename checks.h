@@ -25,6 +25,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_LONGER_60_MONTHS                  17
 #define ERR_COUNTRY_SIZE                      18
 #define ERR_INVALID_TIME_FORMAT               19
+#define ERR_DUPLICATE_EXTENTION               20
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

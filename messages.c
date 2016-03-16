@@ -45,7 +45,8 @@ static const char *error_strings[] =
 	"E: Error parsing URL\n", /* ERR_INVALID_URL */
 	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
-	"E: Invalid time format\n" /* ERR_INVALID_TIME_FORMAT */
+	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
+	"E: Duplicate extention\n" /* ERR_DUPLICATE_EXTENTION */
 };
 
 static const char *warning_strings[] = {
@@ -75,7 +76,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_INVALID_TIME_FORMAT; i++)
+	for (int i = 0; i <= ERR_DUPLICATE_EXTENTION; i++)
 	{
 		if (GetBit(errors, i))
 		{
