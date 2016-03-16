@@ -44,7 +44,6 @@ static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabIdentityValidated = "2.23.140.1.2.2";
-static const char *OIDSubjectAltName = "2.5.29.17";
 
 static ASN1_OBJECT *obj_organizationName;
 static ASN1_OBJECT *obj_StreetAddress;
@@ -456,7 +455,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 		}
 		CERTIFICATEPOLICIES_free(policy);
 	}
-	while(1);
+	while (1);
 
 	if (!bPolicyFound && type == SubscriberCertificate)
 	{
@@ -469,6 +468,46 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 		SetInfo(INF_UNKNOWN_VALIDATION);
 	}
 }
+
+static void CheckSAN(X509 *x509, CertType type)
+{
+	int idx = -1;
+	bool bSanFound = false;
+
+	do
+	{
+		int critical = -1;
+
+		GENERAL_NAME *name = X509_get_ext_d2i(x509, NID_subject_alt_name, &critical, &idx);
+
+		if (name == NULL)
+		{
+			if (critical >= 0)
+			{
+				/* Found but fails to parse */
+				SetError(ERR_INVALID);
+				bSanFound = true;
+				continue;
+			}
+			/* Not found */
+			break;
+		}
+		bSanFound = true;
+	}
+	while (1);
+
+	if (!bSanFound)
+	{
+		/* Required by CAB base 7.1.4.2.1 */
+		/* It's not clear if this should also apply to CAs, the CAB base
+		 * document doesn't exclude them, but I think it shouldn't apply to CAs. */
+		if (type == SubscriberCertificate)
+		{
+			SetError(ERR_NO_SUBJECT_ALT_NAME);
+		}
+	}
+}
+
 
 static char *asn1_time_as_string(ASN1_TIME *time)
 {
@@ -799,23 +838,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	CheckPolicy(x509, type, subject);
-
-	/* Required by CAB base 7.1.4.2.1 */
-	/* It's not clear if this should also apply to CAs, the CAB base
-	 * document doesn't exclude them, but I think it shouldn't apply to CAs. */
-	unsigned int critical;
-	ret = gnutls_x509_crt_get_extension_by_oid(cert, OIDSubjectAltName, 0, NULL, &size, &critical);
-	if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
-	{
-		if (type == SubscriberCertificate)
-		{
-			SetError(ERR_NO_SUBJECT_ALT_NAME);
-		}
-	}
-	else if (ret != 0)
-	{
-		SetError(ERR_INVALID);
-	}
+	CheckSAN(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2 */
 	if (IsNameObjPresent(subject, obj_commonName))
