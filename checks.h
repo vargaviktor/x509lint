@@ -24,9 +24,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_INVALID_URL                       16
 #define ERR_LONGER_60_MONTHS                  17
 #define ERR_DATE_OUT_OF_RANGE                 18
-#define ERR_ANY_POLICY_WITH_OTHER             19
-#define ERR_COUNTRY_SIZE                      20
-#define ERR_INVALID_TIME_FORMAT               21
+#define ERR_COUNTRY_SIZE                      19
+#define ERR_INVALID_TIME_FORMAT               20
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

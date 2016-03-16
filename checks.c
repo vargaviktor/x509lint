@@ -412,8 +412,6 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 {
 	int idx = -1;
 	bool bPolicyFound = false;
-	bool bHaveAnyPolicy = false;
-	size_t policies = 0;
 	bool DomainValidated = false;
 	bool IdentityValidated = false;
 
@@ -437,19 +435,12 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 		}
 		bPolicyFound = true;
 
-		policies += sk_POLICYINFO_num(policy);
-
 		for (int pi = 0; pi < sk_POLICYINFO_num(policy); pi++)
 		{
 			POLICYINFO *info = sk_POLICYINFO_value(policy, pi);
 
 			char oid[80];
 			OBJ_obj2txt(oid, sizeof(oid), info->policyid, 1);
-
-			if (OBJ_obj2nid(info->policyid) == NID_any_policy)
-			{
-				bHaveAnyPolicy = true;
-			}
 
 			if (type == SubscriberCertificate)
 			{
@@ -487,11 +478,6 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	{
 		/* Required by CAB 9.3.4 */
 		SetError(ERR_NO_POLICY);
-	}
-
-	if (bHaveAnyPolicy && policies > 1)
-	{
-		SetError(ERR_ANY_POLICY_WITH_OTHER);
 	}
 
 	if (type == SubscriberCertificate && !DomainValidated && !IdentityValidated)
