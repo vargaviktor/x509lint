@@ -532,7 +532,7 @@ static void time_str_to_tm(char *s, bool general, struct tm *tm)
 		tm->tm_year = (s[0] - '0') * 1000 + (s[1] - '0') * 100 + (s[2] - '0') * 10 + s[3] - '0' - 1900;
 		i += 4;
 
-		if (tm->tm_year < 2050 || tm->tm_year >= 1950)
+		if (tm->tm_year < 150 || tm->tm_year >= 50)
 		{
 			SetError(ERR_INVALID_TIME_FORMAT);
 		}
