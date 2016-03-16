@@ -728,8 +728,6 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	int ret;
 	size_t size = 81920;
 	char buf[81920];
-	gnutls_pk_algorithm_t pk_alg;
-	unsigned int pk_bits;
 	gnutls_x509_crt_t cert;
 	gnutls_datum_t pem;
 	X509 *x509;
@@ -847,12 +845,6 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		{
 			SetInfo(INF_SUBJECT_CN);
 		}
-	}
-
-	pk_alg = gnutls_x509_crt_get_pk_algorithm(cert, &pk_bits);
-	if (pk_alg < 0)
-	{
-		SetError(ERR_INVALID);
 	}
 
 	i = 0;
