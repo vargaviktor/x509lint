@@ -883,7 +883,6 @@ void check_init()
 	obj_countryName = OBJ_nid2obj(NID_countryName);
 	obj_commonName = OBJ_nid2obj(NID_commonName);
 
-	/* Those get leaked, unsure how to clean them up. */
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
 }
@@ -894,6 +893,8 @@ void check_finish()
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
 	gnutls_global_deinit();
+	ASN1_OBJECT_free(obj_StreetAddress);
+	ASN1_OBJECT_free(obj_postalCode);
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 }
