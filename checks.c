@@ -702,12 +702,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetWarning(WARN_CHECKED_AS_CA);
 	}
 
-	ret = gnutls_x509_crt_get_version(cert);
-	if (ret < 0)
-	{
-		SetError(ERR_INVALID);
-	}
-	if (ret != 3)
+	ret = X509_get_version(x509);
+	if (ret != 2)
 	{
 		SetError(ERR_NOT_VERSION3);
 	}
