@@ -27,8 +27,6 @@
 #include <ctype.h>
 #include <stdbool.h>
 
-#include <gnutls/x509.h>
-
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/pem.h>
@@ -781,28 +779,12 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	X509_NAME *issuer;
 	X509_NAME *subject;
 	int ret;
-	gnutls_x509_crt_t cert;
-	gnutls_datum_t pem;
 	X509 *x509;
 	int ca;
 	struct tm tm_before;
 	struct tm tm_after;
 
 	Clear();
-
-	if (gnutls_x509_crt_init(&cert) != 0)
-	{
-		exit(1);
-	}
-
-	pem.data = (unsigned char *)cert_buffer;
-	pem.size = cert_len;
-
-	if (gnutls_x509_crt_import(cert, &pem, format == PEM ? GNUTLS_X509_FMT_PEM : GNUTLS_X509_FMT_DER) != 0)
-	{
-		SetError(ERR_INVALID);
-		return;
-	}
 
 	x509 = LoadCert(cert_buffer, cert_len, format);
 	if (x509 == NULL)
@@ -903,18 +885,11 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckCRL(x509);
 	CheckTime(x509, &tm_before, &tm_after, type);
 
-	gnutls_x509_crt_deinit(cert);
 	X509_free(x509);
 }
 
 void check_init()
 {
-	int ret;
-	if ((ret = gnutls_global_init()) < 0)
-	{
-		fprintf(stderr, "gnutls_global_init: %s\n", gnutls_strerror(ret));
-		exit(1);
-	}
 	OpenSSL_add_all_algorithms();
 
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
@@ -936,7 +911,6 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
-	gnutls_global_deinit();
 	ASN1_OBJECT_free(obj_StreetAddress);
 	ASN1_OBJECT_free(obj_postalCode);
 	EVP_cleanup();
