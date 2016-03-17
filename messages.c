@@ -100,10 +100,6 @@ char *get_messages()
 
 	for (int i = 0; i <= INF_UNKNOWN_VALIDATION; i++)
 	{
-		if (i == INF_STRING_NOT_CHECKED)
-		{
-			continue;
-		}
 		if (GetBit(info, i))
 		{
 			strcat(buffer, info_strings[i]);
