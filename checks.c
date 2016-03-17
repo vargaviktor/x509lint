@@ -236,8 +236,13 @@ static void CheckStringValid(ASN1_STRING *data)
 			}
 		}
 	}
-	else if (data->type == V_ASN1_IA5STRING)
+	else if (data->type == V_ASN1_IA5STRING || data->type == V_ASN1_VISIBLESTRING)
 	{
+		/*
+		 * IA5String's valid range is 0x00 - 0x7F,
+		 * VisibleString restricts it to the visible ones: 0x20 - 0x7E
+		 * We restrict both to the VisibleString range.
+		 */
 		for (int i = 0; i < data->length; i++)
 		{
 			if (data->data[i] == '\0')
@@ -248,7 +253,7 @@ static void CheckStringValid(ASN1_STRING *data)
 			{
 				SetError(ERR_NON_PRINTABLE);
 			}
-			else if (data->data[i] >= 128)
+			else if (data->data[i] >= 127)
 			{
 				SetError(ERR_INVALID_ENCODING);
 			}
