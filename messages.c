@@ -46,7 +46,8 @@ static const char *error_strings[] =
 	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
 	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
-	"E: Duplicate extention\n" /* ERR_DUPLICATE_EXTENTION */
+	"E: Duplicate extention\n", /* ERR_DUPLICATE_EXTENTION */
+	"E: Invalid CRL distribution point\n" /* ERR_INVALID_CRL_DIST_POINT */
 };
 
 static const char *warning_strings[] = {
@@ -54,7 +55,8 @@ static const char *warning_strings[] = {
 	"W: The distinguished name makes use of an IA5String\n", /* WARN_IA5 */
 	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
 	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
-	"W: Subscriber certificate checked as if it was a CA certificate\n" /* WARN_CHECKED_AS_CA */
+	"W: Subscriber certificate checked as if it was a CA certificate\n", /* WARN_CHECKED_AS_CA */
+	"W: CRL distribution point uses relative name\n" /* WARN_CRL_RELATIVE */
 };
 
 static const char *info_strings[] = {
@@ -76,7 +78,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_DUPLICATE_EXTENTION; i++)
+	for (int i = 0; i <= ERR_INVALID_CRL_DIST_POINT; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -84,7 +86,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_CHECKED_AS_CA; i++)
+	for (int i = 0; i <= WARN_CRL_RELATIVE; i++)
 	{
 		if (i == WARN_IA5)
 		{

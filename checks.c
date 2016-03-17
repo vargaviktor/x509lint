@@ -508,6 +508,62 @@ static void CheckSAN(X509 *x509, CertType type)
 	}
 }
 
+static void CheckCRL(X509 *x509)
+{
+	int idx = -1;
+
+	do
+	{
+		int critical = -1;
+
+		STACK_OF(DIST_POINT) *crls = X509_get_ext_d2i(x509, NID_crl_distribution_points, &critical, &idx);
+
+		if (crls == NULL)
+		{
+			if (critical >= 0)
+			{
+				/* Found but fails to parse */
+				SetError(ERR_INVALID);
+				continue;
+			}
+			/* Not found */
+			break;
+		}
+
+		for (int i = 0; i < sk_DIST_POINT_num(crls); i++)
+		{
+			DIST_POINT *dp = sk_DIST_POINT_value(crls, i);
+			if (dp->distpoint == NULL && dp->CRLissuer)
+			{
+				SetError(ERR_INVALID_CRL_DIST_POINT);
+			}
+			if (dp->distpoint->type == 0)
+			{
+				/* full name */
+				for (i = 0; i < sk_GENERAL_NAME_num(dp->distpoint->name.fullname); i++)
+				{
+					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, i);
+					int type;
+					ASN1_STRING *uri = GENERAL_NAME_get0_value(gen, &type);
+					if (type == GEN_URI)
+					{
+						CheckValidURL((char *)ASN1_STRING_data(uri), ASN1_STRING_length(uri));
+					}
+					else
+					{
+						SetInfo(INF_CRL_NOT_URL);
+					}
+				}
+			}
+			else
+			{
+				/* relative name */
+				SetWarning(WARN_CRL_RELATIVE);
+			}
+		}
+	}
+	while (1);
+}
 
 static char *asn1_time_as_string(ASN1_TIME *time)
 {
@@ -724,10 +780,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 {
 	X509_NAME *issuer;
 	X509_NAME *subject;
-	int i;
 	int ret;
-	size_t size = 81920;
-	char buf[81920];
 	gnutls_x509_crt_t cert;
 	gnutls_datum_t pem;
 	X509 *x509;
@@ -847,31 +900,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		}
 	}
 
-	i = 0;
-	while (1)
-	{
-		size = sizeof(buf);
-		int ret = gnutls_x509_crt_get_crl_dist_points(cert, i, buf, &size, NULL, NULL);
-		if (ret == GNUTLS_E_REQUESTED_DATA_NOT_AVAILABLE)
-		{
-			break;
-		}
-		if (ret < 0)
-		{
-			SetError(ERR_INVALID);
-			break;
-		}
-		if (ret != GNUTLS_SAN_URI)
-		{
-			SetInfo(INF_CRL_NOT_URL);
-		}
-		else
-		{
-			CheckValidURL(buf, size);
-		}
-		i++;
-	}
-
+	CheckCRL(x509);
 	CheckTime(x509, &tm_before, &tm_after, type);
 
 	gnutls_x509_crt_deinit(cert);

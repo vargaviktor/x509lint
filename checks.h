@@ -26,6 +26,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_COUNTRY_SIZE                      18
 #define ERR_INVALID_TIME_FORMAT               19
 #define ERR_DUPLICATE_EXTENTION               20
+#define ERR_INVALID_CRL_DIST_POINT            21
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -33,6 +34,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_LONGER_39_MONTHS          2
 #define WARN_CHECKED_AS_SUBSCRIBER     3
 #define WARN_CHECKED_AS_CA             4
+#define WARN_CRL_RELATIVE              5
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                 0
