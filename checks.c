@@ -322,6 +322,10 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 			SetError(ERR_COUNTRY_SIZE);
 		}
 	}
+	if (nid == NID_dnQualifier && data->type != V_ASN1_PRINTABLESTRING)
+	{
+		SetError(ERR_INVALID_TAG_TYPE);
+	}
 
 	return;
 }
