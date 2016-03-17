@@ -100,7 +100,7 @@ static void Clear()
 	info[0] = 0;
 }
 
-static void CheckValidURL(const char *s, int n)
+static void CheckValidURL(const unsigned char *s, int n)
 {
 	/* RFC3986 */
 	static char *reserved_chars = ":/?#[]@!$&'()*+,;=";
@@ -553,7 +553,7 @@ static void CheckCRL(X509 *x509)
 					ASN1_STRING *uri = GENERAL_NAME_get0_value(gen, &type);
 					if (type == GEN_URI)
 					{
-						CheckValidURL((char *)ASN1_STRING_data(uri), ASN1_STRING_length(uri));
+						CheckValidURL(ASN1_STRING_data(uri), ASN1_STRING_length(uri));
 					}
 					else
 					{
