@@ -27,6 +27,10 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_INVALID_TIME_FORMAT               19
 #define ERR_DUPLICATE_EXTENTION               20
 #define ERR_INVALID_CRL_DIST_POINT            21
+#define ERR_INVALID_DISPLAY_TEXT_TYPE         22
+#define ERR_INVALID_DISPLAY_TEXT_LENGTH       23
+#define ERR_INVALID_TYPE_USER_NOTICE          24
+#define ERR_INVALID_POLICY_QUALIFIER_ID       25
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

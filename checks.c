@@ -330,6 +330,21 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	return;
 }
 
+static void CheckDisplayText(ASN1_STRING *s)
+{
+	CheckStringValid(s);
+	if (s->type != V_ASN1_IA5STRING && s->type != V_ASN1_VISIBLESTRING &&
+		s->type != V_ASN1_BMPSTRING && s->type != V_ASN1_UTF8STRING)
+	{
+		SetError(ERR_INVALID_DISPLAY_TEXT_TYPE);
+	}
+	if (s->length > 200)
+	{
+		SetError(ERR_INVALID_DISPLAY_TEXT_LENGTH);
+	}
+	CheckStringValid(s);
+}
+
 static void CheckDN(X509_NAME *dn)
 {
 	for (int i = 0; i < X509_NAME_entry_count(dn); i++)
@@ -459,6 +474,35 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 						&& IsNameObjPresent(subject, obj_countryName)))
 					{
 						SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+					}
+				}
+			}
+
+			if (info->qualifiers)
+			{
+				for (int i = 0; i < sk_POLICYQUALINFO_num(info->qualifiers); i++)
+				{
+					POLICYQUALINFO *qualinfo = sk_POLICYQUALINFO_value(info->qualifiers, i);
+					int nid = OBJ_obj2nid(qualinfo->pqualid);
+					if (nid == NID_id_qt_unotice)
+					{
+						if (qualinfo->d.usernotice->exptext)
+						{
+							ASN1_STRING *s = qualinfo->d.usernotice->exptext;
+							CheckDisplayText(s);
+							if (s->type == V_ASN1_BMPSTRING || s->type == V_ASN1_VISIBLESTRING)
+							{
+								SetError(ERR_INVALID_TYPE_USER_NOTICE);
+							}
+						}
+					}
+					else if (nid == NID_id_qt_cps)
+					{
+						CheckValidURL(qualinfo->d.cpsuri->data, qualinfo->d.cpsuri->length);
+					}
+					else
+					{
+						SetError(ERR_INVALID_POLICY_QUALIFIER_ID);
 					}
 				}
 			}

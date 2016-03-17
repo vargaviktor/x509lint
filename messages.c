@@ -47,7 +47,12 @@ static const char *error_strings[] =
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
 	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
 	"E: Duplicate extention\n", /* ERR_DUPLICATE_EXTENTION */
-	"E: Invalid CRL distribution point\n" /* ERR_INVALID_CRL_DIST_POINT */
+	"E: Invalid CRL distribution point\n", /* ERR_INVALID_CRL_DIST_POINT */
+	"E: Invalid display text type\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
+	"E: Invalid display text length\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
+	"E: Invalid user notice type\n", /* ERR_INVALID_TYPE_USER_NOTICE */
+	"E: Invalid policy qualifier id\n" /* ERR_INVALID_POLICY_QUALIFIER_ID */
+
 };
 
 static const char *warning_strings[] = {
@@ -78,7 +83,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_INVALID_CRL_DIST_POINT; i++)
+	for (int i = 0; i <= ERR_INVALID_POLICY_QUALIFIER_ID; i++)
 	{
 		if (GetBit(errors, i))
 		{
