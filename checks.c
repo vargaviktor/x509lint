@@ -158,14 +158,8 @@ static void CheckPrintableChars(const char *s, int n)
 	}
 }
 
-static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
+static void CheckStringValid(ASN1_STRING *data)
 {
-	int i;
-
-	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
-	ASN1_OBJECT *obj = X509_NAME_ENTRY_get_object(ne);
-	int nid = OBJ_obj2nid(obj);
-
 	if (data->type == V_ASN1_UTF8STRING)
 	{
 		size_t n1 = data->length;
@@ -244,7 +238,7 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	}
 	else if (data->type == V_ASN1_IA5STRING)
 	{
-		for (i = 0; i < data->length; i++)
+		for (int i = 0; i < data->length; i++)
 		{
 			if (data->data[i] == '\0')
 			{
@@ -287,6 +281,15 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	{
 		SetInfo(INF_STRING_NOT_CHECKED);
 	}
+}
+
+static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
+{
+	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
+	ASN1_OBJECT *obj = X509_NAME_ENTRY_get_object(ne);
+	int nid = OBJ_obj2nid(obj);
+
+	CheckStringValid(data);
 
 	/* It should be a DirectoryString, which is one of the below */
 	if ((data->type != V_ASN1_PRINTABLESTRING) &&
