@@ -745,7 +745,7 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 
 }
 
-static int obj_cmp(const ASN1_OBJECT **a, const ASN1_OBJECT **b)
+static int obj_cmp(const ASN1_OBJECT * const *a, const ASN1_OBJECT * const *b)
 {
 	return OBJ_cmp(*a, *b);
 }
