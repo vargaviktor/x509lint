@@ -51,8 +51,15 @@ static const char *error_strings[] =
 	"E: Invalid display text type\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
 	"E: Invalid display text length\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
 	"E: Invalid user notice type\n", /* ERR_INVALID_TYPE_USER_NOTICE */
-	"E: Invalid policy qualifier id\n" /* ERR_INVALID_POLICY_QUALIFIER_ID */
-
+	"E: Invalid policy qualifier id\n", /* ERR_INVALID_POLICY_QUALIFIER_ID */
+	"E: Individual without name\n", /* ERR_INDIVDUAL_WITHOUT_NAME */
+	"E: Individual without country\n", /* ERR_INDIVDUAL_WITHOUT_COUNTRY */
+	"E: EV certificate without organization\n", /* ERR_EV_WITHOUT_ORGANIZATION */
+	"E: EV certificate without business\n", /* ERR_EV_WITHOUT_BUSINESS */
+	"E: EV certificate without jurisdiction country\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
+	"E: EV certificate without number\n", /* ERR_EV_WITHOUT_NUMBER */
+	"E: EV certificate without locality\n", /* ERR_EV_WITHOUT_LOCALITY */
+	"E: EV certificate without country\n" /* ERR_EV_WITHOUT_COUNTRY */
 };
 
 static const char *warning_strings[] = {
@@ -83,7 +90,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_INVALID_POLICY_QUALIFIER_ID; i++)
+	for (int i = 0; i <= ERR_EV_WITHOUT_COUNTRY; i++)
 	{
 		if (GetBit(errors, i))
 		{

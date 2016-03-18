@@ -33,6 +33,14 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_INVALID_DISPLAY_TEXT_LENGTH       23
 #define ERR_INVALID_TYPE_USER_NOTICE          24
 #define ERR_INVALID_POLICY_QUALIFIER_ID       25
+#define ERR_INDIVDUAL_WITHOUT_NAME            26
+#define ERR_INDIVDUAL_WITHOUT_COUNTRY         27
+#define ERR_EV_WITHOUT_ORGANIZATION           28
+#define ERR_EV_WITHOUT_BUSINESS               29
+#define ERR_EV_WITHOUT_JURISDICTION_COUNTRY   30
+#define ERR_EV_WITHOUT_NUMBER                 31
+#define ERR_EV_WITHOUT_LOCALITY               32
+#define ERR_EV_WITHOUT_COUNTRY                33
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

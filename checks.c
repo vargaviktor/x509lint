@@ -41,8 +41,12 @@ static iconv_t iconv_t61;
 
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
+
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
-static const char *OIDCabIdentityValidated = "2.23.140.1.2.2";
+static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
+static const char *OIDCabIndividualIdentityValidated = "2.23.140.1.2.3";
+static const char *OIDCabExtendedValidation = "2.23.140.1.3";
+
 
 static ASN1_OBJECT *obj_organizationName;
 static ASN1_OBJECT *obj_StreetAddress;
@@ -51,6 +55,11 @@ static ASN1_OBJECT *obj_stateOrProvinceName;
 static ASN1_OBJECT *obj_postalCode;
 static ASN1_OBJECT *obj_countryName;
 static ASN1_OBJECT *obj_commonName;
+static ASN1_OBJECT *obj_givenName;
+static ASN1_OBJECT *obj_surname;
+static ASN1_OBJECT *obj_businessCategory;
+static ASN1_OBJECT *obj_serialNumber;
+static ASN1_OBJECT *obj_jurisdictionCountryName;
 
 uint32_t errors[2];
 uint32_t warnings[1];
@@ -422,7 +431,9 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	int idx = -1;
 	bool bPolicyFound = false;
 	bool DomainValidated = false;
-	bool IdentityValidated = false;
+	bool OrganizationValidated = false;
+	bool IndividualValidated = false;
+	bool EVValidated = false;
 
 	do
 	{
@@ -453,10 +464,12 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 
 			if (type == SubscriberCertificate)
 			{
-				/* Required by CAB base 9.3.1 */
-				if (strcmp(oid, OIDCabDomainValidated) == 0)
+				if (strcmp(oid, OIDCabDomainValidated) == 0
+					|| strcmp(oid, "2.16.840.1.114413.1.7.23.1") == 0
+					|| strcmp(oid, "2.16.840.1.114414.1.7.23.1") == 0)
 				{
 					DomainValidated = true;
+					/* Required by CAB base 7.1.6.1 */
 					if (IsNameObjPresent(subject, obj_organizationName)
 						|| IsNameObjPresent(subject, obj_StreetAddress)
 						|| IsNameObjPresent(subject, obj_localityName)
@@ -467,14 +480,80 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					}
 				}
 
-				if (strcmp(oid, OIDCabIdentityValidated) == 0)
+				if (strcmp(oid, OIDCabOrganizationIdentityValidated) == 0
+					|| strcmp(oid, "2.16.840.1.114412.1.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.4788.2.200.1") == 0
+					|| strcmp(oid, "2.16.840.1.114413.1.7.23.2") == 0
+					|| strcmp(oid, "2.16.528.1.1003.1.2.5.6") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.8024.0.2.100.1.1") == 0
+					|| strcmp(oid, "2.16.840.1.114414.1.7.23.2") == 0
+					|| strcmp(oid, "2.16.792.3.0.3.1.1.2") == 0)
 				{
-					IdentityValidated = true;
+					OrganizationValidated = true;
+					/* Required by CAB base 7.1.6.1 */
 					if (!(IsNameObjPresent(subject, obj_organizationName)
 						&& IsNameObjPresent(subject, obj_localityName)
 						&& IsNameObjPresent(subject, obj_countryName)))
 					{
 						SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+					}
+				}
+
+				if (strcmp(oid, OIDCabIndividualIdentityValidated) == 0)
+				{
+					IndividualValidated = true;
+					/* Required by CAB base 7.1.6.1 */
+					if (!IsNameObjPresent(subject, obj_organizationName)
+						|| !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
+					{
+						SetError(ERR_INDIVDUAL_WITHOUT_NAME);
+					}
+					if (!IsNameObjPresent(subject, obj_countryName))
+					{
+						SetError(ERR_INDIVDUAL_WITHOUT_COUNTRY);
+					}
+				}
+
+				if (strcmp(oid, OIDCabExtendedValidation) == 0
+					|| strcmp(oid, "2.16.840.1.114412.2.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.4788.2.202.1") == 0
+					|| strcmp(oid, "2.16.840.1.114413.1.7.23.3") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.8024.0.2.100.1.2") == 0
+					|| strcmp(oid, "2.16.840.1.114414.1.7.23.3") == 0
+					|| strcmp(oid, "2.16.756.1.89.1.2.1.1") == 0
+					|| strcmp(oid, "2.16.792.3.0.3.1.1.5") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.6449.1.2.1.5.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.36305.2") == 0)
+				{
+					EVValidated = true;
+					/* 9.2.1 */
+					if (!IsNameObjPresent(subject, obj_organizationName))
+					{
+						SetError(ERR_EV_WITHOUT_ORGANIZATION);
+					}
+					/* 9.2.4 */
+					if (!IsNameObjPresent(subject, obj_businessCategory))
+					{
+						SetError(ERR_EV_WITHOUT_BUSINESS);
+					}
+					/* 9.2.5 */
+					if (!IsNameObjPresent(subject, obj_jurisdictionCountryName))
+					{
+						SetError(ERR_EV_WITHOUT_JURISDICTION_COUNTRY);
+					}
+					/* 9.2.6 */
+					if (!IsNameObjPresent(subject, obj_serialNumber))
+					{
+						SetError(ERR_EV_WITHOUT_NUMBER);
+					}
+					/* 9.2.7 */
+					if (!IsNameObjPresent(subject, obj_localityName))
+					{
+						SetError(ERR_EV_WITHOUT_LOCALITY);
+					}
+					if (!IsNameObjPresent(subject, obj_countryName))
+					{
+						SetError(ERR_EV_WITHOUT_COUNTRY);
 					}
 				}
 			}
@@ -518,7 +597,8 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 		SetError(ERR_NO_POLICY);
 	}
 
-	if (type == SubscriberCertificate && !DomainValidated && !IdentityValidated)
+	if (type == SubscriberCertificate && !DomainValidated && !OrganizationValidated
+		&& !IndividualValidated && !EVValidated)
 	{
 		SetInfo(INF_UNKNOWN_VALIDATION);
 	}
@@ -897,14 +977,14 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 
 	CheckDuplicateExtentions(x509);
 
-	/* Prohibited in CAB base 9.2.4b */
+	/* Prohibited in CAB base 7.1.4.2.2c */
 	if (!IsNameObjPresent(subject, obj_organizationName)
 		&& IsNameObjPresent(subject, obj_StreetAddress))
 	{
 		SetError(ERR_SUBJECT_ADDR);
 	}
 
-	/* Required in CAB base 9.2.4c and 9.2.4d */
+	/* Required in CAB base 7.1.4.2.2d and 7.1.4.2.2e */
 	if (IsNameObjPresent(subject, obj_organizationName)
 		&& !IsNameObjPresent(subject, obj_stateOrProvinceName)
 		&& !IsNameObjPresent(subject, obj_localityName))
@@ -912,7 +992,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_SUBJECT_ORG_NO_PLACE);
 	}
 
-	/* Prohibited in CAB base 9.2.4c or 9.2.4d */
+	/* Prohibited in CAB base 7.1.4.2.2d or 7.1.4.2.2e */
 	if (!IsNameObjPresent(subject, obj_organizationName)
 		&& (IsNameObjPresent(subject, obj_localityName)
 			|| IsNameObjPresent(subject, obj_stateOrProvinceName)))
@@ -920,7 +1000,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_SUBJECT_NO_ORG_PLACE);
 	}
 
-	/* Required by CAB base 9.2.5 */
+	/* Required by CAB base 7.1.4.2.2g */
 	if (IsNameObjPresent(subject, obj_organizationName)
 		&& !IsNameObjPresent(subject, obj_countryName))
 	{
@@ -930,7 +1010,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);
 
-	/* Deprecated in CAB base 7.1.4.2.2 */
+	/* Deprecated in CAB base 7.1.4.2.2a */
 	if (IsNameObjPresent(subject, obj_commonName))
 	{
 		if (type == SubscriberCertificate)
@@ -958,6 +1038,11 @@ void check_init()
 	obj_stateOrProvinceName = OBJ_nid2obj(NID_stateOrProvinceName);
 	obj_countryName = OBJ_nid2obj(NID_countryName);
 	obj_commonName = OBJ_nid2obj(NID_commonName);
+	obj_givenName = OBJ_nid2obj(NID_givenName);
+	obj_surname = OBJ_nid2obj(NID_surname);
+	obj_businessCategory = OBJ_nid2obj(NID_businessCategory);
+	obj_serialNumber = OBJ_nid2obj(NID_serialNumber);
+	obj_jurisdictionCountryName = OBJ_nid2obj(NID_jurisdictionCountryName);
 
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
