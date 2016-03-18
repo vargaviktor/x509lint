@@ -1,6 +1,8 @@
 #ifndef _CHECKS_H_
 #define _CHECKS_H_
 
+#include <stdint.h>
+
 typedef enum { SubscriberCertificate, IntermediateCA, RootCA } CertType;
 typedef enum { PEM, DER } CertFormat;
 
@@ -46,13 +48,13 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_CRL_NOT_URL                2
 #define INF_UNKNOWN_VALIDATION         3        /* Software doesn't know OID yet. */
 
-extern unsigned int errors[1];
-extern unsigned int warnings[1];
-extern unsigned int info[1];
+extern uint32_t errors[];
+extern uint32_t warnings[];
+extern uint32_t info[];
 
 void check_init();
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
-int GetBit(unsigned int *val, int bit);
+int GetBit(uint32_t *val, int bit);
 void check_finish();
 
 

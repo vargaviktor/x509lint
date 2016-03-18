@@ -26,6 +26,7 @@
 #include <iconv.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
@@ -51,18 +52,18 @@ static ASN1_OBJECT *obj_postalCode;
 static ASN1_OBJECT *obj_countryName;
 static ASN1_OBJECT *obj_commonName;
 
-unsigned int errors[1];
-unsigned int warnings[1];
-unsigned int info[1];
+uint32_t errors[2];
+uint32_t warnings[1];
+uint32_t info[1];
 
-static void SetBit(unsigned int *val, int bit)
+static void SetBit(uint32_t *val, int bit)
 {
-	val[bit/(sizeof(int)*8)] |= (1 << (bit % (sizeof(int)*8)));
+	val[bit/(sizeof(uint32_t)*8)] |= (1 << (bit % (sizeof(int)*8)));
 }
 
-int GetBit(unsigned int *val, int bit)
+int GetBit(uint32_t *val, int bit)
 {
-	return (val[bit/(sizeof(int)*8)] & (1 << (bit % (sizeof(int)*8)))) != 0;
+	return (val[bit/(sizeof(uint32_t)*8)] & (1 << (bit % (sizeof(uint32_t)*8)))) != 0;
 }
 
 #define SetError(bit) SetBit(errors, bit)
