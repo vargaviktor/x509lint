@@ -675,9 +675,9 @@ static void CheckCRL(X509 *x509)
 			if (dp->distpoint->type == 0)
 			{
 				/* full name */
-				for (i = 0; i < sk_GENERAL_NAME_num(dp->distpoint->name.fullname); i++)
+				for (int j = 0; j < sk_GENERAL_NAME_num(dp->distpoint->name.fullname); j++)
 				{
-					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, i);
+					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, j);
 					int type;
 					ASN1_STRING *uri = GENERAL_NAME_get0_value(gen, &type);
 					if (type == GEN_URI)
