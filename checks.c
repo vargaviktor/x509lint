@@ -870,13 +870,13 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 	if (type == SubscriberCertificate)
 	{
 		/* CAB 9.4.1 */
-		if (IsValidLongerThan(*tm_before, *tm_after, 39))
-		{
-			SetWarning(WARN_LONGER_39_MONTHS);
-		}
 		if (IsValidLongerThan(*tm_before, *tm_after, 60))
 		{
-			SetWarning(ERR_LONGER_60_MONTHS);
+			SetError(ERR_LONGER_60_MONTHS);
+		}
+		else if (IsValidLongerThan(*tm_before, *tm_after, 39))
+		{
+			SetWarning(WARN_LONGER_39_MONTHS);
 		}
 	}
 
