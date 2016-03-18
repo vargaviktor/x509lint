@@ -42,6 +42,10 @@ static iconv_t iconv_t61;
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
 
+#if OPENSSL_VERSION_NUMBER < 0x1000200FL
+static const char *OIDjurisdictionCountryName = "1.3.6.1.4.1.311.60.2.1.3";
+#endif
+
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
 static const char *OIDCabIndividualIdentityValidated = "2.23.140.1.2.3";
@@ -1042,7 +1046,12 @@ void check_init()
 	obj_surname = OBJ_nid2obj(NID_surname);
 	obj_businessCategory = OBJ_nid2obj(NID_businessCategory);
 	obj_serialNumber = OBJ_nid2obj(NID_serialNumber);
+
+#if OPENSSL_VERSION_NUMBER < 0x1000200FL
+	obj_jurisdictionCountryName = OBJ_txt2obj(OIDjurisdictionCountryName, 1);
+#else
 	obj_jurisdictionCountryName = OBJ_nid2obj(NID_jurisdictionCountryName);
+#endif
 
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
@@ -1053,6 +1062,9 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
+#if OPENSSL_VERSION_NUMBER < 0x1000200FL
+	ASN1_OBJECT_free(obj_jurisdictionCountryName);
+#endif
 	ASN1_OBJECT_free(obj_StreetAddress);
 	ASN1_OBJECT_free(obj_postalCode);
 	EVP_cleanup();
