@@ -691,7 +691,7 @@ static void CheckCRL(X509 *x509)
 		for (int i = 0; i < sk_DIST_POINT_num(crls); i++)
 		{
 			DIST_POINT *dp = sk_DIST_POINT_value(crls, i);
-			if (dp->distpoint == NULL && dp->CRLissuer != NULL)
+			if (dp->distpoint == NULL && dp->CRLissuer == NULL)
 			{
 				SetError(ERR_INVALID_CRL_DIST_POINT);
 			}
