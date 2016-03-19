@@ -649,7 +649,8 @@ static void CheckSAN(X509 *x509, CertType type)
 			/* Not found */
 			break;
 		}
-		X509V3_EXT_free(NID_subject_alt_name, name);
+		const X509V3_EXT_METHOD *meth = X509V3_EXT_get_nid(NID_subject_alt_name);
+		ASN1_item_free((void *)name, ASN1_ITEM_ptr(meth->it));
 		bSanFound = true;
 	}
 	while (1);
