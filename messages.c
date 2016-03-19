@@ -27,16 +27,16 @@
 static const char *error_strings[] =
 {
 	"E: Error parsing certificate\n", /* ERR_INVALID*/
-	"E: Issuer without organization name\n", /* ERR_ISSUER_ORG_NAME*/
-	"E: Issuer without country name\n", /* ERR_ISSUER_COUNTRY */
-	"E: Subject without OrganizationName but with StreetAddress\n", /* ERR_SUBJECT_ADDR */
-	"E: Subject with OrganizationName but without StateOrProvince or LocalityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
-	"E: Subject without OrganizationName but with StateOrProvince or LocalityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
+	"E: Issuer without organizationName\n", /* ERR_ISSUER_ORG_NAME*/
+	"E: Issuer without countryName\n", /* ERR_ISSUER_COUNTRY */
+	"E: Subject without organizationName but with StreetAddress\n", /* ERR_SUBJECT_ADDR */
+	"E: Subject with organizationName but without StateOrProvince or LocalityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
+	"E: Subject without organizationName but with StateOrProvince or LocalityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
 	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
-	"E: Contains a null character in the distinguished name\n", /* ERR_STRING_WITH_NUL */
+	"E: Contains a null character in the string\n", /* ERR_STRING_WITH_NUL */
 	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
-	"E: The distinguished name contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
-	"E: Subject with OrganizationName but without country name\n", /* ERR_SUBJECT_COUNTRY */
+	"E: The string contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
+	"E: Subject with organizationName but without countryName\n", /* ERR_SUBJECT_COUNTRY */
 	"E: Domain validated certificate but with organization name or address\n", /* ERR_DOMAIN_WITH_ORG_OR_ADDRESS */
 	"E: Identity validated certificate but without organization name or address\n", /* ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS */
 	"E: No policy extension\n", /* ERR_NO_POLICY */
@@ -63,7 +63,7 @@ static const char *error_strings[] =
 };
 
 static const char *warning_strings[] = {
-	"W: The distinguished name contains something that is not a PrintableString or UTF8String\n", /* WARN_NON_PRINTABLE_STRING */
+	"W: The name entry contains something that is not a PrintableString or UTF8String\n", /* WARN_NON_PRINTABLE_STRING */
 	"W: The distinguished name makes use of an IA5String\n", /* WARN_IA5 */
 	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
 	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
