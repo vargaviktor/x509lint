@@ -22,7 +22,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <gnutls/x509.h>
 #include "checks.h"
 #include "messages.h"
 
