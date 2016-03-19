@@ -508,11 +508,17 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				{
 					OrganizationValidated = true;
 					/* Required by CAB base 7.1.6.1 */
-					if (!(IsNameObjPresent(subject, obj_organizationName)
-						&& IsNameObjPresent(subject, obj_localityName)
-						&& IsNameObjPresent(subject, obj_countryName)))
+					if (!IsNameObjPresent(subject, obj_organizationName))
 					{
-						SetError(ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS);
+						SetError(ERR_ORGANIZATION_WITHOUT_ORG);
+					}
+					if (!IsNameObjPresent(subject, obj_localityName))
+					{
+						SetError(ERR_ORGANIZATION_WITHOUT_LOCALITY);
+					}
+					if (!IsNameObjPresent(subject, obj_countryName))
+					{
+						SetError(ERR_ORGANIZATION_WITHOUT_COUNTRY);
 					}
 				}
 

@@ -19,7 +19,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_NON_PRINTABLE                      9
 #define ERR_SUBJECT_COUNTRY                   10
 #define ERR_DOMAIN_WITH_ORG                   11
-#define ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS   12
+#define ERR_ORGANIZATION_WITHOUT_ORG          12
 #define ERR_NO_POLICY                         13
 #define ERR_NO_SUBJECT_ALT_NAME               14
 #define ERR_NOT_VERSION3                      15
@@ -45,6 +45,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_DOMAIN_WITH_LOCALITY              35
 #define ERR_DOMAIN_WITH_STATE                 36
 #define ERR_DOMAIN_WITH_POSTAL                37
+#define ERR_ORGANIZATION_WITHOUT_LOCALITY     38
+#define ERR_ORGANIZATION_WITHOUT_COUNTRY      39
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

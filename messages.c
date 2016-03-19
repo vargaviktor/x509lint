@@ -38,7 +38,7 @@ static const char *error_strings[] =
 	"E: The string contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
 	"E: Subject with organizationName but without countryName\n", /* ERR_SUBJECT_COUNTRY */
 	"E: Domain validated certificate with organizationName\n", /* ERR_DOMAIN_WITH_ORG */
-	"E: Identity validated certificate but without organization name or address\n", /* ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS */
+	"E: Organization validated certificate but without organizationName\n", /* ERR_ORGANIZATION_WITHOUT_ORG */
 	"E: No policy extension\n", /* ERR_NO_POLICY */
 	"E: No Subject alternative name extension\n", /* ERR_NO_SUBJECT_ALT_NAME */
 	"E: Certificate not version 3\n", /* ERR_NOT_VERSION3 */
@@ -63,7 +63,9 @@ static const char *error_strings[] =
 	"E: Domain validated certificate but with streetAddress\n", /* ERR_DOMAIN_WITH_STREET */
 	"E: Domain validated certificate but with localityName\n", /* ERR_DOMAIN_WITH_LOCALITY */
 	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
-	"E: Domain validated certificate but with postalCode\n" /* ERR_DOMAIN_WITH_POSTAL */
+	"E: Domain validated certificate but with postalCode\n", /* ERR_DOMAIN_WITH_POSTAL */
+	"E: Organization validated certificate but without localityName\n", /* ERR_ORGANIZATION_WITHOUT_LOCALITY */
+	"E: Organization validated certificate but without country\n" /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
 };
 
 static const char *warning_strings[] = {
@@ -94,7 +96,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_DOMAIN_WITH_POSTAL; i++)
+	for (int i = 0; i <= ERR_ORGANIZATION_WITHOUT_COUNTRY; i++)
 	{
 		if (GetBit(errors, i))
 		{
