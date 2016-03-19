@@ -635,9 +635,9 @@ static void CheckSAN(X509 *x509, CertType type)
 	{
 		int critical = -1;
 
-		GENERAL_NAME *name = X509_get_ext_d2i(x509, NID_subject_alt_name, &critical, &idx);
+		GENERAL_NAMES *names = X509_get_ext_d2i(x509, NID_subject_alt_name, &critical, &idx);
 
-		if (name == NULL)
+		if (names == NULL)
 		{
 			if (critical >= 0)
 			{
@@ -649,8 +649,7 @@ static void CheckSAN(X509 *x509, CertType type)
 			/* Not found */
 			break;
 		}
-		const X509V3_EXT_METHOD *meth = X509V3_EXT_get_nid(NID_subject_alt_name);
-		ASN1_item_free((void *)name, ASN1_ITEM_ptr(meth->it));
+		sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
 		bSanFound = true;
 	}
 	while (1);
