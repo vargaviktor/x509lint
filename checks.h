@@ -15,7 +15,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_SUBJECT_NO_ORG_PLACE               5
 #define ERR_INVALID_ENCODING                   6
 #define ERR_STRING_WITH_NUL                    7
-#define ERR_INVALID_TAG_TYPE                   8
+#define ERR_INVALID_NAME_ENTRY_TYPE            8
 #define ERR_NON_PRINTABLE                      9
 #define ERR_SUBJECT_COUNTRY                   10
 #define ERR_DOMAIN_WITH_ORG_OR_ADDRESS        11

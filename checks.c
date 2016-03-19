@@ -318,7 +318,7 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		(data->type != V_ASN1_UNIVERSALSTRING) &&
 		(data->type != V_ASN1_BMPSTRING))
 	{
-		SetError(ERR_INVALID_TAG_TYPE);
+		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 	}
 	else if ((data->type != V_ASN1_PRINTABLESTRING) && (data->type != V_ASN1_UTF8STRING))
 	{
@@ -330,7 +330,7 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	{
 		if (data->type != V_ASN1_PRINTABLESTRING)
 		{
-			SetError(ERR_INVALID_TAG_TYPE);
+			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 		}
 		if (data->length != 2)
 		{
@@ -339,7 +339,7 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	}
 	if (nid == NID_dnQualifier && data->type != V_ASN1_PRINTABLESTRING)
 	{
-		SetError(ERR_INVALID_TAG_TYPE);
+		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 	}
 
 	return;

@@ -34,7 +34,7 @@ static const char *error_strings[] =
 	"E: Subject without OrganizationName but with StateOrProvince or LocalityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
 	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
 	"E: Contains a null character in the distinguished name\n", /* ERR_STRING_WITH_NUL */
-	"E: Distinguished name contains invalid DirectoryString type\n", /* ERR_INVALID_TAG_TYPE */
+	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
 	"E: The distinguished name contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
 	"E: Subject with OrganizationName but without country name\n", /* ERR_SUBJECT_COUNTRY */
 	"E: Domain validated certificate but with organization name or address\n", /* ERR_DOMAIN_WITH_ORG_OR_ADDRESS */
