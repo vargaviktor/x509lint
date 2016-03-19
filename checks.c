@@ -649,6 +649,7 @@ static void CheckSAN(X509 *x509, CertType type)
 			/* Not found */
 			break;
 		}
+		X509V3_EXT_free(NID_subject_alt_name, name);
 		bSanFound = true;
 	}
 	while (1);
@@ -718,6 +719,7 @@ static void CheckCRL(X509 *x509)
 				SetWarning(WARN_CRL_RELATIVE);
 			}
 		}
+		sk_DIST_POINT_pop_free(crls, DIST_POINT_free);
 	}
 	while (1);
 }
