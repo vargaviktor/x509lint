@@ -18,7 +18,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_INVALID_NAME_ENTRY_TYPE            8
 #define ERR_NON_PRINTABLE                      9
 #define ERR_SUBJECT_COUNTRY                   10
-#define ERR_DOMAIN_WITH_ORG_OR_ADDRESS        11
+#define ERR_DOMAIN_WITH_ORG                   11
 #define ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS   12
 #define ERR_NO_POLICY                         13
 #define ERR_NO_SUBJECT_ALT_NAME               14
@@ -41,6 +41,10 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_EV_WITHOUT_NUMBER                 31
 #define ERR_EV_WITHOUT_LOCALITY               32
 #define ERR_EV_WITHOUT_COUNTRY                33
+#define ERR_DOMAIN_WITH_STREET                34
+#define ERR_DOMAIN_WITH_LOCALITY              35
+#define ERR_DOMAIN_WITH_STATE                 36
+#define ERR_DOMAIN_WITH_POSTAL                37
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

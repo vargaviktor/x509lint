@@ -37,7 +37,7 @@ static const char *error_strings[] =
 	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
 	"E: The string contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
 	"E: Subject with organizationName but without countryName\n", /* ERR_SUBJECT_COUNTRY */
-	"E: Domain validated certificate but with organization name or address\n", /* ERR_DOMAIN_WITH_ORG_OR_ADDRESS */
+	"E: Domain validated certificate with organizationName\n", /* ERR_DOMAIN_WITH_ORG */
 	"E: Identity validated certificate but without organization name or address\n", /* ERR_IDENTITY_WITHOUT_ORG_OR_ADDRESS */
 	"E: No policy extension\n", /* ERR_NO_POLICY */
 	"E: No Subject alternative name extension\n", /* ERR_NO_SUBJECT_ALT_NAME */
@@ -59,7 +59,11 @@ static const char *error_strings[] =
 	"E: EV certificate without jurisdiction country\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
 	"E: EV certificate without number\n", /* ERR_EV_WITHOUT_NUMBER */
 	"E: EV certificate without locality\n", /* ERR_EV_WITHOUT_LOCALITY */
-	"E: EV certificate without country\n" /* ERR_EV_WITHOUT_COUNTRY */
+	"E: EV certificate without country\n", /* ERR_EV_WITHOUT_COUNTRY */
+	"E: Domain validated certificate but with streetAddress\n", /* ERR_DOMAIN_WITH_STREET */
+	"E: Domain validated certificate but with localityName\n", /* ERR_DOMAIN_WITH_LOCALITY */
+	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
+	"E: Domain validated certificate but with postalCode\n" /* ERR_DOMAIN_WITH_POSTAL */
 };
 
 static const char *warning_strings[] = {
@@ -90,7 +94,7 @@ char *get_messages()
 	buffer = malloc(8192);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_EV_WITHOUT_COUNTRY; i++)
+	for (int i = 0; i <= ERR_DOMAIN_WITH_POSTAL; i++)
 	{
 		if (GetBit(errors, i))
 		{

@@ -475,13 +475,25 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				{
 					DomainValidated = true;
 					/* Required by CAB base 7.1.6.1 */
-					if (IsNameObjPresent(subject, obj_organizationName)
-						|| IsNameObjPresent(subject, obj_StreetAddress)
-						|| IsNameObjPresent(subject, obj_localityName)
-						|| IsNameObjPresent(subject, obj_stateOrProvinceName)
-						|| IsNameObjPresent(subject, obj_postalCode))
+					if (IsNameObjPresent(subject, obj_organizationName))
 					{
-						SetError(ERR_DOMAIN_WITH_ORG_OR_ADDRESS);
+						SetError(ERR_DOMAIN_WITH_ORG);
+					}
+					if (IsNameObjPresent(subject, obj_StreetAddress))
+					{
+						SetError(ERR_DOMAIN_WITH_STREET);
+					}
+					if (IsNameObjPresent(subject, obj_localityName))
+					{
+						SetError(ERR_DOMAIN_WITH_LOCALITY);
+					}
+					if (IsNameObjPresent(subject, obj_stateOrProvinceName))
+					{
+						SetError(ERR_DOMAIN_WITH_STATE);
+					}
+					if (IsNameObjPresent(subject, obj_postalCode))
+					{
+						SetError(ERR_DOMAIN_WITH_POSTAL);
 					}
 				}
 
