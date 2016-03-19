@@ -273,7 +273,6 @@ static void CheckStringValid(ASN1_STRING *data)
 				SetError(ERR_INVALID_ENCODING);
 			}
 		}
-		SetWarning(WARN_IA5);
 	}
 	else if (data->type == V_ASN1_T61STRING)  /* TeletexString, T61String */
 	{

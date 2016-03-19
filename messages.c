@@ -70,7 +70,6 @@ static const char *error_strings[] =
 
 static const char *warning_strings[] = {
 	"W: The name entry contains something that is not a PrintableString or UTF8String\n", /* WARN_NON_PRINTABLE_STRING */
-	"W: The distinguished name makes use of an IA5String\n", /* WARN_IA5 */
 	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
 	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
 	"W: Subscriber certificate checked as if it was a CA certificate\n", /* WARN_CHECKED_AS_CA */
@@ -106,10 +105,6 @@ char *get_messages()
 
 	for (int i = 0; i <= WARN_CRL_RELATIVE; i++)
 	{
-		if (i == WARN_IA5)
-		{
-			continue;
-		}
 		if (GetBit(warnings, i))
 		{
 			strcat(buffer, warning_strings[i]);
