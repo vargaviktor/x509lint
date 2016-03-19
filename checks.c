@@ -34,6 +34,7 @@
 #include <openssl/evp.h>
 
 #include "checks.h"
+#include "asn1_time.h"
 
 static iconv_t iconv_utf8;
 static iconv_t iconv_ucs2;
@@ -704,170 +705,24 @@ static void CheckCRL(X509 *x509)
 	while (1);
 }
 
-static char *asn1_time_as_string(ASN1_TIME *time)
-{
-	char *s = malloc(time->length+1);
-	if (s == NULL)
-	{
-		exit(1);
-	}
-	strncpy(s, (char *)time->data, time->length);
-	s[time->length] = '\0';
-	if (strlen(s) != time->length)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	return s;
-}
-
-static void time_str_to_tm(char *s, bool general, struct tm *tm)
-{
-	for (int i = 0; i < strlen(s)-1; i++)
-	{
-		if (isdigit(s[i]) == 0)
-		{
-			SetError(ERR_INVALID_TIME_FORMAT);
-			return;
-		}
-	}
-	int i = 0;
-	if (general)
-	{
-		tm->tm_year = (s[0] - '0') * 1000 + (s[1] - '0') * 100 + (s[2] - '0') * 10 + s[3] - '0' - 1900;
-		i += 4;
-
-		if (tm->tm_year < 150 || tm->tm_year >= 50)
-		{
-			SetError(ERR_INVALID_TIME_FORMAT);
-		}
-	}
-	else
-	{
-		int year = (s[0] - '0') * 10 + s[1] - '0';
-		if (year < 50)
-		{
-			tm->tm_year = 100 + year;
-		}
-		else
-		{
-			tm->tm_year = year;
-		}
-		i += 2;
-	}
-	tm->tm_mon = (s[i] - '0') * 10 + s[i+1] - '0' - 1;
-	i += 2;
-	if (tm->tm_mon > 11)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	tm->tm_mday = (s[i] - '0') * 10 + s[i+1] - '0';
-	i += 2;
-	if (tm->tm_mday == 0 || tm->tm_mday > 31)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-
-	if ((tm->tm_mon == 3 || tm->tm_mon == 5 || tm->tm_mon == 8 || tm->tm_mon == 10)
-		&& tm->tm_mday > 30)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	if (tm->tm_mon == 1)
-	{
-		if (((tm->tm_year % 4) == 0 && (tm->tm_year % 100) != 0)
-			|| (((tm->tm_year + 1900) % 400) == 0))
-		{
-			if (tm->tm_mday > 29)
-			{
-				SetError(ERR_INVALID_TIME_FORMAT);
-			}
-		}
-		else
-		{
-			if (tm->tm_mday > 28)
-			{
-				SetError(ERR_INVALID_TIME_FORMAT);
-			}
-		}
-	}
-
-	tm->tm_hour = (s[i] - '0') * 10 + s[i+1] - '0';
-	i += 2;
-	if (tm->tm_hour > 23)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	tm->tm_min = (s[i] - '0') * 10 + s[i+1] - '0';
-	i += 2;
-	if (tm->tm_min > 59)
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	tm->tm_sec = (s[i] - '0') * 10 + s[i+1] - '0';
-	if (tm->tm_sec > 60) /* including leap seconds */
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-}
-
-static void asn1_time_to_tm(ASN1_TIME *time, bool general, struct tm *tm)
-{
-	char *s = asn1_time_as_string(time);
-	if (general)
-	{
-		if (strlen(s) != 15)
-		{
-			SetError(ERR_INVALID_TIME_FORMAT);
-		}
-	}
-	else
-	{
-		if (strlen(s) != 13)
-		{
-			SetError(ERR_INVALID_TIME_FORMAT);
-		}
-	}
-	if (s[strlen(s)-1] != 'Z')
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-	time_str_to_tm(s, general, tm);
-	free(s);
-}
-
 static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, CertType type)
 {
 	ASN1_TIME *before = X509_get_notBefore(x509);
 	ASN1_TIME *after = X509_get_notAfter(x509);
+	bool error = false;
 
-	if (before->type == V_ASN1_GENERALIZEDTIME)
+	if (!asn1_time_to_tm(before, tm_before))
 	{
-		asn1_time_to_tm(before, true, tm_before);
+		error = true;
 	}
-	else if (before->type == V_ASN1_UTCTIME)
+	if (!asn1_time_to_tm(after, tm_after))
 	{
-		asn1_time_to_tm(before, false, tm_before);
+		error = true;
 	}
-	else
+
+	if (error)
 	{
 		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-
-	if (after->type == V_ASN1_GENERALIZEDTIME)
-	{
-		asn1_time_to_tm(after, true, tm_after);
-	}
-	else if (after->type == V_ASN1_UTCTIME)
-	{
-		asn1_time_to_tm(after, false, tm_after);
-	}
-	else
-	{
-		SetError(ERR_INVALID_TIME_FORMAT);
-	}
-
-	if (GetBit(errors, ERR_INVALID_TIME_FORMAT))
-	{
 		return;
 	}
 
@@ -883,7 +738,6 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 			SetWarning(WARN_LONGER_39_MONTHS);
 		}
 	}
-
 }
 
 static int obj_cmp(const ASN1_OBJECT * const *a, const ASN1_OBJECT * const *b)
