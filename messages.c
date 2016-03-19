@@ -29,9 +29,9 @@ static const char *error_strings[] =
 	"E: Error parsing certificate\n", /* ERR_INVALID*/
 	"E: Issuer without organizationName\n", /* ERR_ISSUER_ORG_NAME*/
 	"E: Issuer without countryName\n", /* ERR_ISSUER_COUNTRY */
-	"E: Subject without organizationName but with StreetAddress\n", /* ERR_SUBJECT_ADDR */
-	"E: Subject with organizationName but without StateOrProvince or LocalityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
-	"E: Subject without organizationName but with StateOrProvince or LocalityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
+	"E: Subject without organizationName but with streetAddress\n", /* ERR_SUBJECT_ADDR */
+	"E: Subject with organizationName but without stateOrProvince or localityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
+	"E: Subject without organizationName but with stateOrProvince or localityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
 	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
 	"E: Contains a null character in the string\n", /* ERR_STRING_WITH_NUL */
 	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
