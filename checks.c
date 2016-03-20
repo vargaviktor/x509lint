@@ -153,32 +153,49 @@ static void CheckValidURL(const unsigned char *s, int n)
 /*
  * Check that the string contains pritable characters.
  * The input is in internal UCS-4 notation.
+ *
+ * Returns true when no error found and false when an error was found.
+ * It also updates the errors.
  */
-static void CheckPrintableChars(const uint32_t *s, int n)
+static bool CheckPrintableChars(const uint32_t *s, int n)
 {
 	int i;
+	bool ret = true;
 
 	for (i = 0; i < n; i++)
 	{
 		if (s[i] == '\0')
 		{
 			SetError(ERR_STRING_WITH_NUL);
+			ret = false;
 		}
 		else if (s[i] < 32)
 		{
 			SetError(ERR_NON_PRINTABLE);
+			ret = false;
 		}
 		if (s[i] >= 0x7F && s[i] <= 0x9F)
 		{
 			SetError(ERR_NON_PRINTABLE);
+			ret = false;
 		}
 	}
+	return ret;
 }
 
-static void CheckStringValid(ASN1_STRING *data)
+/*
+ * Checks that a string is valid
+ *
+ * Returns true when no error was found and false when an error was found
+ * It also updates the error
+ * When no error was found it will fill in char_len with the number of
+ * characters in the string, not the number of octets.
+ */
+static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 {
 	char *utf8 = NULL;
 	size_t utf8_len;
+	bool ret = true;
 
 	if (data->type == V_ASN1_UTF8STRING)
 	{
@@ -193,6 +210,7 @@ static void CheckStringValid(ASN1_STRING *data)
 
 		if (iconv(iconv_utf8, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
+			ret = false;
 			SetError(ERR_INVALID_ENCODING);
 		}
 		utf8_len = utf8_size;
@@ -210,6 +228,7 @@ static void CheckStringValid(ASN1_STRING *data)
 
 		if (iconv(iconv_ucs2, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
+			ret = false;
 			SetError(ERR_INVALID_ENCODING);
 		}
 		utf8_len = pu - utf8;
@@ -220,10 +239,12 @@ static void CheckStringValid(ASN1_STRING *data)
 		{
 			if (data->data[i] == '\0')
 			{
+				ret = false;
 				SetError(ERR_STRING_WITH_NUL);
 			}
 			else if (data->data[i] < 32)
 			{
+				ret = false;
 				SetError(ERR_NON_PRINTABLE);
 			}
 			else if (!((data->data[i] >= 'A' && data->data[i] <= 'Z') ||
@@ -241,6 +262,7 @@ static void CheckStringValid(ASN1_STRING *data)
 				(data->data[i] == '?') ||
 				(data->data[i] == ' ')))
 			{
+				ret = false;
 				SetError(ERR_INVALID_ENCODING);
 			}
 		}
@@ -256,14 +278,17 @@ static void CheckStringValid(ASN1_STRING *data)
 		{
 			if (data->data[i] == '\0')
 			{
+				ret = false;
 				SetError(ERR_STRING_WITH_NUL);
 			}
 			else if (data->data[i] < 32)
 			{
+				ret = false;
 				SetError(ERR_NON_PRINTABLE);
 			}
 			else if (data->data[i] >= 127)
 			{
+				ret = false;
 				SetError(ERR_INVALID_ENCODING);
 			}
 		}
@@ -281,6 +306,7 @@ static void CheckStringValid(ASN1_STRING *data)
 
 		if (iconv(iconv_t61, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
+			ret = false;
 			SetError(ERR_INVALID_ENCODING);
 		}
 		utf8_len = pu - utf8;
@@ -288,12 +314,11 @@ static void CheckStringValid(ASN1_STRING *data)
 	else
 	{
 		SetInfo(INF_STRING_NOT_CHECKED);
-		return;
+		return 0;
 	}
 
 	if (!GetBit(errors, ERR_INVALID_ENCODING))
 	{
-		size_t char_len;
 
 		if (utf8 != NULL)
 		{
@@ -312,21 +337,25 @@ static void CheckStringValid(ASN1_STRING *data)
 				SetError(ERR_INVALID_ENCODING);
 				free(utf8);
 				free(ucs4);
-				return;
+				return false;
 			}
 			else
 			{
-				char_len = (pu - (char *)ucs4) / 4;
-				CheckPrintableChars(ucs4, char_len);
+				*char_len = (pu - (char *)ucs4) / 4;
+				if (!CheckPrintableChars(ucs4, *char_len))
+				{
+					ret = false;
+				}
 			}
 			free(ucs4);
 		}
 		else
 		{
-			char_len = data->length;
+			*char_len = data->length;
 		}
 	}
 	free(utf8);
+	return ret;
 }
 
 static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
@@ -334,8 +363,15 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
 	ASN1_OBJECT *obj = X509_NAME_ENTRY_get_object(ne);
 	int nid = OBJ_obj2nid(obj);
+	size_t char_len;
 
-	CheckStringValid(data);
+	if (CheckStringValid(data, &char_len))
+	{
+		if (nid == NID_countryName && char_len != 2)
+		{
+				SetError(ERR_COUNTRY_SIZE);
+		}
+	}
 
 	/* It should be a DirectoryString, which is one of the below */
 	if ((data->type != V_ASN1_PRINTABLESTRING) &&
@@ -352,16 +388,9 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		SetWarning(WARN_NON_PRINTABLE_STRING);
 	}
 
-	if (nid == NID_countryName)
+	if (nid == NID_countryName && data->type != V_ASN1_PRINTABLESTRING)
 	{
-		if (data->type != V_ASN1_PRINTABLESTRING)
-		{
-			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
-		}
-		if (data->length != 2)
-		{
-			SetError(ERR_COUNTRY_SIZE);
-		}
+		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 	}
 	if (nid == NID_dnQualifier && data->type != V_ASN1_PRINTABLESTRING)
 	{
@@ -373,17 +402,20 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 
 static void CheckDisplayText(ASN1_STRING *s)
 {
-	CheckStringValid(s);
+	size_t char_len;
+
 	if (s->type != V_ASN1_IA5STRING && s->type != V_ASN1_VISIBLESTRING &&
 		s->type != V_ASN1_BMPSTRING && s->type != V_ASN1_UTF8STRING)
 	{
 		SetError(ERR_INVALID_DISPLAY_TEXT_TYPE);
 	}
-	if (s->length > 200)
+	if (CheckStringValid(s, &char_len))
 	{
-		SetError(ERR_INVALID_DISPLAY_TEXT_LENGTH);
+		if (char_len > 200)
+		{
+			SetError(ERR_INVALID_DISPLAY_TEXT_LENGTH);
+		}
 	}
-	CheckStringValid(s);
 }
 
 static void CheckDN(X509_NAME *dn)
