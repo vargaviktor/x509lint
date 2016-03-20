@@ -513,6 +513,10 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 	{
 		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 	}
+	if (nid == NID_serialNumber && data->type != V_ASN1_PRINTABLESTRING)
+	{
+		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
+	}
 
 	return;
 }
