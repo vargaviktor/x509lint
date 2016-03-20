@@ -213,7 +213,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 			ret = false;
 			SetError(ERR_INVALID_ENCODING);
 		}
-		utf8_len = utf8_size;
+		utf8_len = data->length;
 	}
 	else if (data->type == V_ASN1_BMPSTRING)
 	{
@@ -367,25 +367,142 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 
 	if (CheckStringValid(data, &char_len))
 	{
-		if (nid == NID_countryName && char_len != 2)
+		if (nid == NID_countryName)
 		{
+			if (char_len != 2)
+			{
 				SetError(ERR_COUNTRY_SIZE);
+			}
+		}
+		else if (nid == NID_commonName)
+		{
+			if (char_len > ub_common_name)
+			{
+				SetError(ERR_COMMON_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_localityName)
+		{
+			if (char_len > ub_locality_name)
+			{
+				SetError(ERR_LOCALITY_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_stateOrProvinceName)
+		{
+			if (char_len > ub_state_name)
+			{
+				SetError(ERR_STATE_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_organizationName)
+		{
+			if (char_len > ub_organization_name)
+			{
+				SetError(ERR_ORGANIZATION_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_organizationalUnitName)
+		{
+			if (char_len > ub_organization_unit_name)
+			{
+				SetError(ERR_ORGANIZATIONAL_UNIT_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_serialNumber)
+		{
+			if (char_len > 64)
+			{
+				SetError(ERR_SERIAL_NUMBER_SIZE);
+			}
+		}
+		else if (OBJ_cmp(obj, obj_jurisdictionCountryName) == 0)
+		{
+			if (char_len != 2)
+			{
+				SetError(ERR_COUNTRY_SIZE);
+			}
+		}
+		else if (nid == NID_businessCategory)
+		{
+			/* TODO: We should check it's one of the valid entries */
+		}
+		else if (OBJ_cmp(obj, obj_postalCode) == 0)
+		{
+			if (char_len > 16)
+			{
+				SetError(ERR_POSTAL_CODE_SIZE);
+			}
+		}
+		else if (OBJ_cmp(obj, obj_StreetAddress) == 0)
+		{
+			/*
+			 * There might not be a limit, it's not clear
+			 * to me currently.
+			 */
+			if (char_len > 30)
+			{
+				SetError(ERR_STREET_ADDRESS_SIZE);
+			}
+		}
+		else if (nid == NID_dnQualifier)
+		{
+			/* Doesn't seem to have a limit */
+		}
+		else if (nid == NID_pkcs9_emailAddress)
+		{
+			if (char_len > 255)
+			{
+				SetError(ERR_EMAIL_SIZE);
+			}
+		}
+		else if (nid == NID_givenName)
+		{
+			if (char_len > 16)
+			{
+				/*
+				 * This seems rather short, but it's what
+				 * RFC5280 says.
+				 */
+				SetError(ERR_GIVEN_NAME_SIZE);
+			}
+		}
+		else if (nid == NID_surname)
+		{
+			if (char_len > 40)
+			{
+				SetError(ERR_SURNAME_SIZE);
+			}
+		}
+		else
+		{
+			SetInfo(INF_NAME_ENTRY_LENGTH_NOT_CHECKED);
 		}
 	}
 
-	/* It should be a DirectoryString, which is one of the below */
-	if ((data->type != V_ASN1_PRINTABLESTRING) &&
-		(data->type != V_ASN1_UTF8STRING) &&
-		(data->type != V_ASN1_T61STRING) &&
-		(data->type != V_ASN1_UNIVERSALSTRING) &&
-		(data->type != V_ASN1_BMPSTRING))
+	if (nid == NID_pkcs9_emailAddress)
 	{
-		SetError(ERR_INVALID_NAME_ENTRY_TYPE);
+		if (data->type != V_ASN1_IA5STRING)
+		{
+			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
+		}
 	}
-	else if ((data->type != V_ASN1_PRINTABLESTRING) && (data->type != V_ASN1_UTF8STRING))
+	else
 	{
-		/* RFC5280 says it MUST be PrintableString or UTF8String, with exceptions. */
-		SetWarning(WARN_NON_PRINTABLE_STRING);
+		/* It should be a DirectoryString, which is one of the below */
+		if ((data->type != V_ASN1_PRINTABLESTRING) &&
+			(data->type != V_ASN1_UTF8STRING) &&
+			(data->type != V_ASN1_T61STRING) &&
+			(data->type != V_ASN1_UNIVERSALSTRING) &&
+			(data->type != V_ASN1_BMPSTRING))
+		{
+			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
+		}
+		else if ((data->type != V_ASN1_PRINTABLESTRING) && (data->type != V_ASN1_UTF8STRING))
+		{
+			/* RFC5280 says it MUST be PrintableString or UTF8String, with exceptions. */
+			SetWarning(WARN_NON_PRINTABLE_STRING);
+		}
 	}
 
 	if (nid == NID_countryName && data->type != V_ASN1_PRINTABLESTRING)

@@ -65,7 +65,18 @@ static const char *error_strings[] =
 	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
 	"E: Domain validated certificate but with postalCode\n", /* ERR_DOMAIN_WITH_POSTAL */
 	"E: Organization validated certificate but without localityName\n", /* ERR_ORGANIZATION_WITHOUT_LOCALITY */
-	"E: Organization validated certificate but without country\n" /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
+	"E: Organization validated certificate but without country\n", /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
+	"E: commonName too long\n", /* ERR_COMMON_NAME_SIZE */
+	"E: localityName too long\n", /* ERR_LOCALITY_NAME_SIZE */
+	"E: stateOrProvinceName too long\n", /* ERR_STATE_NAME_SIZE */
+	"E: organizationName too long\n", /* ERR_ORGANIZATION_NAME_SIZE */
+	"E: organizationalUnitName too long\n", /* ERR_ORGANIZATIONAL_UNIT_NAME_SIZE */
+	"E: serialNumber too long\n", /* ERR_SERIAL_NUMBER_SIZE */
+	"E: postalCode too long\n", /* ERR_POSTAL_CODE_SIZE */
+	"E: emailAddress too long\n", /* ERR_EMAIL_SIZE */
+	"E: givenName too long\n", /* ERR_GIVEN_NAME_SIZE */
+	"E: surname too long\n", /* ERR_SURNAME_SIZE */
+	"E: streetAddress too long\n", /* ERR_STREET_ADDRESS_SIZE */
 };
 
 static const char *warning_strings[] = {
@@ -80,7 +91,8 @@ static const char *info_strings[] = {
 	"I: Subject has a deprecated CommonName\n", /* INF_SUBJECT_CN */
 	"I: String not checked\n", /* INF_STRING_NOT_CHECKED */
 	"I: CRL is not a URL\n", /* INF_CRL_NOT_URL */
-	"I: Unknown validation policy\n" /* INF_UNKNOWN_VALIDATION */
+	"I: Unknown validation policy\n", /* INF_UNKNOWN_VALIDATION */
+	"I: Name entry length not checked\n", /* INF_NAME_ENTRY_LENGTH_NOT_CHECKED */
 };
 
 /* 
@@ -92,10 +104,10 @@ char *get_messages()
 	char *buffer;
 
 	/* Should be large enough for all strings. */
-	buffer = malloc(8192);
+	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_ORGANIZATION_WITHOUT_COUNTRY; i++)
+	for (int i = 0; i <= ERR_STREET_ADDRESS_SIZE; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -111,7 +123,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= INF_UNKNOWN_VALIDATION; i++)
+	for (int i = 0; i <= INF_NAME_ENTRY_LENGTH_NOT_CHECKED; i++)
 	{
 		if (GetBit(info, i))
 		{

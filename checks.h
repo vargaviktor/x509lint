@@ -47,6 +47,17 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_DOMAIN_WITH_POSTAL                37
 #define ERR_ORGANIZATION_WITHOUT_LOCALITY     38
 #define ERR_ORGANIZATION_WITHOUT_COUNTRY      39
+#define ERR_COMMON_NAME_SIZE                  40
+#define ERR_LOCALITY_NAME_SIZE                41
+#define ERR_STATE_NAME_SIZE                   42
+#define ERR_ORGANIZATION_NAME_SIZE            43
+#define ERR_ORGANIZATIONAL_UNIT_NAME_SIZE     44
+#define ERR_SERIAL_NUMBER_SIZE                45
+#define ERR_POSTAL_CODE_SIZE                  46
+#define ERR_EMAIL_SIZE                        47
+#define ERR_GIVEN_NAME_SIZE                   48
+#define ERR_SURNAME_SIZE                      49
+#define ERR_STREET_ADDRESS_SIZE               50
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -56,10 +67,11 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_CRL_RELATIVE              4
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
-#define INF_SUBJECT_CN                 0
-#define INF_STRING_NOT_CHECKED         1        /* Software doesn't know how to check it yet. */
-#define INF_CRL_NOT_URL                2
-#define INF_UNKNOWN_VALIDATION         3        /* Software doesn't know OID yet. */
+#define INF_SUBJECT_CN                    0
+#define INF_STRING_NOT_CHECKED            1        /* Software doesn't know how to check it yet. */
+#define INF_CRL_NOT_URL                   2
+#define INF_UNKNOWN_VALIDATION            3        /* Software doesn't know OID yet. */
+#define INF_NAME_ENTRY_LENGTH_NOT_CHECKED 4        /* Software doesn't hnow how to check size yet. */
 
 extern uint32_t errors[];
 extern uint32_t warnings[];
