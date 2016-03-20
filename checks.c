@@ -39,6 +39,7 @@
 static iconv_t iconv_utf8;
 static iconv_t iconv_ucs2;
 static iconv_t iconv_t61;
+static iconv_t iconv_ucs4;
 
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
@@ -151,78 +152,71 @@ static void CheckValidURL(const unsigned char *s, int n)
 
 /*
  * Check that the string contains pritable characters.
- * The input is a valid UTF-8 string.
+ * The input is in internal UCS-4 notation.
  */
-static void CheckPrintableChars(const char *s, int n)
+static void CheckPrintableChars(const uint32_t *s, int n)
 {
 	int i;
 
-	const unsigned char *s2 = (const unsigned char *)s;
-
 	for (i = 0; i < n; i++)
 	{
-		if (s2[i] == '\0')
+		if (s[i] == '\0')
 		{
 			SetError(ERR_STRING_WITH_NUL);
 		}
-		else if (s2[i] < 32)
+		else if (s[i] < 32)
 		{
 			SetError(ERR_NON_PRINTABLE);
 		}
-		/* TODO: Check U+007F to U+009F */
+		if (s[i] >= 0x7F && s[i] <= 0x9F)
+		{
+			SetError(ERR_NON_PRINTABLE);
+		}
 	}
 }
 
 static void CheckStringValid(ASN1_STRING *data)
 {
+	char *utf8 = NULL;
+	size_t utf8_len;
+
 	if (data->type == V_ASN1_UTF8STRING)
 	{
-		size_t n1 = data->length;
-		size_t n2 = data->length;
-		char *s1 = (char *)data->data;
-		char *s2 = malloc(n2);
-		char *ps2 = s2;
+		size_t n = data->length;
+		size_t utf8_size = data->length;
+		char *s = (char *)data->data;
+		utf8 = malloc(utf8_size);
+		char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_utf8, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_utf8, &s1, &n1, &ps2, &n2) == (size_t) -1 || n1 != 0)
+		if (iconv(iconv_utf8, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-		else
-		{
-			CheckPrintableChars((const char *)data->data, data->length);
-		}
-
-		free(s2);
+		utf8_len = utf8_size;
 	}
 	else if (data->type == V_ASN1_BMPSTRING)
 	{
-		size_t n1 = data->length;
-		size_t n2 = data->length*3;		/* U+FFFF is represented with 3 UTF-8 chars */
-		char *s1 = (char *)data->data;
-		char *s2 = malloc(n2);
-		char *ps2 = s2;
+		size_t n = data->length;
+		size_t utf8_size = data->length*3;		/* U+FFFF is represented with 3 UTF-8 chars */
+		char *s = (char *)data->data;
+		utf8 = malloc(utf8_size);
+		char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_ucs2, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_ucs2, &s1, &n1, &ps2, &n2) == (size_t) -1 || n1 != 0)
+		if (iconv(iconv_ucs2, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-		else
-		{
-			CheckPrintableChars(s2, ps2-s2);
-		}
-
-		free(s2);
+		utf8_len = pu - utf8;
 	}
 	else if (data->type == V_ASN1_PRINTABLESTRING)
 	{
-		int i;
-		for (i = 0; i < data->length; i++)
+		for (int i = 0; i < data->length; i++)
 		{
 			if (data->data[i] == '\0')
 			{
@@ -276,30 +270,63 @@ static void CheckStringValid(ASN1_STRING *data)
 	}
 	else if (data->type == V_ASN1_T61STRING)  /* TeletexString, T61String */
 	{
-		size_t n1 = data->length;
-		size_t n2 = data->length*2;
-		char *s1 = (char *)data->data;
-		char *s2 = malloc(n2);
-		char *ps2 = s2;
+		size_t n = data->length;
+		size_t utf8_size = data->length*2;
+		char *s = (char *)data->data;
+		utf8 = malloc(utf8_size);
+		char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_t61, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_t61, &s1, &n1, &ps2, &n2) == (size_t) -1 || n1 != 0)
+		if (iconv(iconv_t61, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			SetError(ERR_INVALID_ENCODING);
 		}
-		else
-		{
-			CheckPrintableChars(s2, ps2-s2);
-		}
-
-		free(s2);
+		utf8_len = pu - utf8;
 	}
 	else
 	{
 		SetInfo(INF_STRING_NOT_CHECKED);
+		return;
 	}
+
+	if (!GetBit(errors, ERR_INVALID_ENCODING))
+	{
+		size_t char_len;
+
+		if (utf8 != NULL)
+		{
+			/* reset iconv */
+			iconv(iconv_ucs4, NULL, 0, NULL, 0);
+
+			char *s = utf8;
+			size_t n = utf8_len;
+			size_t ucs4_size = utf8_len * 4;
+			uint32_t *ucs4 = malloc(ucs4_size);
+			char *pu = (char *)ucs4;
+
+			if (iconv(iconv_ucs4, &s, &n, (char **)&pu, &ucs4_size) == (size_t) -1 || n != 0)
+			{
+				/* Shouldn't happen. */
+				SetError(ERR_INVALID_ENCODING);
+				free(utf8);
+				free(ucs4);
+				return;
+			}
+			else
+			{
+				char_len = (pu - (char *)ucs4) / 4;
+				CheckPrintableChars(ucs4, char_len);
+			}
+			free(ucs4);
+		}
+		else
+		{
+			char_len = data->length;
+		}
+	}
+	free(utf8);
 }
 
 static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
@@ -909,6 +936,7 @@ void check_init()
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");
 	iconv_t61 = iconv_open("utf-8", "CSISO103T618BIT");
+	iconv_ucs4 = iconv_open("UCS-4", "utf-8");
 
 	obj_organizationName = OBJ_nid2obj(NID_organizationName);
 	obj_localityName = OBJ_nid2obj(NID_localityName);
@@ -935,6 +963,7 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
+	iconv_close(iconv_ucs4);
 #if OPENSSL_VERSION_NUMBER < 0x1000200FL
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
 #endif
