@@ -904,6 +904,82 @@ static void CheckCRL(X509 *x509)
 	while (1);
 }
 
+static void CheckAIA(X509 *x509, CertType type)
+{
+	int idx = -1;
+	bool HaveOCSPHTTP = false;
+	bool HaveCertHTTP = false;
+	bool HaveAIA = false;
+
+	do
+	{
+		int critical = -1;
+
+		AUTHORITY_INFO_ACCESS *info = X509_get_ext_d2i(x509, NID_info_access, &critical, &idx);
+
+		if (info == NULL)
+		{
+			if (critical >= 0)
+			{
+				/* Found but fails to parse */
+				SetError(ERR_INVALID);
+				continue;
+			}
+			/* Not found */
+			break;
+		}
+		if (critical)
+		{
+			SetError(ERR_AIA_CRITICAL);
+		}
+		HaveAIA = true;
+
+		for (int i = 0; i < sk_ACCESS_DESCRIPTION_num(info); i++)
+		{
+			ACCESS_DESCRIPTION *ad = sk_ACCESS_DESCRIPTION_value(info, i);
+			if (ad->location->type == GEN_URI)
+			{
+				CheckValidURL(ad->location->d.uniformResourceIdentifier->data,
+					ad->location->d.uniformResourceIdentifier->length);
+			}
+			if (OBJ_obj2nid(ad->method) == NID_ad_OCSP && ad->location->type == GEN_URI)
+			{
+				if (ad->location->d.uniformResourceIdentifier->length > 7 &&
+					strncmp((char *)ad->location->d.uniformResourceIdentifier->data, "http://", 7) == 0)
+				{
+					HaveOCSPHTTP = true;
+				}
+			}
+			if (OBJ_obj2nid(ad->method) == NID_ad_ca_issuers && ad->location->type == GEN_URI)
+			{
+				if (ad->location->d.uniformResourceIdentifier->length > 7 &&
+					strncmp((char *)ad->location->d.uniformResourceIdentifier->data, "http://", 7) == 0)
+				{
+					HaveCertHTTP = true;
+				}
+			}
+		}
+		sk_ACCESS_DESCRIPTION_pop_free(info, ACCESS_DESCRIPTION_free);
+	}
+	while (1);
+
+	if (type == SubscriberCertificate)
+	{
+		if (!HaveOCSPHTTP)
+		{
+			SetError(ERR_NO_OCSP_HTTP);
+		}
+		if (!HaveCertHTTP)
+		{
+			SetWarning(WARN_NO_ISSUING_CERT_HTTP);
+		}
+		if (!HaveAIA)
+		{
+			SetError(ERR_NO_AIA);
+		}
+	}
+}
+
 static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, CertType type)
 {
 	ASN1_TIME *before = X509_get_notBefore(x509);
@@ -1077,6 +1153,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	CheckCRL(x509);
+	CheckAIA(x509, type);
 	CheckTime(x509, &tm_before, &tm_after, type);
 
 	X509_free(x509);

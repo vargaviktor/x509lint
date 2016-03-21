@@ -77,6 +77,9 @@ static const char *error_strings[] =
 	"E: givenName too long\n", /* ERR_GIVEN_NAME_SIZE */
 	"E: surname too long\n", /* ERR_SURNAME_SIZE */
 	"E: streetAddress too long\n", /* ERR_STREET_ADDRESS_SIZE */
+	"E: authorityInformationAccess is marked critical\n", /* ERR_AIA_CRITICAL */
+	"E: No OCSP over HTTP\n",  /* ERR_NO_OCSP_HTTP */
+	"E: no authorityInformationAccess extention\n", /* ERR_NO_AIA */
 };
 
 static const char *warning_strings[] = {
@@ -84,7 +87,8 @@ static const char *warning_strings[] = {
 	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
 	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
 	"W: Subscriber certificate checked as if it was a CA certificate\n", /* WARN_CHECKED_AS_CA */
-	"W: CRL distribution point uses relative name\n" /* WARN_CRL_RELATIVE */
+	"W: CRL distribution point uses relative name\n", /* WARN_CRL_RELATIVE */
+	"W: No HTTP URL for issuing certificate\n", /* WARN_NO_ISSUING_CERT_HTTP */
 };
 
 static const char *info_strings[] = {
@@ -107,7 +111,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_STREET_ADDRESS_SIZE; i++)
+	for (int i = 0; i <= ERR_NO_AIA; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -115,7 +119,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_CRL_RELATIVE; i++)
+	for (int i = 0; i <= WARN_NO_ISSUING_CERT_HTTP; i++)
 	{
 		if (GetBit(warnings, i))
 		{
