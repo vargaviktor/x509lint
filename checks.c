@@ -111,10 +111,18 @@ static X509 *LoadCert(unsigned char *data, size_t len, CertFormat format)
 
 static void Clear()
 {
-	errors[0] = 0;
-	errors[1] = 0;
-	warnings[0] = 0;
-	info[0] = 0;
+	for (int i = 0; i < sizeof(errors)/sizeof(errors[0]); i++)
+	{
+		errors[i] = 0;
+	}
+	for (int i = 0; i < sizeof(warnings)/sizeof(warnings[0]); i++)
+	{
+		warnings[i] = 0;
+	}
+	for (int i = 0; i < sizeof(info)/sizeof(info[0]); i++)
+	{
+		info[i] = 0;
+	}
 }
 
 static void CheckValidURL(const unsigned char *s, int n)
