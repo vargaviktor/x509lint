@@ -112,6 +112,7 @@ static X509 *LoadCert(unsigned char *data, size_t len, CertFormat format)
 static void Clear()
 {
 	errors[0] = 0;
+	errors[1] = 0;
 	warnings[0] = 0;
 	info[0] = 0;
 }
