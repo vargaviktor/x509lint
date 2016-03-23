@@ -80,6 +80,8 @@ static const char *error_strings[] =
 	"E: authorityInformationAccess is marked critical\n", /* ERR_AIA_CRITICAL */
 	"E: No OCSP over HTTP\n",  /* ERR_NO_OCSP_HTTP */
 	"E: no authorityInformationAccess extention\n", /* ERR_NO_AIA */
+	"E: Invalid type in SAN entry\n", /* ERR_SAN_TYPE */
+	"E: Invalid type in GeneralName\n", /* ERR_GEN_NAME_TYPE */
 };
 
 static const char *warning_strings[] = {
@@ -89,6 +91,7 @@ static const char *warning_strings[] = {
 	"W: Subscriber certificate checked as if it was a CA certificate\n", /* WARN_CHECKED_AS_CA */
 	"W: CRL distribution point uses relative name\n", /* WARN_CRL_RELATIVE */
 	"W: No HTTP URL for issuing certificate\n", /* WARN_NO_ISSUING_CERT_HTTP */
+	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
 };
 
 static const char *info_strings[] = {
@@ -111,7 +114,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_NO_AIA; i++)
+	for (int i = 0; i <= ERR_GEN_NAME_TYPE; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -119,7 +122,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_NO_ISSUING_CERT_HTTP; i++)
+	for (int i = 0; i <= WARN_DUPLICATE_SAN; i++)
 	{
 		if (GetBit(warnings, i))
 		{

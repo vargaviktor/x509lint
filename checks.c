@@ -815,6 +815,27 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	}
 }
 
+static void CheckGeneralNameType(GENERAL_NAME *name)
+{
+	int type;
+	ASN1_STRING *s = GENERAL_NAME_get0_value(name, &type);
+	if (type == GEN_DNS || type == GEN_EMAIL || type == GEN_URI)
+	{
+		if (s->type != V_ASN1_IA5STRING)
+		{
+			SetError(ERR_GEN_NAME_TYPE);
+		}
+	}
+	else if (type == GEN_IPADD)
+	{
+		if (s->type != V_ASN1_OCTET_STRING)
+		{
+			SetError(ERR_GEN_NAME_TYPE);
+		}
+	}
+	/* TODO: Add checks for other types. */
+}
+
 static void CheckSAN(X509 *x509, CertType type)
 {
 	int idx = -1;
@@ -837,6 +858,32 @@ static void CheckSAN(X509 *x509, CertType type)
 			}
 			/* Not found */
 			break;
+		}
+		for (int i = 0; i < sk_GENERAL_NAME_num(names); i++)
+		{
+			GENERAL_NAME *name = sk_GENERAL_NAME_value(names, i);
+			int type;
+			ASN1_STRING *name_s = GENERAL_NAME_get0_value(name, &type);
+			if (type != GEN_DNS && type != GEN_IPADD)
+			{
+				/*
+				 * TODO: Allow other types in case it's not a
+				 * certificate for server authentication.
+				 */
+				SetError(ERR_SAN_TYPE);
+			}
+			for (int j = i+1; j < sk_GENERAL_NAME_num(names); j++)
+			{
+				GENERAL_NAME *name2 = sk_GENERAL_NAME_value(names, j);
+				int type2;
+				ASN1_STRING *name2_s = GENERAL_NAME_get0_value(name2, &type2);
+				if (type == type2 && ASN1_STRING_cmp(name_s, name2_s) == 0)
+				{
+					/* TODO: Check should be case insensitive. */
+					SetWarning(WARN_DUPLICATE_SAN);
+				}
+			}
+			CheckGeneralNameType(name);
 		}
 		sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
 		bSanFound = true;
@@ -900,6 +947,7 @@ static void CheckCRL(X509 *x509)
 					{
 						SetInfo(INF_CRL_NOT_URL);
 					}
+					CheckGeneralNameType(gen);
 				}
 			}
 			else

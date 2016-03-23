@@ -61,6 +61,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_AIA_CRITICAL                      51
 #define ERR_NO_OCSP_HTTP                      52
 #define ERR_NO_AIA                            53
+#define ERR_SAN_TYPE                          54
+#define ERR_GEN_NAME_TYPE                     55
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -69,6 +71,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_CHECKED_AS_CA             3
 #define WARN_CRL_RELATIVE              4
 #define WARN_NO_ISSUING_CERT_HTTP      5
+#define WARN_DUPLICATE_SAN             6
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0
