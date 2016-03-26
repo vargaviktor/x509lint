@@ -28,6 +28,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <arpa/inet.h>
 
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
@@ -873,6 +874,21 @@ static void CheckSAN(X509 *x509, CertType type)
 	int idx = -1;
 	bool bSanFound = false;
 	bool bSanName = false;
+	bool bCommonNameFound = false;
+	ASN1_STRING *commonName = NULL;
+
+	X509_NAME *subject = X509_get_subject_name(x509);
+	for (int i = 0; i < X509_NAME_entry_count(subject); i++)
+	{
+		X509_NAME_ENTRY *ne = X509_NAME_get_entry(subject, i);
+		ASN1_OBJECT *obj = X509_NAME_ENTRY_get_object(ne);
+
+		if (OBJ_cmp(obj_commonName, obj) == 0)
+		{
+			commonName = X509_NAME_ENTRY_get_data(ne);
+			break;
+		}
+	}
 
 	do
 	{
@@ -905,14 +921,57 @@ static void CheckSAN(X509 *x509, CertType type)
 				 */
 				SetError(ERR_SAN_TYPE);
 			}
-			for (int j = i+1; j < sk_GENERAL_NAME_num(names); j++)
+			if (type == GEN_DNS)
 			{
-				GENERAL_NAME *name2 = sk_GENERAL_NAME_value(names, j);
-				int type2;
-				ASN1_STRING *name2_s = GENERAL_NAME_get0_value(name2, &type2);
-				if (type == type2 && ASN1_STRING_cmpcase(name_s, name2_s) == 0)
+				for (int j = i+1; j < sk_GENERAL_NAME_num(names); j++)
 				{
-					SetWarning(WARN_DUPLICATE_SAN);
+					GENERAL_NAME *name2 = sk_GENERAL_NAME_value(names, j);
+					int type2;
+					ASN1_STRING *name2_s = GENERAL_NAME_get0_value(name2, &type2);
+					if (type == type2 && ASN1_STRING_cmpcase(name_s, name2_s) == 0)
+					{
+						SetWarning(WARN_DUPLICATE_SAN);
+					}
+				}
+			}
+			if (type == GEN_DNS)
+			{
+				if (ASN1_STRING_cmpcase(name_s, commonName) == 0)
+				{
+					bCommonNameFound = true;
+				}
+			}
+			if (type == GEN_IPADD)
+			{
+				int af = AF_UNSPEC;
+				if (name_s->length == 4)
+				{
+					af = AF_INET;
+				}
+				else if (name_s->length == 16)
+				{
+					af = AF_INET6;
+				}
+				else
+				{
+					SetError(ERR_IP_FAMILY);
+				}
+				if (af != AF_UNSPEC && commonName != NULL)
+				{
+					unsigned char buf[sizeof(struct in6_addr)];
+					char *s = malloc(commonName->length + 1);
+
+					strncpy(s, (char *)commonName->data, commonName->length);
+					s[commonName->length] = '\0';
+
+					inet_pton(af, s, buf);
+
+					/* We want to compare them binary, the string version is not standard. */
+					if (memcmp(buf, name_s->data, name_s->length) == 0)
+					{
+						bCommonNameFound = true;
+					}
+					free(s);
 				}
 			}
 			CheckGeneralNameType(name);
@@ -933,9 +992,13 @@ static void CheckSAN(X509 *x509, CertType type)
 			SetError(ERR_NO_SUBJECT_ALT_NAME);
 		}
 	}
-	if (!bSanName)
+	if (bSanFound && !bSanName)
 	{
 		SetError(ERR_SAN_WITHOUT_NAME);
+	}
+	if (commonName != NULL && bSanFound && !bCommonNameFound)
+	{
+		SetError(ERR_CN_NOT_IN_SAN);
 	}
 }
 

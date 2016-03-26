@@ -65,6 +65,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_GEN_NAME_TYPE                     55
 #define ERR_EV_LONGER_27_MONTHS               56
 #define ERR_SAN_WITHOUT_NAME                  57
+#define ERR_IP_FAMILY                         58
+#define ERR_CN_NOT_IN_SAN                     59
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
