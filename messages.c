@@ -82,6 +82,7 @@ static const char *error_strings[] =
 	"E: no authorityInformationAccess extention\n", /* ERR_NO_AIA */
 	"E: Invalid type in SAN entry\n", /* ERR_SAN_TYPE */
 	"E: Invalid type in GeneralName\n", /* ERR_GEN_NAME_TYPE */
+	"E: EV certificate valid longer than 27 months\n", /* ERR_EV_LONGER_27_MONTHS */
 };
 
 static const char *warning_strings[] = {
@@ -92,6 +93,7 @@ static const char *warning_strings[] = {
 	"W: CRL distribution point uses relative name\n", /* WARN_CRL_RELATIVE */
 	"W: No HTTP URL for issuing certificate\n", /* WARN_NO_ISSUING_CERT_HTTP */
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
+	"W: EV certificate valid longer than 12 months\n", /* WARN_EV_LONGER_12_MONTHS */
 };
 
 static const char *info_strings[] = {
@@ -114,7 +116,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_GEN_NAME_TYPE; i++)
+	for (int i = 0; i <= ERR_EV_LONGER_27_MONTHS; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -122,7 +124,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_DUPLICATE_SAN; i++)
+	for (int i = 0; i <= WARN_EV_LONGER_12_MONTHS; i++)
 	{
 		if (GetBit(warnings, i))
 		{

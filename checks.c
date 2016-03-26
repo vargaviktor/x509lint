@@ -1075,14 +1075,29 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 
 	if (type == SubscriberCertificate)
 	{
-		/* CAB 9.4.1 */
-		if (IsValidLongerThan(*tm_before, *tm_after, 60))
+		if (GetBit(cert_info, CERT_INFO_EV))
 		{
-			SetError(ERR_LONGER_60_MONTHS);
+			/* EV 9.4 */
+			if (IsValidLongerThan(*tm_before, *tm_after, 27))
+			{
+				SetError(ERR_EV_LONGER_27_MONTHS);
+			}
+			else if (IsValidLongerThan(*tm_before, *tm_after, 12))
+			{
+				SetWarning(WARN_EV_LONGER_12_MONTHS);
+			}
 		}
-		else if (IsValidLongerThan(*tm_before, *tm_after, 39))
+		else
 		{
-			SetWarning(WARN_LONGER_39_MONTHS);
+			/* CAB 9.4.1 */
+			if (IsValidLongerThan(*tm_before, *tm_after, 60))
+			{
+				SetError(ERR_LONGER_60_MONTHS);
+			}
+			else if (IsValidLongerThan(*tm_before, *tm_after, 39))
+			{
+				SetWarning(WARN_LONGER_39_MONTHS);
+			}
 		}
 	}
 }
