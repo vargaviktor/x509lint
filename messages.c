@@ -83,6 +83,7 @@ static const char *error_strings[] =
 	"E: Invalid type in SAN entry\n", /* ERR_SAN_TYPE */
 	"E: Invalid type in GeneralName\n", /* ERR_GEN_NAME_TYPE */
 	"E: EV certificate valid longer than 27 months\n", /* ERR_EV_LONGER_27_MONTHS */
+	"E: subjectAlterativeName without name\n", /* ERR_SAN_WITHOUT_NAME */
 };
 
 static const char *warning_strings[] = {
@@ -116,7 +117,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_EV_LONGER_27_MONTHS; i++)
+	for (int i = 0; i <= ERR_SAN_WITHOUT_NAME; i++)
 	{
 		if (GetBit(errors, i))
 		{

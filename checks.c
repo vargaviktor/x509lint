@@ -872,6 +872,7 @@ static void CheckSAN(X509 *x509, CertType type)
 {
 	int idx = -1;
 	bool bSanFound = false;
+	bool bSanName = false;
 
 	do
 	{
@@ -915,6 +916,7 @@ static void CheckSAN(X509 *x509, CertType type)
 				}
 			}
 			CheckGeneralNameType(name);
+			bSanName = true;
 		}
 		sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
 		bSanFound = true;
@@ -930,6 +932,10 @@ static void CheckSAN(X509 *x509, CertType type)
 		{
 			SetError(ERR_NO_SUBJECT_ALT_NAME);
 		}
+	}
+	if (!bSanName)
+	{
+		SetError(ERR_SAN_WITHOUT_NAME);
 	}
 }
 
