@@ -70,6 +70,12 @@ static ASN1_OBJECT *obj_jurisdictionCountryName;
 uint32_t errors[2];
 uint32_t warnings[1];
 uint32_t info[1];
+uint32_t cert_info[1];
+
+#define CERT_INFO_DV            0
+#define CERT_INFO_OV            1
+#define CERT_INFO_IV            1
+#define CERT_INFO_EV            3
 
 static void SetBit(uint32_t *val, int bit)
 {
@@ -84,6 +90,7 @@ int GetBit(uint32_t *val, int bit)
 #define SetError(bit) SetBit(errors, bit)
 #define SetWarning(bit) SetBit(warnings, bit)
 #define SetInfo(bit) SetBit(info, bit)
+#define SetCertInfo(bit) SetBit(cert_info, bit)
 
 static X509 *LoadCert(unsigned char *data, size_t len, CertFormat format)
 {
@@ -122,6 +129,10 @@ static void Clear()
 	for (int i = 0; i < sizeof(info)/sizeof(info[0]); i++)
 	{
 		info[i] = 0;
+	}
+	for (int i = 0; i < sizeof(cert_info)/sizeof(cert_info[0]); i++)
+	{
+		cert_info[i] = 0;
 	}
 }
 
@@ -662,6 +673,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					|| strcmp(oid, "2.16.840.1.114414.1.7.23.1") == 0)
 				{
 					DomainValidated = true;
+					SetCertInfo(CERT_INFO_DV);
 					/* Required by CAB base 7.1.6.1 */
 					if (IsNameObjPresent(subject, obj_organizationName))
 					{
@@ -695,6 +707,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					|| strcmp(oid, "2.16.792.3.0.3.1.1.2") == 0)
 				{
 					OrganizationValidated = true;
+					SetCertInfo(CERT_INFO_OV);
 					/* Required by CAB base 7.1.6.1 */
 					if (!IsNameObjPresent(subject, obj_organizationName))
 					{
@@ -713,6 +726,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				if (strcmp(oid, OIDCabIndividualIdentityValidated) == 0)
 				{
 					IndividualValidated = true;
+					SetCertInfo(CERT_INFO_IV);
 					/* Required by CAB base 7.1.6.1 */
 					if (!IsNameObjPresent(subject, obj_organizationName)
 						|| !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
@@ -737,6 +751,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					|| strcmp(oid, "1.3.6.1.4.1.36305.2") == 0)
 				{
 					EVValidated = true;
+					SetCertInfo(CERT_INFO_EV);
 					/* 9.2.1 */
 					if (!IsNameObjPresent(subject, obj_organizationName))
 					{
