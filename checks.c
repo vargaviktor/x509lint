@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <iconv.h>
 #include <ctype.h>
 #include <stdbool.h>
@@ -851,6 +852,22 @@ static void CheckGeneralNameType(GENERAL_NAME *name)
 	/* TODO: Add checks for other types. */
 }
 
+/* Compare 2 ASN1_STRINGS case incensitive to be equal,
+ * returns 0 when equal, something else when not equal
+ *
+ * This only works with ASN1_STRINGS that are encoded in ASCII
+ * like IA5_STRING and PRINTABLE_STRING.  It will not try to
+ * convert things to a common encoding before comparing.
+ */
+static int ASN1_STRING_cmpcase(const ASN1_STRING *s1, const ASN1_STRING *s2)
+{
+	if (s1->length != s2->length)
+	{
+		return s1->length - s2->length;
+	}
+	return strncasecmp((const char *)s1->data, (const char *)s2->data, s1->length);
+}
+
 static void CheckSAN(X509 *x509, CertType type)
 {
 	int idx = -1;
@@ -892,9 +909,8 @@ static void CheckSAN(X509 *x509, CertType type)
 				GENERAL_NAME *name2 = sk_GENERAL_NAME_value(names, j);
 				int type2;
 				ASN1_STRING *name2_s = GENERAL_NAME_get0_value(name2, &type2);
-				if (type == type2 && ASN1_STRING_cmp(name_s, name2_s) == 0)
+				if (type == type2 && ASN1_STRING_cmpcase(name_s, name2_s) == 0)
 				{
-					/* TODO: Check should be case insensitive. */
 					SetWarning(WARN_DUPLICATE_SAN);
 				}
 			}
