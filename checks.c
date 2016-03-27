@@ -339,7 +339,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 		return 0;
 	}
 
-	if (!GetBit(errors, ERR_INVALID_ENCODING))
+	if (ret)
 	{
 
 		if (utf8 != NULL)
