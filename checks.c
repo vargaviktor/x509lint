@@ -167,7 +167,11 @@ static void CheckValidURL(const unsigned char *s, int n)
 			i+=3;
 			continue;
 		}
-		if (strchr(reserved_chars, s[i]) == NULL && strchr(unreserved_chars, s[i]) == NULL)
+		if (s[i] == '\0')
+		{
+			SetError(ERR_URL_WITH_NUL);
+		}
+		else if (strchr(reserved_chars, s[i]) == NULL && strchr(unreserved_chars, s[i]) == NULL)
 		{
 			SetError(ERR_INVALID_URL);
 			return;

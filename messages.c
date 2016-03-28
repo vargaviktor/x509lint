@@ -88,6 +88,7 @@ static const char *error_strings[] =
 	"E: commonName not in subjectAltName extention\n", /* ERR_CN_NOT_IN_SAN */
 	"E: Invalid length of businessCategory\n", /* ERR_BUSINESS_CATEGORY_SIZE */
 	"E: Invalid length of dnQualifier\n", /* ERR_DN_QUALIFIER_SIZE */
+	"E: URL contains a null character\n", /* ERR_URL_WITH_NUL */
 };
 
 static const char *warning_strings[] = {
@@ -121,7 +122,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_DN_QUALIFIER_SIZE; i++)
+	for (int i = 0; i <= ERR_URL_WITH_NUL; i++)
 	{
 		if (GetBit(errors, i))
 		{
