@@ -46,9 +46,9 @@ static iconv_t iconv_ucs4;
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
 
-#if OPENSSL_VERSION_NUMBER < 0x1000200FL
 static const char *OIDjurisdictionCountryName = "1.3.6.1.4.1.311.60.2.1.3";
-#endif
+static const char *OIDjurisdictionLocalityName = "1.3.6.1.4.1.311.60.2.1.1";
+static const char *OIDjurisdictionStateOrProvinceName = "1.3.6.1.4.1.311.60.2.1.2";
 
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
@@ -57,17 +57,22 @@ static const char *OIDCabExtendedValidation = "2.23.140.1.3";
 
 
 static ASN1_OBJECT *obj_organizationName;
+static ASN1_OBJECT *obj_organizationalUnitName;
 static ASN1_OBJECT *obj_StreetAddress;
 static ASN1_OBJECT *obj_localityName;
+static ASN1_OBJECT *obj_jurisdictionLocalityName;
 static ASN1_OBJECT *obj_stateOrProvinceName;
+static ASN1_OBJECT *obj_jurisdictionStateOrProvinceName;
 static ASN1_OBJECT *obj_postalCode;
 static ASN1_OBJECT *obj_countryName;
+static ASN1_OBJECT *obj_jurisdictionCountryName;
 static ASN1_OBJECT *obj_commonName;
 static ASN1_OBJECT *obj_givenName;
 static ASN1_OBJECT *obj_surname;
 static ASN1_OBJECT *obj_businessCategory;
 static ASN1_OBJECT *obj_serialNumber;
-static ASN1_OBJECT *obj_jurisdictionCountryName;
+static ASN1_OBJECT *obj_dnQualifier;
+static ASN1_OBJECT *obj_pkcs9_emailAddress;
 
 uint32_t errors[2];
 uint32_t warnings[1];
@@ -380,6 +385,33 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	return ret;
 }
 
+static const struct
+{
+	ASN1_OBJECT **obj;
+	size_t min;
+	size_t max;
+	int error;
+} size_limits[] =
+{
+	{ &obj_countryName, 2, 2, ERR_COUNTRY_SIZE },
+	{ &obj_jurisdictionCountryName, 2, 2, ERR_COUNTRY_SIZE },
+	{ &obj_commonName, 1, ub_common_name, ERR_COMMON_NAME_SIZE },
+	{ &obj_localityName, 1, ub_locality_name, ERR_LOCALITY_NAME_SIZE },
+	{ &obj_jurisdictionLocalityName, 1, ub_locality_name, ERR_LOCALITY_NAME_SIZE },
+	{ &obj_stateOrProvinceName, 1, ub_state_name, ERR_STATE_NAME_SIZE },
+	{ &obj_jurisdictionStateOrProvinceName, 1, ub_state_name, ERR_STATE_NAME_SIZE },
+	{ &obj_organizationName, 1, ub_organization_name, ERR_ORGANIZATION_NAME_SIZE },
+	{ &obj_organizationalUnitName, 1, ub_organization_unit_name, ERR_ORGANIZATIONAL_UNIT_NAME_SIZE },
+	{ &obj_serialNumber, 1, 64, ERR_SERIAL_NUMBER_SIZE },
+	{ &obj_businessCategory, 1, ub_name, ERR_BUSINESS_CATEGORY_SIZE },
+	{ &obj_postalCode, 1, 16, ERR_POSTAL_CODE_SIZE },
+	{ &obj_StreetAddress, 1, 30, ERR_STREET_ADDRESS_SIZE }, /* This might be incorrect. */
+	{ &obj_dnQualifier, 1, ub_name, ERR_DN_QUALIFIER_SIZE }, /* Not sure */
+	{ &obj_pkcs9_emailAddress, 1, 255, ERR_EMAIL_SIZE },
+	{ &obj_givenName, 1, 16, ERR_GIVEN_NAME_SIZE }, /* This seems rather short, but it's what RFC5280 says */
+	{ &obj_surname, 1, 40, ERR_SURNAME_SIZE }
+};
+
 static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 {
 	ASN1_STRING *data = X509_NAME_ENTRY_get_data(ne);
@@ -389,114 +421,20 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 
 	if (CheckStringValid(data, &char_len))
 	{
-		if (nid == NID_countryName)
+		bool bChecked = false;
+		for (size_t i = 0; i < sizeof(size_limits)/sizeof(size_limits[0]); i++)
 		{
-			if (char_len != 2)
+			if (OBJ_cmp(*size_limits[i].obj, obj) == 0)
 			{
-				SetError(ERR_COUNTRY_SIZE);
+				if (char_len > size_limits[i].max || char_len < size_limits[i].min)
+				{
+					SetError(size_limits[i].error);
+				}
+				bChecked = true;
+				break;
 			}
 		}
-		else if (nid == NID_commonName)
-		{
-			if (char_len > ub_common_name)
-			{
-				SetError(ERR_COMMON_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_localityName)
-		{
-			if (char_len > ub_locality_name)
-			{
-				SetError(ERR_LOCALITY_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_stateOrProvinceName)
-		{
-			if (char_len > ub_state_name)
-			{
-				SetError(ERR_STATE_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_organizationName)
-		{
-			if (char_len > ub_organization_name)
-			{
-				SetError(ERR_ORGANIZATION_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_organizationalUnitName)
-		{
-			if (char_len > ub_organization_unit_name)
-			{
-				SetError(ERR_ORGANIZATIONAL_UNIT_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_serialNumber)
-		{
-			if (char_len > 64)
-			{
-				SetError(ERR_SERIAL_NUMBER_SIZE);
-			}
-		}
-		else if (OBJ_cmp(obj, obj_jurisdictionCountryName) == 0)
-		{
-			if (char_len != 2)
-			{
-				SetError(ERR_COUNTRY_SIZE);
-			}
-		}
-		else if (nid == NID_businessCategory)
-		{
-			/* TODO: We should check it's one of the valid entries */
-		}
-		else if (OBJ_cmp(obj, obj_postalCode) == 0)
-		{
-			if (char_len > 16)
-			{
-				SetError(ERR_POSTAL_CODE_SIZE);
-			}
-		}
-		else if (OBJ_cmp(obj, obj_StreetAddress) == 0)
-		{
-			/*
-			 * There might not be a limit, it's not clear
-			 * to me currently.
-			 */
-			if (char_len > 30)
-			{
-				SetError(ERR_STREET_ADDRESS_SIZE);
-			}
-		}
-		else if (nid == NID_dnQualifier)
-		{
-			/* Doesn't seem to have a limit */
-		}
-		else if (nid == NID_pkcs9_emailAddress)
-		{
-			if (char_len > 255)
-			{
-				SetError(ERR_EMAIL_SIZE);
-			}
-		}
-		else if (nid == NID_givenName)
-		{
-			if (char_len > 16)
-			{
-				/*
-				 * This seems rather short, but it's what
-				 * RFC5280 says.
-				 */
-				SetError(ERR_GIVEN_NAME_SIZE);
-			}
-		}
-		else if (nid == NID_surname)
-		{
-			if (char_len > 40)
-			{
-				SetError(ERR_SURNAME_SIZE);
-			}
-		}
-		else
+		if (!bChecked)
 		{
 			SetInfo(INF_NAME_ENTRY_LENGTH_NOT_CHECKED);
 		}
@@ -1341,6 +1279,7 @@ void check_init()
 	iconv_ucs4 = iconv_open("UCS-4", "utf-8");
 
 	obj_organizationName = OBJ_nid2obj(NID_organizationName);
+	obj_organizationalUnitName = OBJ_nid2obj(NID_organizationalUnitName);
 	obj_localityName = OBJ_nid2obj(NID_localityName);
 	obj_stateOrProvinceName = OBJ_nid2obj(NID_stateOrProvinceName);
 	obj_countryName = OBJ_nid2obj(NID_countryName);
@@ -1349,12 +1288,12 @@ void check_init()
 	obj_surname = OBJ_nid2obj(NID_surname);
 	obj_businessCategory = OBJ_nid2obj(NID_businessCategory);
 	obj_serialNumber = OBJ_nid2obj(NID_serialNumber);
+	obj_dnQualifier = OBJ_nid2obj(NID_dnQualifier);
+	obj_pkcs9_emailAddress = OBJ_nid2obj(NID_pkcs9_emailAddress);
 
-#if OPENSSL_VERSION_NUMBER < 0x1000200FL
 	obj_jurisdictionCountryName = OBJ_txt2obj(OIDjurisdictionCountryName, 1);
-#else
-	obj_jurisdictionCountryName = OBJ_nid2obj(NID_jurisdictionCountryName);
-#endif
+	obj_jurisdictionLocalityName = OBJ_txt2obj(OIDjurisdictionLocalityName, 1);
+	obj_jurisdictionStateOrProvinceName = OBJ_txt2obj(OIDjurisdictionStateOrProvinceName, 1);
 
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
@@ -1366,9 +1305,9 @@ void check_finish()
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
 	iconv_close(iconv_ucs4);
-#if OPENSSL_VERSION_NUMBER < 0x1000200FL
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
-#endif
+	ASN1_OBJECT_free(obj_jurisdictionLocalityName);
+	ASN1_OBJECT_free(obj_jurisdictionStateOrProvinceName);
 	ASN1_OBJECT_free(obj_StreetAddress);
 	ASN1_OBJECT_free(obj_postalCode);
 	EVP_cleanup();
