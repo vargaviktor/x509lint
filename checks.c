@@ -54,7 +54,7 @@ static const char *OIDjurisdictionStateOrProvinceName = "1.3.6.1.4.1.311.60.2.1.
 static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
 static const char *OIDCabIndividualIdentityValidated = "2.23.140.1.2.3";
-static const char *OIDCabExtendedValidation = "2.23.140.1.3";
+static const char *OIDCabExtendedValidation = "2.23.140.1.1";
 
 
 static ASN1_OBJECT *obj_organizationName;
