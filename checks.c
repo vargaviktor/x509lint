@@ -876,7 +876,7 @@ static void CheckSAN(X509 *x509, CertType type)
 					}
 				}
 			}
-			if (type == GEN_DNS)
+			if (type == GEN_DNS && commonName != NULL)
 			{
 				if (ASN1_STRING_cmpcase(name_s, commonName) == 0)
 				{
