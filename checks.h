@@ -70,6 +70,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_BUSINESS_CATEGORY_SIZE            60
 #define ERR_DN_QUALIFIER_SIZE                 61
 #define ERR_URL_WITH_NUL                      62
+#define ERR_POST_OFFICE_BOX_SIZE              63
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

@@ -45,6 +45,7 @@ static iconv_t iconv_ucs4;
 
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
+static const char *OIDpostOfficeBox = "2.5.4.18";
 
 static const char *OIDjurisdictionCountryName = "1.3.6.1.4.1.311.60.2.1.3";
 static const char *OIDjurisdictionLocalityName = "1.3.6.1.4.1.311.60.2.1.1";
@@ -73,6 +74,7 @@ static ASN1_OBJECT *obj_businessCategory;
 static ASN1_OBJECT *obj_serialNumber;
 static ASN1_OBJECT *obj_dnQualifier;
 static ASN1_OBJECT *obj_pkcs9_emailAddress;
+static ASN1_OBJECT *obj_postOfficeBox;
 
 uint32_t errors[2];
 uint32_t warnings[1];
@@ -409,6 +411,7 @@ static const struct
 	{ &obj_serialNumber, 1, 64, ERR_SERIAL_NUMBER_SIZE },
 	{ &obj_businessCategory, 1, ub_name, ERR_BUSINESS_CATEGORY_SIZE },
 	{ &obj_postalCode, 1, 16, ERR_POSTAL_CODE_SIZE },
+	{ &obj_postOfficeBox, 1, ub_name, ERR_POST_OFFICE_BOX_SIZE },
 	{ &obj_StreetAddress, 1, 30, ERR_STREET_ADDRESS_SIZE }, /* This might be incorrect. */
 	{ &obj_dnQualifier, 1, ub_name, ERR_DN_QUALIFIER_SIZE }, /* Not sure */
 	{ &obj_pkcs9_emailAddress, 1, 255, ERR_EMAIL_SIZE },
@@ -1301,6 +1304,7 @@ void check_init()
 
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
+	obj_postOfficeBox = OBJ_txt2obj(OIDpostOfficeBox, 1);
 }
 
 void check_finish()
@@ -1314,6 +1318,7 @@ void check_finish()
 	ASN1_OBJECT_free(obj_jurisdictionStateOrProvinceName);
 	ASN1_OBJECT_free(obj_StreetAddress);
 	ASN1_OBJECT_free(obj_postalCode);
+	ASN1_OBJECT_free(obj_postOfficeBox);
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 }
