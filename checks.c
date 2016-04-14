@@ -411,8 +411,8 @@ static const struct
 	{ &obj_serialNumber, 1, 64, ERR_SERIAL_NUMBER_SIZE },
 	{ &obj_businessCategory, 1, ub_name, ERR_BUSINESS_CATEGORY_SIZE },
 	{ &obj_postalCode, 1, 16, ERR_POSTAL_CODE_SIZE },
-	{ &obj_postOfficeBox, 1, ub_name, ERR_POST_OFFICE_BOX_SIZE },
-	{ &obj_StreetAddress, 1, ub_name, ERR_STREET_ADDRESS_SIZE },
+	{ &obj_postOfficeBox, 1, 40, ERR_POST_OFFICE_BOX_SIZE },
+	{ &obj_StreetAddress, 1, 128, ERR_STREET_ADDRESS_SIZE },
 	{ &obj_dnQualifier, 1, ub_name, ERR_DN_QUALIFIER_SIZE }, /* Not sure */
 	{ &obj_pkcs9_emailAddress, 1, 255, ERR_EMAIL_SIZE },
 	{ &obj_givenName, 1, 16, ERR_GIVEN_NAME_SIZE }, /* This seems rather short, but it's what RFC5280 says */
