@@ -945,7 +945,7 @@ static void CheckSAN(X509 *x509, CertType type)
 	}
 	if (commonName != NULL && bSanFound && !bCommonNameFound)
 	{
-		SetError(ERR_CN_NOT_IN_SAN);
+//		SetError(ERR_CN_NOT_IN_SAN);
 	}
 }
 
