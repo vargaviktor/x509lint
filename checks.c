@@ -688,7 +688,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					SetCertInfo(CERT_INFO_IV);
 					/* Required by CAB base 7.1.6.1 */
 					if (!IsNameObjPresent(subject, obj_organizationName)
-						|| !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
+						&& !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
 					{
 						SetError(ERR_INDIVDUAL_WITHOUT_NAME);
 					}
