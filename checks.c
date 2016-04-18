@@ -47,6 +47,8 @@ static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
 static const char *OIDpostOfficeBox = "2.5.4.18";
 
+static const char *OIDanyEKU = "2.5.29.37.0";
+
 static const char *OIDjurisdictionCountryName = "1.3.6.1.4.1.311.60.2.1.3";
 static const char *OIDjurisdictionLocalityName = "1.3.6.1.4.1.311.60.2.1.1";
 static const char *OIDjurisdictionStateOrProvinceName = "1.3.6.1.4.1.311.60.2.1.2";
@@ -75,6 +77,7 @@ static ASN1_OBJECT *obj_serialNumber;
 static ASN1_OBJECT *obj_dnQualifier;
 static ASN1_OBJECT *obj_pkcs9_emailAddress;
 static ASN1_OBJECT *obj_postOfficeBox;
+static ASN1_OBJECT *obj_anyEKU;
 
 uint32_t errors[2];
 uint32_t warnings[1];
@@ -85,6 +88,13 @@ uint32_t cert_info[1];
 #define CERT_INFO_OV            1
 #define CERT_INFO_IV            1
 #define CERT_INFO_EV            3
+#define CERT_INFO_ANY_EKU       4
+#define CERT_INFO_SERV_AUTH     5
+#define CERT_INFO_CLIENT_AUTH   6
+#define CERT_INFO_CODE_SIGN     7
+#define CERT_INFO_EMAIL         8
+#define CERT_INFO_TIME_STAMP    9
+#define CERT_INFO_OCSP_SIGN     10
 
 static void SetBit(uint32_t *val, int bit)
 {
@@ -1163,6 +1173,70 @@ static void CheckDuplicateExtentions(X509 *x509)
 	sk_ASN1_OBJECT_free(stack);
 }
 
+static void CheckEKU(X509 *x509)
+{
+	int idx = -1;
+
+	do
+	{
+		int critical = -1;
+
+		EXTENDED_KEY_USAGE *ekus = X509_get_ext_d2i(x509, NID_ext_key_usage, &critical, &idx);
+
+		if (ekus == NULL)
+		{
+			if (critical >= 0)
+			{
+				/* Found but fails to parse */
+				SetError(ERR_INVALID);
+				continue;
+			}
+			/* Not found */
+			break;
+		}
+
+		for (int i = 0; i < sk_DIST_POINT_num(ekus); i++)
+		{
+			ASN1_OBJECT *oid = sk_ASN1_OBJECT_value(ekus, i);
+			int nid = OBJ_obj2nid(oid);
+			if (OBJ_cmp(oid, obj_anyEKU) == 0)
+			{
+				SetCertInfo(CERT_INFO_ANY_EKU);
+			}
+			else if (nid == NID_server_auth)
+			{
+				SetCertInfo(CERT_INFO_SERV_AUTH);
+			}
+			else if (nid == NID_client_auth)
+			{
+				SetCertInfo(CERT_INFO_CLIENT_AUTH);
+			}
+			else if (nid == NID_code_sign)
+			{
+				SetCertInfo(CERT_INFO_CODE_SIGN);
+			}
+			else if (nid == NID_email_protect)
+			{
+				SetCertInfo(CERT_INFO_EMAIL);
+			}
+			else if (nid == NID_time_stamp)
+			{
+				SetCertInfo(CERT_INFO_TIME_STAMP);
+			}
+			else if (nid == NID_OCSP_sign)
+			{
+				SetCertInfo(CERT_INFO_SERV_AUTH);
+			}
+			else 
+			{
+				SetWarning(WARN_UNKNOWN_EKU);
+			}
+		}
+		sk_ASN1_OBJECT_pop_free(ekus, ASN1_OBJECT_free);
+	}
+	while (1);
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -1260,6 +1334,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	CheckPolicy(x509, type, subject);
+	CheckEKU(x509);
 	CheckSAN(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2a */
@@ -1307,6 +1382,7 @@ void check_init()
 	obj_StreetAddress = OBJ_txt2obj(OIDStreetAddress, 1);
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
 	obj_postOfficeBox = OBJ_txt2obj(OIDpostOfficeBox, 1);
+	obj_anyEKU = OBJ_txt2obj(OIDanyEKU, 1);
 }
 
 void check_finish()
@@ -1321,6 +1397,7 @@ void check_finish()
 	ASN1_OBJECT_free(obj_StreetAddress);
 	ASN1_OBJECT_free(obj_postalCode);
 	ASN1_OBJECT_free(obj_postOfficeBox);
+	ASN1_OBJECT_free(obj_anyEKU);
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 }

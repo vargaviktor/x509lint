@@ -101,6 +101,7 @@ static const char *warning_strings[] = {
 	"W: No HTTP URL for issuing certificate\n", /* WARN_NO_ISSUING_CERT_HTTP */
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
 	"W: EV certificate valid longer than 12 months\n", /* WARN_EV_LONGER_12_MONTHS */
+	"W: Unknown extended key usage\n", /* WARN_UNKNOWN_EKU */
 };
 
 static const char *info_strings[] = {
@@ -131,7 +132,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_EV_LONGER_12_MONTHS; i++)
+	for (int i = 0; i <= WARN_UNKNOWN_EKU; i++)
 	{
 		if (GetBit(warnings, i))
 		{
