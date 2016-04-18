@@ -79,7 +79,7 @@ static ASN1_OBJECT *obj_pkcs9_emailAddress;
 static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 
-uint32_t errors[2];
+uint32_t errors[3];
 uint32_t warnings[1];
 uint32_t info[1];
 uint32_t cert_info[1];
@@ -906,6 +906,17 @@ static void CheckSAN(X509 *x509, CertType type)
 						SetWarning(WARN_DUPLICATE_SAN);
 					}
 				}
+
+				char *s = malloc(name_s->length + 1);
+				strncpy(s, (char *)name_s->data, name_s->length);
+				s[name_s->length] = '\0';
+
+				unsigned char buf[sizeof(struct in6_addr)];
+				if (inet_pton(AF_INET, s, buf) == 1 || inet_pton(AF_INET6, s, buf) == 1)
+				{
+					SetError(ERR_IP_IN_DNSNAME);
+				}
+				free(s);
 			}
 			if ((type == GEN_DNS || type == GEN_EMAIL) && commonName != NULL)
 			{
