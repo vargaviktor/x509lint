@@ -833,6 +833,22 @@ static void CheckSAN(X509 *x509, CertType type)
 	bool bSanName = false;
 	bool bCommonNameFound = false;
 	ASN1_STRING *commonName = NULL;
+	bool name_type_allowed[GEN_RID+1];
+
+	for (int i = 0; i < GEN_RID+1; i++)
+	{
+		name_type_allowed[i] = false;
+	}
+
+	if (GetBit(cert_info, CERT_INFO_SERV_AUTH) || GetBit(cert_info, CERT_INFO_ANY_EKU))
+	{
+		name_type_allowed[GEN_DNS] = true;
+		name_type_allowed[GEN_IPADD] = true;
+	}
+	if (GetBit(cert_info, CERT_INFO_EMAIL) || GetBit(cert_info, CERT_INFO_ANY_EKU))
+	{
+		name_type_allowed[GEN_EMAIL] = true;
+	}
 
 	X509_NAME *subject = X509_get_subject_name(x509);
 	for (int i = 0; i < X509_NAME_entry_count(subject); i++)
@@ -870,12 +886,12 @@ static void CheckSAN(X509 *x509, CertType type)
 			GENERAL_NAME *name = sk_GENERAL_NAME_value(names, i);
 			int type;
 			ASN1_STRING *name_s = GENERAL_NAME_get0_value(name, &type);
-			if (type != GEN_DNS && type != GEN_IPADD)
+			if (type > GEN_RID || type < 0)
 			{
-				/*
-				 * TODO: Allow other types in case it's not a
-				 * certificate for server authentication.
-				 */
+				SetError(ERR_INVALID);
+			}
+			else if (!name_type_allowed[type])
+			{
 				SetError(ERR_SAN_TYPE);
 			}
 			if (type == GEN_DNS)
@@ -891,7 +907,7 @@ static void CheckSAN(X509 *x509, CertType type)
 					}
 				}
 			}
-			if (type == GEN_DNS && commonName != NULL)
+			if ((type == GEN_DNS || type == GEN_EMAIL) && commonName != NULL)
 			{
 				if (ASN1_STRING_cmpcase(name_s, commonName) == 0)
 				{
