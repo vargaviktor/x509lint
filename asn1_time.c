@@ -150,7 +150,6 @@ bool asn1_time_to_tm(ASN1_TIME *time, struct tm *tm)
 	{
 		return false;
 	}
-	time_to_tm(time, general, tm);
-	return true;
+	return time_to_tm(time, general, tm);
 }
 
