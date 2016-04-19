@@ -93,6 +93,7 @@ static const char *error_strings[] =
 	"E: IP address in dns name\n", /* ERR_IP_IN_DNSNAME */
 	"E: Serial number not positive\n", /* ERR_SERIAL_NOT_POSITIVE */
 	"E: Serial number too large\n", /* ERR_SERIAL_TOO_LARGE */
+	"E: ASN1 integer not minimally encoded\n", /* ERR_ASN1_INTEGER_NOT_MINIMAL */
 };
 
 static const char *warning_strings[] = {
@@ -127,7 +128,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_SERIAL_TOO_LARGE; i++)
+	for (int i = 0; i <= ERR_ASN1_INTEGER_NOT_MINIMAL; i++)
 	{
 		if (GetBit(errors, i))
 		{

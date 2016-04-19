@@ -1264,6 +1264,16 @@ static void CheckEKU(X509 *x509)
 	while (1);
 }
 
+static void CheckASN1_integer(ASN1_INTEGER *integer)
+{
+	/* OpenSSL 1.1 should already enforce this */
+	if (integer->length > 1 && (((integer->data[0] == 0) && ((integer->data[1] & 0x80) == 0))
+		|| ((integer->data[0] == 0xFF) && ((integer->data[1] & 0x80) == 0x80))))
+	{
+		SetError(ERR_ASN1_INTEGER_NOT_MINIMAL);
+	}
+}
+
 static void CheckSerial(X509 *x509)
 {
 	ASN1_INTEGER *serial = X509_get_serialNumber(x509);
@@ -1274,10 +1284,12 @@ static void CheckSerial(X509 *x509)
 		SetError(ERR_SERIAL_NOT_POSITIVE);
 	}
 
-	if (BN_num_bytes(bn_serial) > 20)
+	if (serial->length > 20)
 	{
 		SetError(ERR_SERIAL_TOO_LARGE);
 	}
+
+	CheckASN1_integer(serial);
 }
 
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
@@ -1314,6 +1326,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	{
 		SetError(ERR_NOT_VERSION3);
 	}
+	CheckASN1_integer(x509->cert_info->version);
 
 	issuer = X509_get_issuer_name(x509);
 	if (issuer == NULL)

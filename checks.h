@@ -74,6 +74,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_IP_IN_DNSNAME                     64
 #define ERR_SERIAL_NOT_POSITIVE               65
 #define ERR_SERIAL_TOO_LARGE                  66
+#define ERR_ASN1_INTEGER_NOT_MINIMAL          67
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
