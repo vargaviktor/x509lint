@@ -91,6 +91,8 @@ static const char *error_strings[] =
 	"E: URL contains a null character\n", /* ERR_URL_WITH_NUL */
 	"E: postOfficeBox too long\n", /* ERR_POST_OFFICE_BOX_SIZE */
 	"E: IP address in dns name\n", /* ERR_IP_IN_DNSNAME */
+	"E: Serial number not positive\n", /* ERR_SERIAL_NOT_POSITIVE */
+	"E: Serial number too large\n", /* ERR_SERIAL_TOO_LARGE */
 };
 
 static const char *warning_strings[] = {
@@ -125,7 +127,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_IP_IN_DNSNAME; i++)
+	for (int i = 0; i <= ERR_SERIAL_TOO_LARGE; i++)
 	{
 		if (GetBit(errors, i))
 		{

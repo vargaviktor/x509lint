@@ -1264,6 +1264,22 @@ static void CheckEKU(X509 *x509)
 	while (1);
 }
 
+static void CheckSerial(X509 *x509)
+{
+	ASN1_INTEGER *serial = X509_get_serialNumber(x509);
+	BIGNUM *bn_serial = ASN1_INTEGER_to_BN(serial, NULL);
+
+	if (BN_is_negative(bn_serial) || BN_is_zero(bn_serial))
+	{
+		SetError(ERR_SERIAL_NOT_POSITIVE);
+	}
+
+	if (BN_num_bytes(bn_serial) > 20)
+	{
+		SetError(ERR_SERIAL_TOO_LARGE);
+	}
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -1307,6 +1323,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 	CheckDN(issuer);
 
+	CheckSerial(x509);
+
 	/* Required by CAB base 9.1.3 */
 	if (!IsNameObjPresent(issuer, obj_organizationName))
 	{
@@ -1319,7 +1337,6 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_ISSUER_COUNTRY);
 	}
 
-	
 	subject = X509_get_subject_name(x509);
 	if (subject == NULL)
 	{
