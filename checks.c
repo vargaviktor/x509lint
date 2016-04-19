@@ -1222,7 +1222,7 @@ static void CheckEKU(X509 *x509)
 			break;
 		}
 
-		for (int i = 0; i < sk_DIST_POINT_num(ekus); i++)
+		for (int i = 0; i < sk_ASN1_OBJECT_num(ekus); i++)
 		{
 			ASN1_OBJECT *oid = sk_ASN1_OBJECT_value(ekus, i);
 			int nid = OBJ_obj2nid(oid);
