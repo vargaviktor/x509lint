@@ -64,7 +64,6 @@ static const char *error_strings[] =
 	"E: Domain validated certificate but with localityName\n", /* ERR_DOMAIN_WITH_LOCALITY */
 	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
 	"E: Domain validated certificate but with postalCode\n", /* ERR_DOMAIN_WITH_POSTAL */
-	"E: Organization validated certificate but without localityName\n", /* ERR_ORGANIZATION_WITHOUT_LOCALITY */
 	"E: Organization validated certificate but without country\n", /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
 	"E: commonName too long\n", /* ERR_COMMON_NAME_SIZE */
 	"E: localityName too long\n", /* ERR_LOCALITY_NAME_SIZE */

@@ -672,10 +672,6 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					{
 						SetError(ERR_ORGANIZATION_WITHOUT_ORG);
 					}
-					if (!IsNameObjPresent(subject, obj_localityName))
-					{
-						SetError(ERR_ORGANIZATION_WITHOUT_LOCALITY);
-					}
 					if (!IsNameObjPresent(subject, obj_countryName))
 					{
 						SetError(ERR_ORGANIZATION_WITHOUT_COUNTRY);
