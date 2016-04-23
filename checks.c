@@ -1326,14 +1326,14 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 			SetError(ERR_RSA_EXP_NOT_ODD);
 		}
 		BIGNUM *i = BN_new();
-		BN_hex2bn(&i, "3");
+		BN_set_word(i, 3);
 		if (BN_cmp(rsa->e, i) < 0)
 		{
 			SetError(ERR_RSA_EXP_3);
 		}
 		else
 		{
-			BN_hex2bn(&i, "10001");
+			BN_set_word(i, 0x10001);
 			if (BN_cmp(rsa->e, i) < 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
@@ -1508,7 +1508,7 @@ void check_init()
 
 	bn_factors = BN_new();
 
-	BN_dec2bn(&bn_factors, "2");
+	BN_set_word(bn_factors, 2);
 	for (int i = 1; i < sizeof(primes)/sizeof(*primes); i++)
 	{
 		BN_mul_word(bn_factors, primes[i]);
