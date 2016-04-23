@@ -1288,6 +1288,53 @@ static void CheckSerial(X509 *x509)
 	CheckASN1_integer(serial);
 }
 
+static void CheckPublicKey(X509 *x509, struct tm tm_after)
+{
+	EVP_PKEY *pkey = X509_get_pubkey(x509);
+	if (pkey->type == EVP_PKEY_RSA)
+	{
+		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
+		if (rsa == NULL || rsa->n == NULL || rsa->e == NULL)
+		{
+			SetError(ERR_INVALID);
+			RSA_free(rsa);
+			return;
+		}
+		if (!GetBit(errors, ERR_INVALID_TIME_FORMAT))
+		{
+			if (tm_after.tm_year >= 114 && BN_num_bits(rsa->n) < 2048)
+			{
+				SetError(ERR_RSA_SIZE_2048);
+			}
+		}
+		if (BN_is_odd(rsa->e) == 0)
+		{
+			SetError(ERR_RSA_EXP_NOT_ODD);
+		}
+		BIGNUM *i = BN_new();
+		BN_hex2bn(&i, "3");
+		if (BN_cmp(rsa->e, i) < 0)
+		{
+			SetError(ERR_RSA_EXP_3);
+		}
+		else
+		{
+			BN_hex2bn(&i, "10001");
+			if (BN_cmp(rsa->e, i) < 0)
+			{
+				SetWarning(WARN_RSA_EXP_RANGE);
+			}
+			BN_hex2bn(&i, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+			if (BN_cmp(rsa->e, i) > 0)
+			{
+				SetWarning(WARN_RSA_EXP_RANGE);
+			}
+		}
+		BN_free(i);
+		RSA_free(rsa);
+	}
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -1333,6 +1380,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckDN(issuer);
 
 	CheckSerial(x509);
+	CheckTime(x509, &tm_before, &tm_after, type);
 
 	/* Required by CAB base 9.1.3 */
 	if (!IsNameObjPresent(issuer, obj_organizationName))
@@ -1401,7 +1449,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 
 	CheckCRL(x509);
 	CheckAIA(x509, type);
-	CheckTime(x509, &tm_before, &tm_after, type);
+	CheckPublicKey(x509, tm_after);
 
 	X509_free(x509);
 }

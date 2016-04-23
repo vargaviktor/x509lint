@@ -74,6 +74,9 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_SERIAL_NOT_POSITIVE               64
 #define ERR_SERIAL_TOO_LARGE                  65
 #define ERR_ASN1_INTEGER_NOT_MINIMAL          66
+#define ERR_RSA_SIZE_2048                     67
+#define ERR_RSA_EXP_NOT_ODD                   68
+#define ERR_RSA_EXP_3                         69
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -85,6 +88,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_DUPLICATE_SAN             6
 #define WARN_EV_LONGER_12_MONTHS       7
 #define WARN_UNKNOWN_EKU               8
+#define WARN_RSA_EXP_RANGE             9
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0

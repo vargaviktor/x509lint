@@ -93,6 +93,9 @@ static const char *error_strings[] =
 	"E: Serial number not positive\n", /* ERR_SERIAL_NOT_POSITIVE */
 	"E: Serial number too large\n", /* ERR_SERIAL_TOO_LARGE */
 	"E: ASN1 integer not minimally encoded\n", /* ERR_ASN1_INTEGER_NOT_MINIMAL */
+	"E: RSA modulus smaller than 2048 bit\n", /* ERR_RSA_SIZE_2048 */
+	"E: RSA public exponent not odd\n", /* ERR_RSA_EXP_NOT_ODD */
+	"E: RSA public exponent not equal to 3 or more\n", /* ERR_RSA_EXP_3 */
 };
 
 static const char *warning_strings[] = {
@@ -105,6 +108,7 @@ static const char *warning_strings[] = {
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
 	"W: EV certificate valid longer than 12 months\n", /* WARN_EV_LONGER_12_MONTHS */
 	"W: Unknown extended key usage\n", /* WARN_UNKNOWN_EKU */
+	"W: RSA public exponent not not in rage of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
 };
 
 static const char *info_strings[] = {
@@ -127,7 +131,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_ASN1_INTEGER_NOT_MINIMAL; i++)
+	for (int i = 0; i <= ERR_RSA_EXP_3; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -135,7 +139,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_UNKNOWN_EKU; i++)
+	for (int i = 0; i <= WARN_RSA_EXP_RANGE; i++)
 	{
 		if (GetBit(warnings, i))
 		{
