@@ -1286,6 +1286,7 @@ static void CheckSerial(X509 *x509)
 	}
 
 	CheckASN1_integer(serial);
+	BN_free(bn_serial);
 }
 
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
