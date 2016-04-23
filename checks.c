@@ -96,6 +96,19 @@ uint32_t cert_info[1];
 #define CERT_INFO_TIME_STAMP    9
 #define CERT_INFO_OCSP_SIGN     10
 
+const int primes[] = {
+	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
+	79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157,
+	163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241,
+	251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347,
+	349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439,
+	443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541, 547,
+	557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641, 643,
+	647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743, 751
+};
+
+static BIGNUM *bn_factors;
+
 static void SetBit(uint32_t *val, int bit)
 {
 	val[bit/(sizeof(uint32_t)*8)] |= (1 << (bit % (sizeof(int)*8)));
@@ -1331,9 +1344,16 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 		}
+		BN_CTX *ctx = BN_CTX_new();
+		if (BN_gcd(i, rsa->n, bn_factors, ctx) == 0 || !BN_is_one(i))
+		{
+			SetError(ERR_RSA_SMALL_FACTOR);
+		}
 		BN_free(i);
+		BN_CTX_free(ctx);
 		RSA_free(rsa);
 	}
+	EVP_PKEY_free(pkey);
 }
 
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
@@ -1485,6 +1505,14 @@ void check_init()
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
 	obj_postOfficeBox = OBJ_txt2obj(OIDpostOfficeBox, 1);
 	obj_anyEKU = OBJ_txt2obj(OIDanyEKU, 1);
+
+	bn_factors = BN_new();
+
+	BN_dec2bn(&bn_factors, "2");
+	for (int i = 1; i < sizeof(primes)/sizeof(*primes); i++)
+	{
+		BN_mul_word(bn_factors, primes[i]);
+	}
 }
 
 void check_finish()
@@ -1493,6 +1521,7 @@ void check_finish()
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
 	iconv_close(iconv_ucs4);
+	BN_free(bn_factors);
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
 	ASN1_OBJECT_free(obj_jurisdictionLocalityName);
 	ASN1_OBJECT_free(obj_jurisdictionStateOrProvinceName);

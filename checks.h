@@ -77,6 +77,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_RSA_SIZE_2048                     67
 #define ERR_RSA_EXP_NOT_ODD                   68
 #define ERR_RSA_EXP_3                         69
+#define ERR_RSA_SMALL_FACTOR                  70
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

@@ -96,6 +96,7 @@ static const char *error_strings[] =
 	"E: RSA modulus smaller than 2048 bit\n", /* ERR_RSA_SIZE_2048 */
 	"E: RSA public exponent not odd\n", /* ERR_RSA_EXP_NOT_ODD */
 	"E: RSA public exponent not equal to 3 or more\n", /* ERR_RSA_EXP_3 */
+	"E: RSA modulus has small factor\n", /* ERR_RSA_SMALL_FACTOR */
 };
 
 static const char *warning_strings[] = {
@@ -131,7 +132,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_RSA_EXP_3; i++)
+	for (int i = 0; i <= ERR_RSA_SMALL_FACTOR; i++)
 	{
 		if (GetBit(errors, i))
 		{
