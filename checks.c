@@ -759,6 +759,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 
 			if (info->qualifiers)
 			{
+				SetWarning(WARN_POLICY_QUALIFIER);
 				for (int i = 0; i < sk_POLICYQUALINFO_num(info->qualifiers); i++)
 				{
 					POLICYQUALINFO *qualinfo = sk_POLICYQUALINFO_value(info->qualifiers, i);

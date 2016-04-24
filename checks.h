@@ -90,6 +90,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_EV_LONGER_12_MONTHS       7
 #define WARN_UNKNOWN_EKU               8
 #define WARN_RSA_EXP_RANGE             9
+#define WARN_POLICY_QUALIFIER         10
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0
