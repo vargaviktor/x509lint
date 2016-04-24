@@ -641,6 +641,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				if (strcmp(oid, OIDCabDomainValidated) == 0
 					|| strcmp(oid, "2.16.840.1.114413.1.7.23.1") == 0
 					|| strcmp(oid, "1.3.6.1.4.1.30360.3.3.3.3.4.5.3") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.14777.1.2.4") == 0
 					|| strcmp(oid, "2.16.840.1.114414.1.7.23.1") == 0)
 				{
 					DomainValidated = true;
@@ -676,6 +677,8 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					|| strcmp(oid, "1.3.6.1.4.1.8024.0.2.100.1.1") == 0
 					|| strcmp(oid, "2.16.840.1.114414.1.7.23.2") == 0
 					|| strcmp(oid, "1.3.6.1.4.1.30360.3.3.3.3.4.4.3") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.14777.1.2.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.14777.1.1.3") == 0
 					|| strcmp(oid, "2.16.792.3.0.3.1.1.2") == 0)
 				{
 					OrganizationValidated = true;
@@ -716,6 +719,8 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					|| strcmp(oid, "2.16.756.1.89.1.2.1.1") == 0
 					|| strcmp(oid, "2.16.792.3.0.3.1.1.5") == 0
 					|| strcmp(oid, "1.3.6.1.4.1.6449.1.2.1.5.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.14777.6.1.1") == 0
+					|| strcmp(oid, "1.3.6.1.4.1.14777.6.1.2") == 0
 					|| strcmp(oid, "1.3.6.1.4.1.36305.2") == 0)
 				{
 					EVValidated = true;
