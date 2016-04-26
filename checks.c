@@ -1281,12 +1281,14 @@ static void CheckEKU(X509 *x509)
 
 static void CheckASN1_integer(ASN1_INTEGER *integer)
 {
+#if 0
 	/* OpenSSL 1.1 should already enforce this */
 	if (integer->length > 1 && (((integer->data[0] == 0) && ((integer->data[1] & 0x80) == 0))
 		|| ((integer->data[0] == 0xFF) && ((integer->data[1] & 0x80) == 0x80))))
 	{
 		SetError(ERR_ASN1_INTEGER_NOT_MINIMAL);
 	}
+#endif
 }
 
 static void CheckSerial(X509 *x509)
