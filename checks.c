@@ -1364,6 +1364,42 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		RSA_free(rsa);
 	}
+	if (pkey->type == EVP_PKEY_EC)
+	{
+		EC_KEY *ec_key = EVP_PKEY_get1_EC_KEY(pkey);
+		const EC_GROUP *group = EC_KEY_get0_group(ec_key);
+		const EC_POINT *point = EC_KEY_get0_public_key(ec_key);
+		BN_CTX *ctx = BN_CTX_new();
+		BIGNUM *order = BN_new();
+		EC_GROUP_get_order(group, order, ctx);
+		if (EC_POINT_is_at_infinity(group, point))
+		{
+			SetError(ERR_EC_AT_INFINITY);
+		}
+		if (EC_POINT_is_on_curve(group, point, ctx) != 1)
+		{
+			SetError(ERR_EC_POINT_NOT_ON_CURVE);
+		}
+		EC_POINT *result = EC_POINT_new(group);
+		if (BN_is_zero(order))
+		{
+			SetError(ERR_EC_INVALID_GROUP_ORDER);
+		}
+		EC_POINT_mul(group, result, NULL, point, order, ctx);
+		if (!EC_POINT_is_at_infinity(group, result))
+		{
+			SetError(ERR_EC_INCORRECT_ORDER);
+		}
+		int nid = EC_GROUP_get_curve_name(group);
+		if (nid != NID_X9_62_prime256v1 && nid != NID_secp384r1 && nid != NID_secp521r1)
+		{
+			SetError(ERR_EC_NON_ALLOWED_CURVE);
+		}
+		EC_POINT_free(result);
+		BN_free(order);
+		BN_CTX_free(ctx);
+		EC_KEY_free(ec_key);
+	}
 	EVP_PKEY_free(pkey);
 }
 

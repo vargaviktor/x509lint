@@ -97,6 +97,11 @@ static const char *error_strings[] =
 	"E: RSA public exponent not odd\n", /* ERR_RSA_EXP_NOT_ODD */
 	"E: RSA public exponent not equal to 3 or more\n", /* ERR_RSA_EXP_3 */
 	"E: RSA modulus has small factor\n", /* ERR_RSA_SMALL_FACTOR */
+	"E: EC point at infinity\n", /* ERR_EC_AT_INFINITY */
+	"E: EC point not on curve\n", /* ERR_EC_POINT_NOT_ON_CURVE */
+	"E: EC key has invalid group order\n", /* ERR_EC_INVALID_GROUP_ORDER */
+	"E: EC key has incorrect group order\n", /* ERR_EC_INCORRECT_ORDER */
+	"E: EC curve is not one of the allowed curves\n", /* ERR_EC_NON_ALLOWED_CURVE */
 };
 
 static const char *warning_strings[] = {
@@ -133,7 +138,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_RSA_SMALL_FACTOR; i++)
+	for (int i = 0; i <= ERR_EC_NON_ALLOWED_CURVE; i++)
 	{
 		if (GetBit(errors, i))
 		{
