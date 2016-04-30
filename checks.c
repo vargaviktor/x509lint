@@ -759,7 +759,6 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 
 			if (info->qualifiers)
 			{
-				SetWarning(WARN_POLICY_QUALIFIER);
 				for (int i = 0; i < sk_POLICYQUALINFO_num(info->qualifiers); i++)
 				{
 					POLICYQUALINFO *qualinfo = sk_POLICYQUALINFO_value(info->qualifiers, i);
@@ -783,6 +782,10 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					else
 					{
 						SetError(ERR_INVALID_POLICY_QUALIFIER_ID);
+					}
+					if (nid != NID_id_qt_cps)
+					{
+						SetWarning(WARN_POLICY_QUALIFIER_NOT_CPS);
 					}
 				}
 			}
