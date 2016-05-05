@@ -769,7 +769,25 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 						{
 							ASN1_STRING *s = qualinfo->d.usernotice->exptext;
 							CheckDisplayText(s);
-							if (s->type == V_ASN1_BMPSTRING || s->type == V_ASN1_VISIBLESTRING)
+							/*
+							 * RFC5280 says:
+							 * Conforming CAs SHOULD use the UTF8String encoding for explicitText,
+							 * but MAY use IA5String. Conforming CAs MUST NOT encode explicitText
+							 * as VisibleString or BMPString.
+							 *
+							 * RFC6818 updates that to:
+							 * Conforming CAs SHOULD use the UTF8String encoding for explicitText.
+							 * VisibleString or BMPString are acceptable but less preferred alternatives.
+							 * Conforming CAs MUST NOT encode explicitText as IA5String.
+							 *
+							 * Combining both, UTF8String is the only valid encoding.
+							 */
+							if (s->type != V_ASN1_UTF8STRING)
+							{
+								SetWarning(WARN_EXPLICIT_TEXT_ENCODING);
+							}
+							else if (s->type != V_ASN1_BMPSTRING && s->type != V_ASN1_VISIBLESTRING &&
+								s->type != V_ASN1_IA5STRING)
 							{
 								SetError(ERR_INVALID_TYPE_USER_NOTICE);
 							}
