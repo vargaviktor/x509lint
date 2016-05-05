@@ -147,7 +147,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_POLICY_QUALIFIER_NOT_CPS; i++)
+	for (int i = 0; i <= WARN_EXPLICIT_TEXT_ENCODING; i++)
 	{
 		if (GetBit(warnings, i))
 		{
