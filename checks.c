@@ -41,7 +41,7 @@
 static iconv_t iconv_utf8;
 static iconv_t iconv_ucs2;
 static iconv_t iconv_t61;
-static iconv_t iconv_ucs4;
+static iconv_t iconv_utf32;
 
 static const char *OIDStreetAddress = "2.5.4.9";
 static const char *OIDpostalCode = "2.5.4.17";
@@ -375,35 +375,34 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 
 	if (ret)
 	{
-
 		if (utf8 != NULL)
 		{
 			/* reset iconv */
-			iconv(iconv_ucs4, NULL, 0, NULL, 0);
+			iconv(iconv_utf32, NULL, 0, NULL, 0);
 
 			char *s = utf8;
 			size_t n = utf8_len;
-			size_t ucs4_size = utf8_len * 4;
-			uint32_t *ucs4 = malloc(ucs4_size);
-			char *pu = (char *)ucs4;
+			size_t utf32_size = (utf8_len+1) * 4; /* It adds a BOM */
+			uint32_t *utf32 = malloc(utf32_size);
+			char *pu = (char *)utf32;
 
-			if (iconv(iconv_ucs4, &s, &n, (char **)&pu, &ucs4_size) == (size_t) -1 || n != 0)
+			if (iconv(iconv_utf32, &s, &n, (char **)&pu, &utf32_size) == (size_t) -1 || n != 0)
 			{
 				/* Shouldn't happen. */
 				SetError(ERR_INVALID_ENCODING);
 				free(utf8);
-				free(ucs4);
+				free(utf32);
 				return false;
 			}
 			else
 			{
-				*char_len = (pu - (char *)ucs4) / 4;
-				if (!CheckPrintableChars(ucs4, *char_len))
+				*char_len = (pu - (char *)utf32) / 4;
+				if (!CheckPrintableChars(utf32, *char_len))
 				{
 					ret = false;
 				}
 			}
-			free(ucs4);
+			free(utf32);
 		}
 		else
 		{
@@ -1547,7 +1546,7 @@ void check_init()
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");
 	iconv_t61 = iconv_open("utf-8", "CSISO103T618BIT");
-	iconv_ucs4 = iconv_open("UCS-4", "utf-8");
+	iconv_utf32 = iconv_open("utf-32", "utf-8");
 
 	obj_organizationName = OBJ_nid2obj(NID_organizationName);
 	obj_organizationalUnitName = OBJ_nid2obj(NID_organizationalUnitName);
@@ -1585,7 +1584,7 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_t61);
-	iconv_close(iconv_ucs4);
+	iconv_close(iconv_utf32);
 	BN_free(bn_factors);
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
 	ASN1_OBJECT_free(obj_jurisdictionLocalityName);
