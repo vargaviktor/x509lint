@@ -785,8 +785,8 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 							{
 								SetWarning(WARN_EXPLICIT_TEXT_ENCODING);
 							}
-							else if (s->type != V_ASN1_BMPSTRING && s->type != V_ASN1_VISIBLESTRING &&
-								s->type != V_ASN1_IA5STRING)
+							if (s->type != V_ASN1_UTF8STRING && s->type != V_ASN1_BMPSTRING &&
+								s->type != V_ASN1_VISIBLESTRING && s->type != V_ASN1_IA5STRING)
 							{
 								SetError(ERR_INVALID_TYPE_USER_NOTICE);
 							}
