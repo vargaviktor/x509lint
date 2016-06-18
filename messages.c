@@ -46,14 +46,14 @@ static const char *error_strings[] =
 	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
 	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
-	"E: Duplicate extention\n", /* ERR_DUPLICATE_EXTENTION */
+	"E: Duplicate extension\n", /* ERR_DUPLICATE_EXTENSION */
 	"E: Invalid CRL distribution point\n", /* ERR_INVALID_CRL_DIST_POINT */
 	"E: Invalid display text type\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
 	"E: Invalid display text length\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
 	"E: Invalid user notice type\n", /* ERR_INVALID_TYPE_USER_NOTICE */
 	"E: Invalid policy qualifier id\n", /* ERR_INVALID_POLICY_QUALIFIER_ID */
-	"E: Individual without name\n", /* ERR_INDIVDUAL_WITHOUT_NAME */
-	"E: Individual without country\n", /* ERR_INDIVDUAL_WITHOUT_COUNTRY */
+	"E: Individual without name\n", /* ERR_INDIVIDUAL_WITHOUT_NAME */
+	"E: Individual without country\n", /* ERR_INDIVIDUAL_WITHOUT_COUNTRY */
 	"E: EV certificate without organization\n", /* ERR_EV_WITHOUT_ORGANIZATION */
 	"E: EV certificate without business\n", /* ERR_EV_WITHOUT_BUSINESS */
 	"E: EV certificate without jurisdiction country\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
@@ -78,13 +78,13 @@ static const char *error_strings[] =
 	"E: streetAddress too long\n", /* ERR_STREET_ADDRESS_SIZE */
 	"E: authorityInformationAccess is marked critical\n", /* ERR_AIA_CRITICAL */
 	"E: No OCSP over HTTP\n",  /* ERR_NO_OCSP_HTTP */
-	"E: no authorityInformationAccess extention\n", /* ERR_NO_AIA */
+	"E: no authorityInformationAccess extension\n", /* ERR_NO_AIA */
 	"E: Invalid type in SAN entry\n", /* ERR_SAN_TYPE */
 	"E: Invalid type in GeneralName\n", /* ERR_GEN_NAME_TYPE */
 	"E: EV certificate valid longer than 27 months\n", /* ERR_EV_LONGER_27_MONTHS */
-	"E: subjectAlterativeName without name\n", /* ERR_SAN_WITHOUT_NAME */
+	"E: subjectAltName without name\n", /* ERR_SAN_WITHOUT_NAME */
 	"E: Invalid length of IP address\n", /* ERR_IP_FAMILY */
-	"E: commonName not in subjectAltName extention\n", /* ERR_CN_NOT_IN_SAN */
+	"E: commonName not in subjectAltName extension\n", /* ERR_CN_NOT_IN_SAN */
 	"E: Invalid length of businessCategory\n", /* ERR_BUSINESS_CATEGORY_SIZE */
 	"E: Invalid length of dnQualifier\n", /* ERR_DN_QUALIFIER_SIZE */
 	"E: URL contains a null character\n", /* ERR_URL_WITH_NUL */
@@ -114,7 +114,7 @@ static const char *warning_strings[] = {
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
 	"W: EV certificate valid longer than 12 months\n", /* WARN_EV_LONGER_12_MONTHS */
 	"W: Unknown extended key usage\n", /* WARN_UNKNOWN_EKU */
-	"W: RSA public exponent not not in rage of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
+	"W: RSA public exponent not in rage of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
 	"W: explicitText is not using an UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
 };

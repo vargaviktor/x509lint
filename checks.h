@@ -27,14 +27,14 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_LONGER_60_MONTHS                  17
 #define ERR_COUNTRY_SIZE                      18
 #define ERR_INVALID_TIME_FORMAT               19
-#define ERR_DUPLICATE_EXTENTION               20
+#define ERR_DUPLICATE_EXTENSION               20
 #define ERR_INVALID_CRL_DIST_POINT            21
 #define ERR_INVALID_DISPLAY_TEXT_TYPE         22
 #define ERR_INVALID_DISPLAY_TEXT_LENGTH       23
 #define ERR_INVALID_TYPE_USER_NOTICE          24
 #define ERR_INVALID_POLICY_QUALIFIER_ID       25
-#define ERR_INDIVDUAL_WITHOUT_NAME            26
-#define ERR_INDIVDUAL_WITHOUT_COUNTRY         27
+#define ERR_INDIVIDUAL_WITHOUT_NAME            26
+#define ERR_INDIVIDUAL_WITHOUT_COUNTRY         27
 #define ERR_EV_WITHOUT_ORGANIZATION           28
 #define ERR_EV_WITHOUT_BUSINESS               29
 #define ERR_EV_WITHOUT_JURISDICTION_COUNTRY   30
@@ -103,7 +103,7 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_STRING_NOT_CHECKED            1        /* Software doesn't know how to check it yet. */
 #define INF_CRL_NOT_URL                   2
 #define INF_UNKNOWN_VALIDATION            3        /* Software doesn't know OID yet. */
-#define INF_NAME_ENTRY_LENGTH_NOT_CHECKED 4        /* Software doesn't hnow how to check size yet. */
+#define INF_NAME_ENTRY_LENGTH_NOT_CHECKED 4        /* Software doesn't know how to check size yet. */
 
 extern uint32_t errors[];
 extern uint32_t warnings[];
