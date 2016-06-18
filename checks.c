@@ -207,7 +207,7 @@ static void CheckValidURL(const unsigned char *s, int n)
 }
 
 /*
- * Check that the string contains pritable characters.
+ * Check that the string contains printable characters.
  * The input is in internal UCS-4 notation.
  *
  * Returns true when no error found and false when an error was found.
@@ -701,11 +701,11 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					if (!IsNameObjPresent(subject, obj_organizationName)
 						&& !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
 					{
-						SetError(ERR_INDIVDUAL_WITHOUT_NAME);
+						SetError(ERR_INDIVIDUAL_WITHOUT_NAME);
 					}
 					if (!IsNameObjPresent(subject, obj_countryName))
 					{
-						SetError(ERR_INDIVDUAL_WITHOUT_COUNTRY);
+						SetError(ERR_INDIVIDUAL_WITHOUT_COUNTRY);
 					}
 				}
 
@@ -845,7 +845,7 @@ static void CheckGeneralNameType(GENERAL_NAME *name)
 	/* TODO: Add checks for other types. */
 }
 
-/* Compare 2 ASN1_STRINGS case incensitive to be equal,
+/* Compare 2 ASN1_STRINGS case insensitive to be equal,
  * returns 0 when equal, something else when not equal
  *
  * This only works with ASN1_STRINGS that are encoded in ASCII
@@ -1211,7 +1211,7 @@ static int obj_cmp(const ASN1_OBJECT * const *a, const ASN1_OBJECT * const *b)
 	return OBJ_cmp(*a, *b);
 }
 
-static void CheckDuplicateExtentions(X509 *x509)
+static void CheckDuplicateExtensions(X509 *x509)
 {
 	STACK_OF(ASN1_OBJECT) *stack = sk_ASN1_OBJECT_new(obj_cmp);
 
@@ -1225,7 +1225,7 @@ static void CheckDuplicateExtentions(X509 *x509)
 		}
 		if (sk_ASN1_OBJECT_find(stack, ext->object) >= 0)
 		{
-			SetError(ERR_DUPLICATE_EXTENTION);
+			SetError(ERR_DUPLICATE_EXTENSION);
 		}
 		else
 		{
@@ -1487,7 +1487,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 	CheckDN(subject);
 
-	CheckDuplicateExtentions(x509);
+	CheckDuplicateExtensions(x509);
 
 	/* Prohibited in CAB base 7.1.4.2.2c */
 	if (!IsNameObjPresent(subject, obj_organizationName)
