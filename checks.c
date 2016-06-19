@@ -38,6 +38,20 @@
 #include "checks.h"
 #include "asn1_time.h"
 
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#define EVP_PKEY_base_id(pkey) (pkey->type)
+
+static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
+{
+	if (n != NULL)
+		*n = r->n;
+	if (e != NULL)
+		*e = r->e;
+	if (d != NULL)
+		*d = r->d;
+}
+#endif
+
 static iconv_t iconv_utf8;
 static iconv_t iconv_ucs2;
 static iconv_t iconv_t61;
@@ -1223,13 +1237,14 @@ static void CheckDuplicateExtensions(X509 *x509)
 			SetError(ERR_INVALID);
 			continue;
 		}
-		if (sk_ASN1_OBJECT_find(stack, ext->object) >= 0)
+		ASN1_OBJECT *obj = X509_EXTENSION_get_object(ext);
+		if (sk_ASN1_OBJECT_find(stack, obj) >= 0)
 		{
 			SetError(ERR_DUPLICATE_EXTENSION);
 		}
 		else
 		{
-			sk_ASN1_OBJECT_push(stack, ext->object);
+			sk_ASN1_OBJECT_push(stack, obj);
 		}
 	}
 	sk_ASN1_OBJECT_free(stack);
@@ -1333,10 +1348,20 @@ static void CheckSerial(X509 *x509)
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
 {
 	EVP_PKEY *pkey = X509_get_pubkey(x509);
-	if (pkey->type == EVP_PKEY_RSA)
+	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
 	{
 		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
-		if (rsa == NULL || rsa->n == NULL || rsa->e == NULL)
+
+		if (rsa == NULL)
+		{
+			SetError(ERR_INVALID);
+			RSA_free(rsa);
+			return;
+		}
+
+		const BIGNUM *n, *e;
+		RSA_get0_key(rsa, &n, &e, NULL);
+		if (n == NULL || e == NULL)
 		{
 			SetError(ERR_INVALID);
 			RSA_free(rsa);
@@ -1344,36 +1369,36 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		}
 		if (!GetBit(errors, ERR_INVALID_TIME_FORMAT))
 		{
-			if (tm_after.tm_year >= 114 && BN_num_bits(rsa->n) < 2048)
+			if (tm_after.tm_year >= 114 && BN_num_bits(n) < 2048)
 			{
 				SetError(ERR_RSA_SIZE_2048);
 			}
 		}
-		if (BN_is_odd(rsa->e) == 0)
+		if (BN_is_odd(e) == 0)
 		{
 			SetError(ERR_RSA_EXP_NOT_ODD);
 		}
 		BIGNUM *i = BN_new();
 		BN_set_word(i, 3);
-		if (BN_cmp(rsa->e, i) < 0)
+		if (BN_cmp(e, i) < 0)
 		{
 			SetError(ERR_RSA_EXP_3);
 		}
 		else
 		{
 			BN_set_word(i, 0x10001);
-			if (BN_cmp(rsa->e, i) < 0)
+			if (BN_cmp(e, i) < 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 			BN_hex2bn(&i, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-			if (BN_cmp(rsa->e, i) > 0)
+			if (BN_cmp(e, i) > 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 		}
 		BN_CTX *ctx = BN_CTX_new();
-		if (BN_gcd(i, rsa->n, bn_factors, ctx) == 0 || !BN_is_one(i))
+		if (BN_gcd(i, n, bn_factors, ctx) == 0 || !BN_is_one(i))
 		{
 			SetError(ERR_RSA_SMALL_FACTOR);
 		}
@@ -1381,7 +1406,7 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		RSA_free(rsa);
 	}
-	if (pkey->type == EVP_PKEY_EC)
+	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_EC)
 	{
 		EC_KEY *ec_key = EVP_PKEY_get1_EC_KEY(pkey);
 		const EC_GROUP *group = EC_KEY_get0_group(ec_key);
@@ -1454,7 +1479,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	{
 		SetError(ERR_NOT_VERSION3);
 	}
-	CheckASN1_integer(x509->cert_info->version);
+	//CheckASN1_integer(x509->cert_info->version);
 
 	issuer = X509_get_issuer_name(x509);
 	if (issuer == NULL)
