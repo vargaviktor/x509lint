@@ -114,7 +114,7 @@ static const char *warning_strings[] = {
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
 	"W: EV certificate valid longer than 12 months\n", /* WARN_EV_LONGER_12_MONTHS */
 	"W: Unknown extended key usage\n", /* WARN_UNKNOWN_EKU */
-	"W: RSA public exponent not in rage of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
+	"W: RSA public exponent not in range of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
 	"W: explicitText is not using an UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
 };
