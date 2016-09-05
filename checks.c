@@ -1348,6 +1348,11 @@ static void CheckSerial(X509 *x509)
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
 {
 	EVP_PKEY *pkey = X509_get_pubkey(x509);
+	if (pkey == NULL)
+	{
+		SetError(ERR_INVALID);
+		return;
+	}
 	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
 	{
 		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
