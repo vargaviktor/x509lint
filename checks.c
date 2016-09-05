@@ -1348,7 +1348,11 @@ static void CheckSerial(X509 *x509)
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
 {
 	EVP_PKEY *pkey = X509_get_pubkey(x509);
-	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
+	if (pkey == NULL)
+	{
+		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
+	}
+	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
 	{
 		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
 
@@ -1406,7 +1410,7 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		RSA_free(rsa);
 	}
-	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_EC)
+	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_EC)
 	{
 		EC_KEY *ec_key = EVP_PKEY_get1_EC_KEY(pkey);
 		const EC_GROUP *group = EC_KEY_get0_group(ec_key);
@@ -1442,7 +1446,15 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		EC_KEY_free(ec_key);
 	}
-	EVP_PKEY_free(pkey);
+	else
+	{
+		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
+	}
+
+	if (pkey != NULL)
+	{
+		EVP_PKEY_free(pkey);
+	}
 }
 
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)

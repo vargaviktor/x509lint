@@ -102,6 +102,7 @@ static const char *error_strings[] =
 	"E: EC key has invalid group order\n", /* ERR_EC_INVALID_GROUP_ORDER */
 	"E: EC key has incorrect group order\n", /* ERR_EC_INCORRECT_ORDER */
 	"E: EC curve is not one of the allowed curves\n", /* ERR_EC_NON_ALLOWED_CURVE */
+	"E: Unknown public key type\n", /* ERR_UNKNOWN_PUBLIC_KEY_TYPE */
 };
 
 static const char *warning_strings[] = {
@@ -139,7 +140,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_EC_NON_ALLOWED_CURVE; i++)
+	for (int i = 0; i <= ERR_UNKNOWN_PUBLIC_KEY_TYPE; i++)
 	{
 		if (GetBit(errors, i))
 		{
