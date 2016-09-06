@@ -446,7 +446,7 @@ static const struct
 	{ &obj_organizationalUnitName, 1, ub_organization_unit_name, ERR_ORGANIZATIONAL_UNIT_NAME_SIZE },
 	{ &obj_serialNumber, 1, 64, ERR_SERIAL_NUMBER_SIZE },
 	{ &obj_businessCategory, 1, ub_name, ERR_BUSINESS_CATEGORY_SIZE },
-	{ &obj_postalCode, 1, 16, ERR_POSTAL_CODE_SIZE },
+	{ &obj_postalCode, 1, 40, ERR_POSTAL_CODE_SIZE },
 	{ &obj_postOfficeBox, 1, 40, ERR_POST_OFFICE_BOX_SIZE },
 	{ &obj_StreetAddress, 1, 128, ERR_STREET_ADDRESS_SIZE },
 	{ &obj_dnQualifier, 1, ub_name, ERR_DN_QUALIFIER_SIZE }, /* Not sure */
