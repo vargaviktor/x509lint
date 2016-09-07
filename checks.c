@@ -50,6 +50,9 @@ static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const
 	if (d != NULL)
 		*d = r->d;
 }
+
+#define ASN1_STRING_get0_data ASN1_STRING_data
+
 #endif
 
 static iconv_t iconv_utf8;
@@ -1074,7 +1077,7 @@ static void CheckCRL(X509 *x509)
 					ASN1_STRING *uri = GENERAL_NAME_get0_value(gen, &type);
 					if (type == GEN_URI)
 					{
-						CheckValidURL(ASN1_STRING_data(uri), ASN1_STRING_length(uri));
+						CheckValidURL(ASN1_STRING_get0_data(uri), ASN1_STRING_length(uri));
 					}
 					else
 					{
