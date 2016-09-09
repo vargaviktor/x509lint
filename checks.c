@@ -419,7 +419,10 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 					ret = false;
 				}
 				if (utf32[0] == 0xFEFF)
-					(*char_len)--;	/* Don't count the BOM */
+				{
+					/* Don't count the BOM */
+					(*char_len)--;
+				}
 			}
 			free(utf32);
 		}
