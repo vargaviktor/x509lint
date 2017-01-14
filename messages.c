@@ -29,14 +29,14 @@ static const char *error_strings[] =
 	"E: Error parsing certificate\n", /* ERR_INVALID*/
 	"E: Issuer without organizationName\n", /* ERR_ISSUER_ORG_NAME*/
 	"E: Issuer without countryName\n", /* ERR_ISSUER_COUNTRY */
-	"E: Subject without organizationName but with streetAddress\n", /* ERR_SUBJECT_ADDR */
-	"E: Subject with organizationName but without stateOrProvince or localityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
-	"E: Subject without organizationName but with stateOrProvince or localityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
+	"E: Subject without organizationName, givenName or surname but with streetAddress\n", /* ERR_SUBJECT_ADDR */
+	"E: Subject with organizationName, givenName or surname but without stateOrProvince or localityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
+	"E: Subject without organizationName, givenName or surname but with stateOrProvince or localityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
 	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
 	"E: Contains a null character in the string\n", /* ERR_STRING_WITH_NUL */
 	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
 	"E: The string contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
-	"E: Subject with organizationName but without countryName\n", /* ERR_SUBJECT_COUNTRY */
+	"E: Subject with organizationName, givenName or surname but without countryName\n", /* ERR_SUBJECT_COUNTRY */
 	"E: Domain validated certificate with organizationName\n", /* ERR_DOMAIN_WITH_ORG */
 	"E: Organization validated certificate but without organizationName\n", /* ERR_ORGANIZATION_WITHOUT_ORG */
 	"E: No policy extension\n", /* ERR_NO_POLICY */
@@ -103,6 +103,9 @@ static const char *error_strings[] =
 	"E: EC key has incorrect group order\n", /* ERR_EC_INCORRECT_ORDER */
 	"E: EC curve is not one of the allowed curves\n", /* ERR_EC_NON_ALLOWED_CURVE */
 	"E: Unknown public key type\n", /* ERR_UNKNOWN_PUBLIC_KEY_TYPE */
+	"E: Subject without organizationName, givenName or surname but with postalCode\n", /* ERR_SUBJECT_POSTAL */
+	"E: Domain validated certificate but with givenName or surname\n", /* ERR_DOMAIN_WITH_NAME */
+	"E: Subject with givenName or surname but without the CAB IV policy oid\n", /* ERR_NAME_NO_IV_POLICY */
 };
 
 static const char *warning_strings[] = {
@@ -140,7 +143,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_UNKNOWN_PUBLIC_KEY_TYPE; i++)
+	for (int i = 0; i <= ERR_NAME_NO_IV_POLICY; i++)
 	{
 		if (GetBit(errors, i))
 		{

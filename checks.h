@@ -84,6 +84,9 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_EC_INCORRECT_ORDER                74
 #define ERR_EC_NON_ALLOWED_CURVE              75
 #define ERR_UNKNOWN_PUBLIC_KEY_TYPE           76
+#define ERR_SUBJECT_POSTAL                    77
+#define ERR_DOMAIN_WITH_NAME                  78
+#define ERR_NAME_NO_IV_POLICY                 79
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

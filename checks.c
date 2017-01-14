@@ -634,6 +634,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	bool OrganizationValidated = false;
 	bool IndividualValidated = false;
 	bool EVValidated = false;
+	bool CabIVPresent = false;
 
 	do
 	{
@@ -693,6 +694,10 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					{
 						SetError(ERR_DOMAIN_WITH_POSTAL);
 					}
+					if (IsNameObjPresent(subject, obj_givenName) || IsNameObjPresent(subject, obj_surname))
+					{
+						SetError(ERR_DOMAIN_WITH_NAME);
+					}
 				}
 
 				if (strcmp(oid, OIDCabOrganizationIdentityValidated) == 0
@@ -718,6 +723,11 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					{
 						SetError(ERR_ORGANIZATION_WITHOUT_COUNTRY);
 					}
+				}
+
+				if (strcmp(oid, OIDCabIndividualIdentityValidated) == 0)
+				{
+					CabIVPresent = true;
 				}
 
 				if (strcmp(oid, OIDCabIndividualIdentityValidated) == 0)
@@ -837,6 +847,14 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 		CERTIFICATEPOLICIES_free(policy);
 	}
 	while (1);
+
+	if ((IsNameObjPresent(subject, obj_givenName) || IsNameObjPresent(subject, obj_surname))
+		&& !CabIVPresent)
+	{
+		/* Required by CAB 7.1.4.2.2c */
+		SetError(ERR_NAME_NO_IV_POLICY);
+	}
+
 
 	if (!bPolicyFound && type == SubscriberCertificate)
 	{
@@ -1539,23 +1557,29 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 
 	CheckDuplicateExtensions(x509);
 
-	/* Prohibited in CAB base 7.1.4.2.2c */
+	/* Prohibited in CAB base 7.1.4.2.2d */
 	if (!IsNameObjPresent(subject, obj_organizationName)
+		&& !IsNameObjPresent(subject, obj_givenName)
+		&& !IsNameObjPresent(subject, obj_surname)
 		&& IsNameObjPresent(subject, obj_StreetAddress))
 	{
 		SetError(ERR_SUBJECT_ADDR);
 	}
 
-	/* Required in CAB base 7.1.4.2.2d and 7.1.4.2.2e */
-	if (IsNameObjPresent(subject, obj_organizationName)
+	/* Required in CAB base 7.1.4.2.2e and 7.1.4.2.2f */
+	if ((IsNameObjPresent(subject, obj_organizationName) ||
+		IsNameObjPresent(subject, obj_givenName) ||
+		IsNameObjPresent(subject, obj_surname))
 		&& !IsNameObjPresent(subject, obj_stateOrProvinceName)
 		&& !IsNameObjPresent(subject, obj_localityName))
 	{
 		SetError(ERR_SUBJECT_ORG_NO_PLACE);
 	}
 
-	/* Prohibited in CAB base 7.1.4.2.2d or 7.1.4.2.2e */
+	/* Prohibited in CAB base 7.1.4.2.2e or 7.1.4.2.2f */
 	if (!IsNameObjPresent(subject, obj_organizationName)
+		&& !IsNameObjPresent(subject, obj_givenName)
+		&& !IsNameObjPresent(subject, obj_surname)
 		&& (IsNameObjPresent(subject, obj_localityName)
 			|| IsNameObjPresent(subject, obj_stateOrProvinceName)))
 	{
@@ -1563,7 +1587,18 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	/* Required by CAB base 7.1.4.2.2g */
-	if (IsNameObjPresent(subject, obj_organizationName)
+	if (!IsNameObjPresent(subject, obj_organizationName)
+		&& !IsNameObjPresent(subject, obj_givenName)
+		&& !IsNameObjPresent(subject, obj_surname)
+		&& IsNameObjPresent(subject, obj_postalCode))
+	{
+		SetError(ERR_SUBJECT_POSTAL);
+	}
+
+	/* Required by CAB base 7.1.4.2.2h */
+	if ((IsNameObjPresent(subject, obj_organizationName) ||
+		IsNameObjPresent(subject, obj_givenName) ||
+		IsNameObjPresent(subject, obj_surname))
 		&& !IsNameObjPresent(subject, obj_countryName))
 	{
 		SetError(ERR_SUBJECT_COUNTRY);
