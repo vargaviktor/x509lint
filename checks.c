@@ -112,6 +112,7 @@ uint32_t cert_info[1];
 #define CERT_INFO_EMAIL         8
 #define CERT_INFO_TIME_STAMP    9
 #define CERT_INFO_OCSP_SIGN     10
+#define CERT_INFO_NO_EKU        11
 
 const int primes[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
@@ -920,12 +921,12 @@ static void CheckSAN(X509 *x509, CertType type)
 		name_type_allowed[i] = false;
 	}
 
-	if (GetBit(cert_info, CERT_INFO_SERV_AUTH) || GetBit(cert_info, CERT_INFO_ANY_EKU))
+	if (GetBit(cert_info, CERT_INFO_SERV_AUTH) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
 		name_type_allowed[GEN_DNS] = true;
 		name_type_allowed[GEN_IPADD] = true;
 	}
-	if (GetBit(cert_info, CERT_INFO_EMAIL) || GetBit(cert_info, CERT_INFO_ANY_EKU))
+	if (GetBit(cert_info, CERT_INFO_EMAIL) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
 		name_type_allowed[GEN_EMAIL] = true;
 	}
@@ -1281,7 +1282,7 @@ static void CheckDuplicateExtensions(X509 *x509)
 	sk_ASN1_OBJECT_free(stack);
 }
 
-static void CheckEKU(X509 *x509)
+static void CheckEKU(X509 *x509, CertType type)
 {
 	int idx = -1;
 
@@ -1299,8 +1300,19 @@ static void CheckEKU(X509 *x509)
 				SetError(ERR_INVALID);
 				continue;
 			}
+			SetCertInfo(CERT_INFO_NO_EKU);
+			if (type == SubscriberCertificate)
+			{
+				SetWarning(WARN_NO_EKU);
+			}
 			/* Not found */
 			break;
+		}
+
+		if (type == RootCA)
+		{
+			/* CAB 7.1.2.1d */
+			SetError(ERR_ROOT_CA_WITH_EKU);
 		}
 
 		for (int i = 0; i < sk_ASN1_OBJECT_num(ekus); i++)
@@ -1339,6 +1351,10 @@ static void CheckEKU(X509 *x509)
 			{
 				SetWarning(WARN_UNKNOWN_EKU);
 			}
+		}
+		if (sk_ASN1_OBJECT_num(ekus) == 0)
+		{
+			SetError(ERR_EMPTY_EKU);
 		}
 		sk_ASN1_OBJECT_pop_free(ekus, ASN1_OBJECT_free);
 	}
@@ -1605,7 +1621,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	CheckPolicy(x509, type, subject);
-	CheckEKU(x509);
+	CheckEKU(x509, type);
 	CheckSAN(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2a */

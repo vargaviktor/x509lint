@@ -106,6 +106,8 @@ static const char *error_strings[] =
 	"E: Subject without organizationName, givenName or surname but with postalCode\n", /* ERR_SUBJECT_POSTAL */
 	"E: Domain validated certificate but with givenName or surname\n", /* ERR_DOMAIN_WITH_NAME */
 	"E: Subject with givenName or surname but without the CAB IV policy oid\n", /* ERR_NAME_NO_IV_POLICY */
+	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
+	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
 };
 
 static const char *warning_strings[] = {
@@ -121,6 +123,7 @@ static const char *warning_strings[] = {
 	"W: RSA public exponent not in range of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
 	"W: explicitText is not using an UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
+	"W: Subscriber certificate without Extended Key Usage\n", /* WARN_NO_EKU */
 };
 
 static const char *info_strings[] = {
@@ -143,7 +146,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_NAME_NO_IV_POLICY; i++)
+	for (int i = 0; i <= ERR_EMPTY_EKU; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -151,7 +154,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_EXPLICIT_TEXT_ENCODING; i++)
+	for (int i = 0; i <= WARN_NO_EKU; i++)
 	{
 		if (GetBit(warnings, i))
 		{

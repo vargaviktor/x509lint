@@ -87,6 +87,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_SUBJECT_POSTAL                    77
 #define ERR_DOMAIN_WITH_NAME                  78
 #define ERR_NAME_NO_IV_POLICY                 79
+#define ERR_ROOT_CA_WITH_EKU                  80
+#define ERR_EMPTY_EKU                         81
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -101,6 +103,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_RSA_EXP_RANGE             9
 #define WARN_POLICY_QUALIFIER_NOT_CPS 10
 #define WARN_EXPLICIT_TEXT_ENCODING   11
+#define WARN_NO_EKU                   12
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0
