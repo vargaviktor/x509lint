@@ -1285,6 +1285,7 @@ static void CheckDuplicateExtensions(X509 *x509)
 static void CheckEKU(X509 *x509, CertType type)
 {
 	int idx = -1;
+	bool first = true;
 
 	do
 	{
@@ -1300,14 +1301,18 @@ static void CheckEKU(X509 *x509, CertType type)
 				SetError(ERR_INVALID);
 				continue;
 			}
-			SetCertInfo(CERT_INFO_NO_EKU);
-			if (type == SubscriberCertificate)
-			{
-				SetWarning(WARN_NO_EKU);
-			}
 			/* Not found */
+			if (first)
+			{
+				SetCertInfo(CERT_INFO_NO_EKU);
+				if (type == SubscriberCertificate)
+				{
+					SetWarning(WARN_NO_EKU);
+				}
+			}
 			break;
 		}
+		first = false;
 
 		if (type == RootCA)
 		{
