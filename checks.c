@@ -1050,8 +1050,6 @@ static void CheckSAN(X509 *x509, CertType type)
 	if (!bSanFound)
 	{
 		/* Required by CAB base 7.1.4.2.1 */
-		/* It's not clear if this should also apply to CAs, the CAB base
-		 * document doesn't exclude them, but I think it shouldn't apply to CAs. */
 		if (type == SubscriberCertificate)
 		{
 			SetError(ERR_NO_SUBJECT_ALT_NAME);
@@ -1588,7 +1586,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	/* Required in CAB base 7.1.4.2.2e and 7.1.4.2.2f */
-	if ((IsNameObjPresent(subject, obj_organizationName) ||
+	if (((IsNameObjPresent(subject, obj_organizationName) && type == SubscriberCertificate) ||
 		IsNameObjPresent(subject, obj_givenName) ||
 		IsNameObjPresent(subject, obj_surname))
 		&& !IsNameObjPresent(subject, obj_stateOrProvinceName)
@@ -1617,7 +1615,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	/* Required by CAB base 7.1.4.2.2h */
-	if ((IsNameObjPresent(subject, obj_organizationName) ||
+	if (((IsNameObjPresent(subject, obj_organizationName) && type == SubscriberCertificate) ||
 		IsNameObjPresent(subject, obj_givenName) ||
 		IsNameObjPresent(subject, obj_surname))
 		&& !IsNameObjPresent(subject, obj_countryName))
