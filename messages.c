@@ -124,6 +124,7 @@ static const char *warning_strings[] = {
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
 	"W: explicitText is not using an UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
 	"W: Subscriber certificate without Extended Key Usage\n", /* WARN_NO_EKU */
+	"W: No commonName\n" /* WARN_NO_CN */
 };
 
 static const char *info_strings[] = {
@@ -154,7 +155,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_NO_EKU; i++)
+	for (int i = 0; i <= WARN_NO_CN; i++)
 	{
 		if (GetBit(warnings, i))
 		{

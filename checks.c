@@ -1635,6 +1635,10 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 			SetInfo(INF_SUBJECT_CN);
 		}
 	}
+	else if (type != SubscriberCertificate)
+	{
+		SetWarning(WARN_NO_CN);
+	}
 
 	CheckCRL(x509);
 	CheckAIA(x509, type);
