@@ -1618,7 +1618,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	/* Required by CAB base 7.1.4.2.2h */
-	if (((IsNameObjPresent(subject, obj_organizationName) && type == SubscriberCertificate) ||
+	if ((IsNameObjPresent(subject, obj_organizationName) ||
 		IsNameObjPresent(subject, obj_givenName) ||
 		IsNameObjPresent(subject, obj_surname))
 		&& !IsNameObjPresent(subject, obj_countryName))
