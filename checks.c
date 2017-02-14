@@ -1348,7 +1348,7 @@ static void CheckEKU(X509 *x509, CertType type)
 			}
 			else if (nid == NID_OCSP_sign)
 			{
-				SetCertInfo(CERT_INFO_SERV_AUTH);
+				SetCertInfo(CERT_INFO_OCSP_SIGN);
 			}
 			else 
 			{
