@@ -912,6 +912,7 @@ static void CheckSAN(X509 *x509, CertType type)
 	int idx = -1;
 	bool bSanFound = false;
 	bool bSanName = false;
+	bool bSanRequired = false;
 	bool bCommonNameFound = false;
 	ASN1_STRING *commonName = NULL;
 	bool name_type_allowed[GEN_RID+1];
@@ -925,10 +926,12 @@ static void CheckSAN(X509 *x509, CertType type)
 	{
 		name_type_allowed[GEN_DNS] = true;
 		name_type_allowed[GEN_IPADD] = true;
+		bSanRequired = true;
 	}
 	if (GetBit(cert_info, CERT_INFO_EMAIL) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
 		name_type_allowed[GEN_EMAIL] = true;
+		bSanRequired = true;
 	}
 
 	X509_NAME *subject = X509_get_subject_name(x509);
@@ -1047,7 +1050,7 @@ static void CheckSAN(X509 *x509, CertType type)
 	}
 	while (1);
 
-	if (!bSanFound)
+	if (!bSanFound && bSanRequired)
 	{
 		/* Required by CAB base 7.1.4.2.1 */
 		if (type == SubscriberCertificate)
