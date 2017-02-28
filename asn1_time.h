@@ -6,7 +6,7 @@
 #include <openssl/asn1.h>
 
 /*
- * Converts a ASN1_TIME to a struct tm.  Only the fields tm_year, tm_mon,
+ * Converts an ASN1_TIME to a struct tm.  Only the fields tm_year, tm_mon,
  * tm_mday, tm_hour, tm_min and tm_sec are filled in, the rest are set to 0.
  *
  * The values are stored in UTC, and so are not usable for a function

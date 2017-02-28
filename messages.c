@@ -122,7 +122,7 @@ static const char *warning_strings[] = {
 	"W: Unknown extended key usage\n", /* WARN_UNKNOWN_EKU */
 	"W: RSA public exponent not in range of 2^16+1 to 2^256-1\n", /* WARN_RSA_EXP_RANGE */
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
-	"W: explicitText is not using an UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
+	"W: explicitText is not using a UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
 	"W: Subscriber certificate without Extended Key Usage\n", /* WARN_NO_EKU */
 	"W: No commonName\n" /* WARN_NO_CN */
 };
