@@ -333,6 +333,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 				(data->data[i] == '.') ||
 				(data->data[i] == '/') ||
 				(data->data[i] == ':') ||
+				(data->data[i] == '=') ||
 				(data->data[i] == '?') ||
 				(data->data[i] == ' ')))
 			{
