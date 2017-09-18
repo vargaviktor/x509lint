@@ -108,6 +108,7 @@ static const char *error_strings[] =
 	"E: Subject with givenName or surname but without the CAB IV policy oid\n", /* ERR_NAME_NO_IV_POLICY */
 	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
 	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
+	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
 };
 
 static const char *warning_strings[] = {
@@ -147,7 +148,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_EMPTY_EKU; i++)
+	for (int i = 0; i <= ERR_MISSING_EKU; i++)
 	{
 		if (GetBit(errors, i))
 		{

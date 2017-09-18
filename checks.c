@@ -1368,7 +1368,7 @@ static void CheckEKU(X509 *x509, CertType type)
 		}
 		if (GetBit(cert_info, CERT_INFO_AMTVPRO_EKU) && !GetBit(cert_info, CERT_INFO_SERV_AUTH))
 		{
-			SetWarning(WARN_UNKNOWN_EKU);
+			SetError(ERR_MISSING_EKU);
 		}
 		if (sk_ASN1_OBJECT_num(ekus) == 0)
 		{

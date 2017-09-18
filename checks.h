@@ -89,6 +89,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_NAME_NO_IV_POLICY                 79
 #define ERR_ROOT_CA_WITH_EKU                  80
 #define ERR_EMPTY_EKU                         81
+#define ERR_MISSING_EKU                       82
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
