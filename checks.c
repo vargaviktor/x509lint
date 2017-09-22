@@ -65,6 +65,7 @@ static const char *OIDpostalCode = "2.5.4.17";
 static const char *OIDpostOfficeBox = "2.5.4.18";
 
 static const char *OIDanyEKU = "2.5.29.37.0";
+static const char *OIDIntelAMTvProEKU = "2.16.840.1.113741.1.2.3";
 
 static const char *OIDjurisdictionCountryName = "1.3.6.1.4.1.311.60.2.1.3";
 static const char *OIDjurisdictionLocalityName = "1.3.6.1.4.1.311.60.2.1.1";
@@ -95,6 +96,7 @@ static ASN1_OBJECT *obj_dnQualifier;
 static ASN1_OBJECT *obj_pkcs9_emailAddress;
 static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
+static ASN1_OBJECT *obj_IntelAMTvProEKU;
 
 uint32_t errors[3];
 uint32_t warnings[1];
@@ -113,6 +115,7 @@ uint32_t cert_info[1];
 #define CERT_INFO_TIME_STAMP    9
 #define CERT_INFO_OCSP_SIGN     10
 #define CERT_INFO_NO_EKU        11
+#define CERT_INFO_AMTVPRO_EKU   12
 
 const int primes[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
@@ -1354,10 +1357,18 @@ static void CheckEKU(X509 *x509, CertType type)
 			{
 				SetCertInfo(CERT_INFO_OCSP_SIGN);
 			}
-			else 
+			else if (OBJ_cmp(oid, obj_IntelAMTvProEKU) == 0)
+			{
+				SetCertInfo(CERT_INFO_AMTVPRO_EKU);
+			}
+			else
 			{
 				SetWarning(WARN_UNKNOWN_EKU);
 			}
+		}
+		if (GetBit(cert_info, CERT_INFO_AMTVPRO_EKU) && !GetBit(cert_info, CERT_INFO_SERV_AUTH))
+		{
+			SetError(ERR_MISSING_EKU);
 		}
 		if (sk_ASN1_OBJECT_num(ekus) == 0)
 		{
@@ -1681,6 +1692,7 @@ void check_init()
 	obj_postalCode = OBJ_txt2obj(OIDpostalCode, 1);
 	obj_postOfficeBox = OBJ_txt2obj(OIDpostOfficeBox, 1);
 	obj_anyEKU = OBJ_txt2obj(OIDanyEKU, 1);
+	obj_IntelAMTvProEKU = OBJ_txt2obj(OIDIntelAMTvProEKU, 1);
 
 	bn_factors = BN_new();
 
@@ -1705,6 +1717,7 @@ void check_finish()
 	ASN1_OBJECT_free(obj_postalCode);
 	ASN1_OBJECT_free(obj_postOfficeBox);
 	ASN1_OBJECT_free(obj_anyEKU);
+	ASN1_OBJECT_free(obj_IntelAMTvProEKU);
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 }
