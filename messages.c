@@ -109,7 +109,8 @@ static const char *error_strings[] =
 	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
 	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
 	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
-        "E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
+	"E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
+	"E: Invalid length of unstructuredName", /* ERR_UNSTRUCTUREDNAME_SIZE */
 };
 
 static const char *warning_strings[] = {
