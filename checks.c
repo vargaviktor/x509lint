@@ -93,7 +93,9 @@ static ASN1_OBJECT *obj_surname;
 static ASN1_OBJECT *obj_businessCategory;
 static ASN1_OBJECT *obj_serialNumber;
 static ASN1_OBJECT *obj_dnQualifier;
+static ASN1_OBJECT *obj_domainComponent;
 static ASN1_OBJECT *obj_pkcs9_emailAddress;
+static ASN1_OBJECT *obj_pkcs9_unstructuredName;
 static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 static ASN1_OBJECT *obj_IntelAMTvProEKU;
@@ -468,7 +470,9 @@ static const struct
 	{ &obj_postOfficeBox, 1, 40, ERR_POST_OFFICE_BOX_SIZE },
 	{ &obj_StreetAddress, 1, 128, ERR_STREET_ADDRESS_SIZE },
 	{ &obj_dnQualifier, 1, ub_name, ERR_DN_QUALIFIER_SIZE }, /* Not sure */
+	{ &obj_domainComponent, 1, 63, ERR_DOMAINCOMPONENT_SIZE },
 	{ &obj_pkcs9_emailAddress, 1, 255, ERR_EMAIL_SIZE },
+	{ &obj_pkcs9_unstructuredName, 1, 255, ERR_UNSTRUCTUREDNAME_SIZE },
 	{ &obj_givenName, 1, ub_name, ERR_GIVEN_NAME_SIZE },
 	{ &obj_surname, 1, 40, ERR_SURNAME_SIZE }
 };
@@ -501,12 +505,16 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 		}
 	}
 
-	if (nid == NID_pkcs9_emailAddress)
+	if (nid == NID_pkcs9_emailAddress || nid == NID_domainComponent)
 	{
 		if (data->type != V_ASN1_IA5STRING)
 		{
 			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 		}
+	}
+	else if (nid == NID_pkcs9_unstructuredName && data->type == V_ASN1_IA5STRING)
+	{
+		/* PKCS#9 unstructuredName may be IA5String or DirectoryString */
 	}
 	else
 	{
@@ -1682,7 +1690,9 @@ void check_init()
 	obj_businessCategory = OBJ_nid2obj(NID_businessCategory);
 	obj_serialNumber = OBJ_nid2obj(NID_serialNumber);
 	obj_dnQualifier = OBJ_nid2obj(NID_dnQualifier);
+	obj_domainComponent = OBJ_nid2obj(NID_domainComponent);
 	obj_pkcs9_emailAddress = OBJ_nid2obj(NID_pkcs9_emailAddress);
+	obj_pkcs9_unstructuredName = OBJ_nid2obj(NID_pkcs9_unstructuredName);
 
 	obj_jurisdictionCountryName = OBJ_txt2obj(OIDjurisdictionCountryName, 1);
 	obj_jurisdictionLocalityName = OBJ_txt2obj(OIDjurisdictionLocalityName, 1);

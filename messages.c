@@ -109,6 +109,8 @@ static const char *error_strings[] =
 	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
 	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
 	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
+	"E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
+	"E: Invalid length of unstructuredName", /* ERR_UNSTRUCTUREDNAME_SIZE */
 };
 
 static const char *warning_strings[] = {
@@ -148,7 +150,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_MISSING_EKU; i++)
+	for (int i = 0; i <= MAX_ERR; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -156,7 +158,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_NO_CN; i++)
+	for (int i = 0; i <= MAX_WARN; i++)
 	{
 		if (GetBit(warnings, i))
 		{
@@ -164,7 +166,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= INF_NAME_ENTRY_LENGTH_NOT_CHECKED; i++)
+	for (int i = 0; i <= MAX_INF; i++)
 	{
 		if (GetBit(info, i))
 		{
