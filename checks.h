@@ -92,6 +92,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_MISSING_EKU                       82
 #define ERR_DOMAINCOMPONENT_SIZE              83
 #define ERR_UNSTRUCTUREDNAME_SIZE             84
+#define MAX_ERR                               ERR_UNSTRUCTUREDNAME_SIZE
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -108,6 +109,7 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_EXPLICIT_TEXT_ENCODING   11
 #define WARN_NO_EKU                   12
 #define WARN_NO_CN                    13
+#define MAX_WARN                      WARN_NO_CN
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0
@@ -115,6 +117,7 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_CRL_NOT_URL                   2
 #define INF_UNKNOWN_VALIDATION            3        /* Software doesn't know OID yet. */
 #define INF_NAME_ENTRY_LENGTH_NOT_CHECKED 4        /* Software doesn't know how to check size yet. */
+#define MAX_INF                           INF_NAME_ENTRY_LENGTH_NOT_CHECKED
 
 extern uint32_t errors[];
 extern uint32_t warnings[];

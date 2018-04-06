@@ -150,7 +150,7 @@ char *get_messages()
 	buffer = malloc(16384);
 	buffer[0] = '\0';
 
-	for (int i = 0; i <= ERR_MISSING_EKU; i++)
+	for (int i = 0; i <= MAX_ERR; i++)
 	{
 		if (GetBit(errors, i))
 		{
@@ -158,7 +158,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= WARN_NO_CN; i++)
+	for (int i = 0; i <= MAX_WARN; i++)
 	{
 		if (GetBit(warnings, i))
 		{
@@ -166,7 +166,7 @@ char *get_messages()
 		}
 	}
 
-	for (int i = 0; i <= INF_NAME_ENTRY_LENGTH_NOT_CHECKED; i++)
+	for (int i = 0; i <= MAX_INF; i++)
 	{
 		if (GetBit(info, i))
 		{
