@@ -512,7 +512,8 @@ static void CheckNameEntryValid(X509_NAME_ENTRY *ne)
 			SetError(ERR_INVALID_NAME_ENTRY_TYPE);
 		}
 	}
-	else if (nid == NID_pkcs9_unstructuredName && data->type == V_ASN1_IA5STRING) {
+	else if (nid == NID_pkcs9_unstructuredName && data->type == V_ASN1_IA5STRING)
+	{
 		/* PKCS#9 unstructuredName may be IA5String or DirectoryString */
 	}
 	else
