@@ -57,7 +57,6 @@ static void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e, const
 
 static iconv_t iconv_utf8;
 static iconv_t iconv_ucs2;
-static iconv_t iconv_t61;
 static iconv_t iconv_utf32;
 
 static const char *OIDStreetAddress = "2.5.4.9";
@@ -1697,7 +1696,6 @@ void check_init()
 
 	iconv_utf8 = iconv_open("utf-8", "utf-8");
 	iconv_ucs2 = iconv_open("utf-8", "ucs-2be");
-	iconv_t61 = iconv_open("utf-8", "CSISO103T618BIT");
 	iconv_utf32 = iconv_open("utf-32", "utf-8");
 
 	obj_organizationName = OBJ_nid2obj(NID_organizationName);
@@ -1738,7 +1736,6 @@ void check_finish()
 {
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
-	iconv_close(iconv_t61);
 	iconv_close(iconv_utf32);
 	BN_free(bn_factors);
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
