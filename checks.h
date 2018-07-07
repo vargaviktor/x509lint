@@ -33,8 +33,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_INVALID_DISPLAY_TEXT_LENGTH       23
 #define ERR_INVALID_TYPE_USER_NOTICE          24
 #define ERR_INVALID_POLICY_QUALIFIER_ID       25
-#define ERR_INDIVIDUAL_WITHOUT_NAME            26
-#define ERR_INDIVIDUAL_WITHOUT_COUNTRY         27
+#define ERR_INDIVIDUAL_WITHOUT_NAME           26
+#define ERR_INDIVIDUAL_WITHOUT_COUNTRY        27
 #define ERR_EV_WITHOUT_ORGANIZATION           28
 #define ERR_EV_WITHOUT_BUSINESS               29
 #define ERR_EV_WITHOUT_JURISDICTION_COUNTRY   30
@@ -92,7 +92,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_MISSING_EKU                       82
 #define ERR_DOMAINCOMPONENT_SIZE              83
 #define ERR_UNSTRUCTUREDNAME_SIZE             84
-#define MAX_ERR                               ERR_UNSTRUCTUREDNAME_SIZE
+#define ERR_TELETEX_WITH_ESCAPE               85
+#define MAX_ERR                               ERR_TELETEX_WITH_ESCAPE
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

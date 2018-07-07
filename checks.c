@@ -375,21 +375,42 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	}
 	else if (data->type == V_ASN1_T61STRING)  /* TeletexString, T61String */
 	{
-		size_t n = data->length;
-		size_t utf8_size = data->length*2;
-		char *s = (char *)data->data;
-		utf8 = malloc(utf8_size);
-		char *pu = utf8;
-
-		/* reset iconv */
-		iconv(iconv_t61, NULL, 0, NULL, 0);
-
-		if (iconv(iconv_t61, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
+		/* Don't try to decode it, nothing properly implements it. Just accept the 102 character set. */
+		for (int i = 0; i < data->length; i++)
 		{
-			ret = false;
-			SetError(ERR_INVALID_ENCODING);
+			if (data->data[i] == '\0')
+			{
+				ret = false;
+				SetError(ERR_STRING_WITH_NUL);
+			}
+			if (data->data[i] == 0x1B)
+			{
+				/*
+				 * It's valid, but there are no implemenations that really handle
+				 * things, just return an error.
+				 */
+				ret = false;
+				SetError(ERR_TELETEX_WITH_ESCAPE);
+			}
+			else if (data->data[i] < 32)
+			{
+				ret = false;
+				SetError(ERR_NON_PRINTABLE);
+			}
+			else if (data->data[i] >= 127)
+			{
+				/* Things could be mapped here, but it first requires an escape sequence */
+				ret = false;
+				SetError(ERR_INVALID_ENCODING);
+			}
+			else if (data->data[i] == 0x5C || data->data[i] == 0x5E || data->data[i] == 0x60 ||
+				data->data[i] == 0x7B || data->data[i] == 0x7D || data->data[i] == 0x7E)
+			{
+				/* Not mapped in the 102 character set */
+				ret = false;
+				SetError(ERR_INVALID_ENCODING);
+			}
 		}
-		utf8_len = pu - utf8;
 	}
 	else
 	{

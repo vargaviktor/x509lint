@@ -111,6 +111,7 @@ static const char *error_strings[] =
 	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
 	"E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
 	"E: Invalid length of unstructuredName", /* ERR_UNSTRUCTUREDNAME_SIZE */
+	"E: Teletex string with an escape sequence", /* ERR_TELETEX_WITH_ESCAPE */
 };
 
 static const char *warning_strings[] = {
