@@ -5,6 +5,11 @@ RM = rm
 CFLAGS = -g -Wall -O2 -std=c99
 LIBS = -lcrypto
 
+UNAME_O := $(shell uname -o)
+ifeq ($(UNAME_O),Cygwin)
+    LIBS += -liconv
+endif
+
 OBJECTS = x509lint.o checks.o messages.o asn1_time.o
 
 x509lint: $(OBJECTS)
