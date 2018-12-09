@@ -947,23 +947,36 @@ static void CheckSAN(X509 *x509, CertType type)
 	bool bSanRequired = false;
 	bool bCommonNameFound = false;
 	ASN1_STRING *commonName = NULL;
-	bool name_type_allowed[GEN_RID+1];
+	enum { SAN_TYPE_NOT_ALLOWED, SAN_TYPE_ALLOWED, SAN_TYPE_WARN } name_type_allowed[GEN_RID+1];
 
 	for (int i = 0; i < GEN_RID+1; i++)
 	{
-		name_type_allowed[i] = false;
+		name_type_allowed[i] = SAN_TYPE_NOT_ALLOWED;
 	}
 
 	if (GetBit(cert_info, CERT_INFO_SERV_AUTH) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
-		name_type_allowed[GEN_DNS] = true;
-		name_type_allowed[GEN_IPADD] = true;
+		name_type_allowed[GEN_DNS] = SAN_TYPE_ALLOWED;
+		name_type_allowed[GEN_IPADD] = SAN_TYPE_ALLOWED;
 		bSanRequired = true;
 	}
 	if (GetBit(cert_info, CERT_INFO_EMAIL) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
-		name_type_allowed[GEN_EMAIL] = true;
+		name_type_allowed[GEN_EMAIL] = SAN_TYPE_ALLOWED;
 		bSanRequired = true;
+	}
+	if (GetBit(cert_info, CERT_INFO_CLIENT_AUTH))
+	{
+		/*
+		 * DNS and IP address doesn't make sense for a TLS client that
+		 * doesn't also do server authentication.
+		 */
+		if (name_type_allowed[GEN_DNS] == SAN_TYPE_NOT_ALLOWED)
+		{
+			name_type_allowed[GEN_DNS] = SAN_TYPE_WARN;
+			name_type_allowed[GEN_IPADD] = SAN_TYPE_WARN;
+		}
+		name_type_allowed[GEN_EMAIL] = SAN_TYPE_ALLOWED;
 	}
 
 	X509_NAME *subject = X509_get_subject_name(x509);
@@ -1006,9 +1019,13 @@ static void CheckSAN(X509 *x509, CertType type)
 			{
 				SetError(ERR_INVALID);
 			}
-			else if (!name_type_allowed[type])
+			else if (name_type_allowed[type] == SAN_TYPE_NOT_ALLOWED)
 			{
 				SetError(ERR_SAN_TYPE);
+			}
+			else if (name_type_allowed[type] == SAN_TYPE_WARN)
+			{
+				SetWarning(WARN_TLS_CLIENT_DNS);
 			}
 			if (type == GEN_DNS)
 			{

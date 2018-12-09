@@ -128,7 +128,8 @@ static const char *warning_strings[] = {
 	"W: Policy information has qualifier other than CPS URI\n", /* WARN_POLICY_QUALIFIER_NOT_CPS */
 	"W: explicitText is not using a UTF8String\n", /* WARN_EXPLICIT_TEXT_ENCODING */
 	"W: Subscriber certificate without Extended Key Usage\n", /* WARN_NO_EKU */
-	"W: No commonName\n" /* WARN_NO_CN */
+	"W: No commonName\n", /* WARN_NO_CN */
+	"W: TLS client with DNS or IP address\n", /* WARN_TLS_CLIENT_DNS */
 };
 
 static const char *info_strings[] = {
