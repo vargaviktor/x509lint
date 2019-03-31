@@ -890,6 +890,14 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 			SetError(ERR_NAME_NO_IV_POLICY);
 		}
 	}
+	else
+	{
+		if (DomainValidated || IndividualValidated || CabIVPresent)
+		{
+			SetError(ERR_POLICY_BR);
+		}
+	}
+
 
 	if (!bPolicyFound && type == SubscriberCertificate)
 	{

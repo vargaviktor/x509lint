@@ -93,7 +93,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_DOMAINCOMPONENT_SIZE              83
 #define ERR_UNSTRUCTUREDNAME_SIZE             84
 #define ERR_TELETEX_WITH_ESCAPE               85
-#define MAX_ERR                               ERR_TELETEX_WITH_ESCAPE
+#define ERR_POLICY_BR                         86
+#define MAX_ERR                               ERR_POLICY_BR
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

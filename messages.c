@@ -112,6 +112,7 @@ static const char *error_strings[] =
 	"E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
 	"E: Invalid length of unstructuredName", /* ERR_UNSTRUCTUREDNAME_SIZE */
 	"E: Teletex string with an escape sequence", /* ERR_TELETEX_WITH_ESCAPE */
+	"E: Baseline Requirements policy present for non server authentication certificate", /* ERR_POLICY_BR */
 };
 
 static const char *warning_strings[] = {
