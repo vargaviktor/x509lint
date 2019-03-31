@@ -881,13 +881,15 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	}
 	while (1);
 
-	if ((IsNameObjPresent(subject, obj_givenName) || IsNameObjPresent(subject, obj_surname))
-		&& !CabIVPresent)
+	if (GetBit(cert_info, CERT_INFO_SERV_AUTH) || GetBit(cert_info, CERT_INFO_ANY_EKU) || GetBit(cert_info, CERT_INFO_NO_EKU))
 	{
-		/* Required by CAB 7.1.4.2.2c */
-		SetError(ERR_NAME_NO_IV_POLICY);
+		if ((IsNameObjPresent(subject, obj_givenName) || IsNameObjPresent(subject, obj_surname))
+			&& !CabIVPresent)
+		{
+			/* Required by CAB 7.1.4.2.2c */
+			SetError(ERR_NAME_NO_IV_POLICY);
+		}
 	}
-
 
 	if (!bPolicyFound && type == SubscriberCertificate)
 	{
