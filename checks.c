@@ -978,6 +978,17 @@ static void CheckSAN(X509 *x509, CertType type)
 		}
 		name_type_allowed[GEN_EMAIL] = SAN_TYPE_ALLOWED;
 	}
+	if (GetBit(warnings, WARN_UNKNOWN_EKU) && !GetBit(cert_info, CERT_INFO_SERV_AUTH) && !GetBit(cert_info, CERT_INFO_ANY_EKU))
+	{
+		/*
+		 * If it's a certificate with an unknown EKU that isn't
+		 * also valid for server auth, allow the other types
+		 */
+		name_type_allowed[GEN_OTHERNAME] = SAN_TYPE_ALLOWED;
+		name_type_allowed[GEN_X400] = SAN_TYPE_ALLOWED;
+		name_type_allowed[GEN_EDIPARTY] = SAN_TYPE_ALLOWED;
+		name_type_allowed[GEN_URI] = SAN_TYPE_ALLOWED;
+	}
 
 	X509_NAME *subject = X509_get_subject_name(x509);
 	for (int i = 0; i < X509_NAME_entry_count(subject); i++)
