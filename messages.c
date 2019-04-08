@@ -109,10 +109,10 @@ static const char *error_strings[] =
 	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
 	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
 	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
-	"E: Invalid length of domainComponent", /* ERR_DOMAINCOMPONENT_SIZE */
-	"E: Invalid length of unstructuredName", /* ERR_UNSTRUCTUREDNAME_SIZE */
-	"E: Teletex string with an escape sequence", /* ERR_TELETEX_WITH_ESCAPE */
-	"E: Baseline Requirements policy present for non server authentication certificate", /* ERR_POLICY_BR */
+	"E: Invalid length of domainComponent\n", /* ERR_DOMAINCOMPONENT_SIZE */
+	"E: Invalid length of unstructuredName\n", /* ERR_UNSTRUCTUREDNAME_SIZE */
+	"E: Teletex string with an escape sequence\n", /* ERR_TELETEX_WITH_ESCAPE */
+	"E: Baseline Requirements policy present for non server authentication certificate\n", /* ERR_POLICY_BR */
 };
 
 static const char *warning_strings[] = {
