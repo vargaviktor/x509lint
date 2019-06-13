@@ -1704,8 +1704,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_SUBJECT_COUNTRY);
 	}
 
-	CheckPolicy(x509, type, subject);
 	CheckEKU(x509, type);
+	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2a */
