@@ -58,8 +58,6 @@ static const char *error_strings[] =
 	"E: EV certificate without business\n", /* ERR_EV_WITHOUT_BUSINESS */
 	"E: EV certificate without jurisdiction country\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
 	"E: EV certificate without number\n", /* ERR_EV_WITHOUT_NUMBER */
-	"E: EV certificate without locality\n", /* ERR_EV_WITHOUT_LOCALITY */
-	"E: EV certificate without country\n", /* ERR_EV_WITHOUT_COUNTRY */
 	"E: Domain validated certificate but with streetAddress\n", /* ERR_DOMAIN_WITH_STREET */
 	"E: Domain validated certificate but with localityName\n", /* ERR_DOMAIN_WITH_LOCALITY */
 	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
