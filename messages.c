@@ -111,6 +111,7 @@ static const char *error_strings[] =
 	"E: Invalid length of unstructuredName\n", /* ERR_UNSTRUCTUREDNAME_SIZE */
 	"E: Teletex string with an escape sequence\n", /* ERR_TELETEX_WITH_ESCAPE */
 	"E: Baseline Requirements policy present for non server authentication certificate\n", /* ERR_POLICY_BR */
+	"E: RSA modulus is negative\n", /* ERR_RSA_MODULUS_NEGATIVE */
 };
 
 static const char *warning_strings[] = {

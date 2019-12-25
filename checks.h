@@ -92,7 +92,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_UNSTRUCTUREDNAME_SIZE             82
 #define ERR_TELETEX_WITH_ESCAPE               83
 #define ERR_POLICY_BR                         84
-#define MAX_ERR                               ERR_POLICY_BR
+#define ERR_RSA_MODULUS_NEGATIVE              85
+#define MAX_ERR                               ERR_RSA_MODULUS_NEGATIVE
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

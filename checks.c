@@ -1500,6 +1500,10 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 				SetError(ERR_RSA_SIZE_2048);
 			}
 		}
+		if (BN_is_negative(n))
+		{
+			SetError(ERR_RSA_MODULUS_NEGATIVE);
+		}
 		if (BN_is_odd(e) == 0)
 		{
 			SetError(ERR_RSA_EXP_NOT_ODD);
