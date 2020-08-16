@@ -1701,6 +1701,19 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetWarning(WARN_CALLED_WITH_WRONG_TYPE);
 	}
 
+	if (type == SubscriberCertificate)
+	{
+		SetInfo(INF_CHECKING_LEAF);
+	}
+	else if (type == IntermediateCA)
+	{
+		SetInfo(INF_CHECKING_INTERMEDIATE_CA);
+	}
+	else if (type == RootCA)
+	{
+		SetInfo(INF_CHECKING_ROOT_CA);
+	}
+
 	ret = X509_get_version(x509);
 	if (ret != 2)
 	{

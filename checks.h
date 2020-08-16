@@ -125,7 +125,10 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_CRL_NOT_URL                   2
 #define INF_UNKNOWN_VALIDATION            3        /* Software doesn't know OID yet. */
 #define INF_NAME_ENTRY_LENGTH_NOT_CHECKED 4        /* Software doesn't know how to check size yet. */
-#define MAX_INF                           INF_NAME_ENTRY_LENGTH_NOT_CHECKED
+#define INF_CHECKING_LEAF                 5
+#define INF_CHECKING_INTERMEDIATE_CA      6
+#define INF_CHECKING_ROOT_CA              7
+#define MAX_INF                           INF_CHECKING_ROOT_CA
 
 extern uint32_t errors[];
 extern uint32_t warnings[];

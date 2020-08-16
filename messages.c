@@ -144,6 +144,9 @@ static const char *info_strings[] = {
 	"I: CRL is not a URL\n", /* INF_CRL_NOT_URL */
 	"I: Unknown validation policy\n", /* INF_UNKNOWN_VALIDATION */
 	"I: Name entry length not checked\n", /* INF_NAME_ENTRY_LENGTH_NOT_CHECKED */
+	"I: Checking as leaf certificate\n", /* #define INF_CHECKING_LEAF */
+	"I: Checking as intermediate CA certificate\n", /* #define INF_CHECKING_INTERMEDIATE_CA */
+	"I: Checking as root CA certificate\n", /* #define INF_CHECKING_ROOT_CA */
 };
 
 /* 
