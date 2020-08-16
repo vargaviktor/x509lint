@@ -98,7 +98,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_KEY_USAGE_TOO_LONG                88
 #define ERR_KEY_USAGE_HAS_CERT_SIGN           89
 #define ERR_KEY_USAGE_NO_CERT_SIGN            90
-#define MAX_ERR                               ERR_KEY_USAGE_NO_CERT_SIGN
+#define ERR_AKID_MISSING                      91
+#define MAX_ERR                               ERR_AKID_MISSING
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

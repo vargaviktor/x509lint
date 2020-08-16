@@ -1645,21 +1645,34 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 CertType GetType(X509 *x509)
 {
 	int ca = X509_check_ca(x509);
-	if (ca == 0)
-	{
-		return SubscriberCertificate;
-	}
-
-	if (X509_check_issued(x509, x509) != X509_V_OK)
-	{
-		return IntermediateCA;
-	}
 
 	int critical = -1;
 	AUTHORITY_KEYID *akid = X509_get_ext_d2i(x509, NID_authority_key_identifier, &critical, NULL);
 	if (akid == NULL && critical >= 0)
 	{
 		SetError(ERR_INVALID);
+	}
+
+	if (ca == 0)
+	{
+		if (akid == NULL)
+		{
+			SetError(ERR_AKID_MISSING);
+		}
+		return SubscriberCertificate;
+	}
+
+	if (X509_check_issued(x509, x509) != X509_V_OK)
+	{
+		if (akid == NULL)
+		{
+			SetError(ERR_AKID_MISSING);
+		}
+		return IntermediateCA;
+	}
+
+	if (akid != NULL && X509_check_akid(x509, akid) != X509_V_OK)
+	{
 		return IntermediateCA;
 	}
 	return RootCA;
