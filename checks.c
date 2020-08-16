@@ -146,7 +146,7 @@ int GetBit(uint32_t *val, int bit)
 #define SetInfo(bit) SetBit(info, bit)
 #define SetCertInfo(bit) SetBit(cert_info, bit)
 
-static X509 *LoadCert(unsigned char *data, size_t len, CertFormat format)
+X509 *GetCert(unsigned char *data, size_t len, CertFormat format)
 {
 	X509 *x509;
 	BIO *bio = BIO_new_mem_buf(data, len);
@@ -1642,33 +1642,50 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 	}
 }
 
+CertType GetType(X509 *x509)
+{
+	int ca = X509_check_ca(x509);
+	if (ca == 0)
+	{
+		return SubscriberCertificate;
+	}
+
+	if (X509_check_issued(x509, x509) != X509_V_OK)
+	{
+		return IntermediateCA;
+	}
+
+	int critical = -1;
+	AUTHORITY_KEYID *akid = X509_get_ext_d2i(x509, NID_authority_key_identifier, &critical, NULL);
+	if (akid == NULL && critical >= 0)
+	{
+		SetError(ERR_INVALID);
+		return IntermediateCA;
+	}
+	return RootCA;
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
 	X509_NAME *subject;
 	int ret;
 	X509 *x509;
-	int ca;
 	struct tm tm_before;
 	struct tm tm_after;
 
 	Clear();
 
-	x509 = LoadCert(cert_buffer, cert_len, format);
+	x509 = GetCert(cert_buffer, cert_len, format);
 	if (x509 == NULL)
 	{
 		SetError(ERR_INVALID);
 		return;
 	}
 
-	ca = X509_check_ca(x509);
-	if (ca > 0 && type == SubscriberCertificate)
+	if (type != GetType(x509))
 	{
-		SetWarning(WARN_CHECKED_AS_SUBSCRIBER);
-	}
-	else if (ca == 0 && type != SubscriberCertificate)
-	{
-		SetWarning(WARN_CHECKED_AS_CA);
+		SetWarning(WARN_CALLED_WITH_WRONG_TYPE);
 	}
 
 	ret = X509_get_version(x509);

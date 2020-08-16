@@ -103,20 +103,19 @@ typedef enum { PEM, DER } CertFormat;
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
 #define WARN_LONGER_39_MONTHS          1
-#define WARN_CHECKED_AS_SUBSCRIBER     2
-#define WARN_CHECKED_AS_CA             3
-#define WARN_CRL_RELATIVE              4
-#define WARN_NO_ISSUING_CERT_HTTP      5
-#define WARN_DUPLICATE_SAN             6
-#define WARN_EV_LONGER_12_MONTHS       7
-#define WARN_UNKNOWN_EKU               8
-#define WARN_RSA_EXP_RANGE             9
-#define WARN_POLICY_QUALIFIER_NOT_CPS 10
-#define WARN_EXPLICIT_TEXT_ENCODING   11
-#define WARN_NO_EKU                   12
-#define WARN_NO_CN                    13
-#define WARN_TLS_CLIENT_DNS           14
-#define WARN_KEY_USAGE_NOT_CRITICAL   15
+#define WARN_CALLED_WITH_WRONG_TYPE    2
+#define WARN_CRL_RELATIVE              3
+#define WARN_NO_ISSUING_CERT_HTTP      4
+#define WARN_DUPLICATE_SAN             5
+#define WARN_EV_LONGER_12_MONTHS       6
+#define WARN_UNKNOWN_EKU               7
+#define WARN_RSA_EXP_RANGE             8
+#define WARN_POLICY_QUALIFIER_NOT_CPS  9
+#define WARN_EXPLICIT_TEXT_ENCODING   10
+#define WARN_NO_EKU                   11
+#define WARN_NO_CN                    12
+#define WARN_TLS_CLIENT_DNS           13
+#define WARN_KEY_USAGE_NOT_CRITICAL   14
 #define MAX_WARN                      WARN_KEY_USAGE_NOT_CRITICAL
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
@@ -131,7 +130,12 @@ extern uint32_t errors[];
 extern uint32_t warnings[];
 extern uint32_t info[];
 
+struct x509_st;
+typedef struct x509_st X509;
+
 void check_init();
+X509 *GetCert(unsigned char *data, size_t len, CertFormat format);
+CertType GetType(X509 *x509);
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
 int GetBit(uint32_t *val, int bit);
 void check_finish();

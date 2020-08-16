@@ -22,6 +22,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <openssl/x509.h>
 #include "checks.h"
 #include "messages.h"
 
@@ -81,16 +82,23 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Unable to read certificate\n");
 		exit(1);
 	}
+	X509 *x509 = GetCert(buffer, buflen, PEM);
+	if (x509 == NULL)
+	{
+		printf("E: Unable to parse certificate\n");
+		return 1;
+	}
 
 	check_init();
 	
-	check(buffer, buflen, PEM, SubscriberCertificate);
+	check(buffer, buflen, PEM, GetType(x509));
 
 	char *m = get_messages();
 	printf("%s", m);
 	free(m);
 
 	free(buffer);
+	X509_free(x509);
 
 	check_finish();
 

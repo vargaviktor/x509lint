@@ -122,8 +122,7 @@ static const char *error_strings[] =
 static const char *warning_strings[] = {
 	"W: The name entry contains something that is not a PrintableString or UTF8String\n", /* WARN_NON_PRINTABLE_STRING */
 	"W: The certificate is valid for longer than 39 months\n", /* WARN_LONGER_39_MONTHS */
-	"W: CA certificate checked as if it was a subscriber certificate\n", /* WARN_CHECKED_AS_SUBSCRIBER */
-	"W: Subscriber certificate checked as if it was a CA certificate\n", /* WARN_CHECKED_AS_CA */
+	"W: Called with wrong certificate type\n", /* WARN_CALLED_WITH_WRONG_TYPE */
 	"W: CRL distribution point uses relative name\n", /* WARN_CRL_RELATIVE */
 	"W: No HTTP URL for issuing certificate\n", /* WARN_NO_ISSUING_CERT_HTTP */
 	"W: Duplicate SAN entry\n", /* WARN_DUPLICATE_SAN */
