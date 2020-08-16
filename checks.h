@@ -93,7 +93,12 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_TELETEX_WITH_ESCAPE               83
 #define ERR_POLICY_BR                         84
 #define ERR_RSA_MODULUS_NEGATIVE              85
-#define MAX_ERR                               ERR_RSA_MODULUS_NEGATIVE
+#define ERR_NO_KEY_USAGE                      86
+#define ERR_KEY_USAGE_EMPTY                   87
+#define ERR_KEY_USAGE_TOO_LONG                88
+#define ERR_KEY_USAGE_HAS_CERT_SIGN           89
+#define ERR_KEY_USAGE_NO_CERT_SIGN            90
+#define MAX_ERR                               ERR_KEY_USAGE_NO_CERT_SIGN
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -111,7 +116,8 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_NO_EKU                   12
 #define WARN_NO_CN                    13
 #define WARN_TLS_CLIENT_DNS           14
-#define MAX_WARN                      WARN_TLS_CLIENT_DNS
+#define WARN_KEY_USAGE_NOT_CRITICAL   15
+#define MAX_WARN                      WARN_KEY_USAGE_NOT_CRITICAL
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0

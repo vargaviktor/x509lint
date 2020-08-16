@@ -1344,6 +1344,65 @@ static void CheckDuplicateExtensions(X509 *x509)
 	sk_ASN1_OBJECT_free(stack);
 }
 
+static void CheckKU(X509 *x509, CertType type)
+{
+	int critical = -1;
+
+	ASN1_BIT_STRING *usage = X509_get_ext_d2i(x509, NID_key_usage, &critical, NULL);
+	if (usage == NULL)
+	{
+		if (critical >= 0)
+		{
+			/* Found but fails to parse */
+			SetError(ERR_INVALID);
+			return;
+		}
+		if (type != SubscriberCertificate)
+		{
+			SetError(ERR_NO_KEY_USAGE);
+		}
+		return;
+	}
+	if (!critical)
+	{
+		SetWarning(WARN_KEY_USAGE_NOT_CRITICAL);
+	}
+	if (usage->length == 0)
+	{
+		SetError(ERR_KEY_USAGE_EMPTY);
+	}
+	int bits = 0;
+	if (usage->length > 0)
+	{
+		bits = usage->data[0];
+	}
+	if (usage->length > 1)
+	{
+		bits |= (usage->data[1] << 8);
+		if (usage->data[1] == 0)
+		{
+			SetError(ERR_KEY_USAGE_TOO_LONG);
+		}
+	}
+	if (usage->length > 2)
+	{
+		SetError(ERR_KEY_USAGE_TOO_LONG);
+	}
+	if (bits == 0)
+	{
+		SetError(ERR_KEY_USAGE_EMPTY);
+	}
+	if (type == SubscriberCertificate && (bits & KU_KEY_CERT_SIGN) != 0)
+	{
+		SetError(ERR_KEY_USAGE_HAS_CERT_SIGN);
+	}
+	if (type != SubscriberCertificate && (bits & KU_KEY_CERT_SIGN) == 0)
+	{
+		SetError(ERR_KEY_USAGE_NO_CERT_SIGN);
+	}
+	ASN1_BIT_STRING_free(usage);
+}
+
 static void CheckEKU(X509 *x509, CertType type)
 {
 	int idx = -1;
@@ -1699,6 +1758,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_SUBJECT_COUNTRY);
 	}
 
+	CheckKU(x509, type);
 	CheckEKU(x509, type);
 	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);

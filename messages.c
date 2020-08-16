@@ -112,6 +112,11 @@ static const char *error_strings[] =
 	"E: Teletex string with an escape sequence\n", /* ERR_TELETEX_WITH_ESCAPE */
 	"E: Baseline Requirements policy present for non server authentication certificate\n", /* ERR_POLICY_BR */
 	"E: RSA modulus is negative\n", /* ERR_RSA_MODULUS_NEGATIVE */
+	"E: No key usage\n", /* ERR_NO_KEY_USAGE */
+	"E: Key usage is empty\n", /* ERR_KEY_USAGE_EMPTY */
+	"E: Key usage is too long\n", /* ERR_KEY_USAGE_TOO_LONG */
+	"E: Key usage has keyCertSign\n", /* ERR_KEY_USAGE_HAS_CERT_SIGN */
+	"E: Key usage doesn't have keyCertSign\n", /* ERR_KEY_USAGE_NO_CERT_SIGN */
 };
 
 static const char *warning_strings[] = {
@@ -130,6 +135,7 @@ static const char *warning_strings[] = {
 	"W: Subscriber certificate without Extended Key Usage\n", /* WARN_NO_EKU */
 	"W: No commonName\n", /* WARN_NO_CN */
 	"W: TLS client with DNS or IP address\n", /* WARN_TLS_CLIENT_DNS */
+	"W: Key usage not critical\n", /* WARN_KEY_USAGE_NOT_CRITICAL */
 };
 
 static const char *info_strings[] = {
