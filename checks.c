@@ -1653,29 +1653,28 @@ CertType GetType(X509 *x509)
 		SetError(ERR_INVALID);
 	}
 
-	if (ca == 0)
+	bool self_issued = X509_check_issued(x509, x509) == X509_V_OK;
+	bool self_signed = self_issued && (akid == NULL || X509_check_akid(x509, akid) == X509_V_OK);
+
+	if (!self_signed && akid == NULL)
 	{
-		if (akid == NULL)
-		{
-			SetError(ERR_AKID_MISSING);
-		}
+		SetError(ERR_AKID_MISSING);
+	}
+
+	AUTHORITY_KEYID_free(akid);
+
+	if (!ca)
+	{
 		return SubscriberCertificate;
 	}
-
-	if (X509_check_issued(x509, x509) != X509_V_OK)
-	{
-		if (akid == NULL)
-		{
-			SetError(ERR_AKID_MISSING);
-		}
-		return IntermediateCA;
-	}
-
-	if (akid != NULL && X509_check_akid(x509, akid) != X509_V_OK)
+	else if (!self_signed)
 	{
 		return IntermediateCA;
 	}
-	return RootCA;
+	else
+	{
+		return RootCA;
+	}
 }
 
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
