@@ -1151,6 +1151,7 @@ static void CheckCRL(X509 *x509)
 			break;
 		}
 
+		bool bHaveAllReasons = false;
 		for (int i = 0; i < sk_DIST_POINT_num(crls); i++)
 		{
 			DIST_POINT *dp = sk_DIST_POINT_value(crls, i);
@@ -1158,9 +1159,30 @@ static void CheckCRL(X509 *x509)
 			{
 				SetError(ERR_INVALID_CRL_DIST_POINT);
 			}
+			if (dp->CRLissuer != NULL)
+			{
+				if (sk_GENERAL_NAME_num(dp->CRLissuer) == 0)
+				{
+					SetError(ERR_INVALID_CRL_DIST_POINT);
+				}
+				for (int j = 0; j < sk_GENERAL_NAME_num(dp->CRLissuer); j++)
+				{
+					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, j);
+					int type;
+					GENERAL_NAME_get0_value(gen, &type);
+					if (type != GEN_DIRNAME)
+					{
+						SetError(ERR_INVALID_CRL_DIST_POINT);
+					}
+				}
+			}
 			if (dp->distpoint != NULL && dp->distpoint->type == 0)
 			{
 				/* full name */
+				if (sk_GENERAL_NAME_num(dp->distpoint->name.fullname) == 0)
+				{
+					SetError(ERR_INVALID_CRL_DIST_POINT);
+				}
 				for (int j = 0; j < sk_GENERAL_NAME_num(dp->distpoint->name.fullname); j++)
 				{
 					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, j);
@@ -1181,7 +1203,19 @@ static void CheckCRL(X509 *x509)
 			{
 				/* relative name */
 				SetWarning(WARN_CRL_RELATIVE);
+				if (dp->CRLissuer != NULL && sk_GENERAL_NAME_num(dp->CRLissuer) != 1)
+				{
+					SetError(ERR_INVALID_CRL_DIST_POINT);
+				}
 			}
+			if (dp->reasons == NULL || dp->dp_reasons == CRLDP_ALL_REASONS)
+			{
+				bHaveAllReasons = true;
+			}
+		}
+		if (!bHaveAllReasons)
+		{
+			SetError(ERR_NOT_ALL_CRL_REASONS);
 		}
 		sk_DIST_POINT_pop_free(crls, DIST_POINT_free);
 	}

@@ -118,6 +118,7 @@ static const char *error_strings[] =
 	"E: Key usage has keyCertSign\n", /* ERR_KEY_USAGE_HAS_CERT_SIGN */
 	"E: Key usage doesn't have keyCertSign\n", /* ERR_KEY_USAGE_NO_CERT_SIGN */
 	"E: AKID missing\n", /* ERR_AKID_MISSING */
+	"E: No CRL distpoint with all reasons\n", /* ERR_NOT_ALL_CRL_REASONS */
 };
 
 static const char *warning_strings[] = {
