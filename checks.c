@@ -1434,7 +1434,15 @@ static void CheckKU(X509 *x509, CertType type)
 	}
 	if (critical == 0)
 	{
-		SetWarning(WARN_KEY_USAGE_NOT_CRITICAL);
+		if (type != SubscriberCertificate)
+		{
+			/* The BRs make this required */
+			SetError(ERR_KEY_USAGE_NOT_CRITICAL);
+		}
+		else
+		{
+			SetWarning(WARN_KEY_USAGE_NOT_CRITICAL);
+		}
 	}
 	if (usage->length == 0)
 	{
