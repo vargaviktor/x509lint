@@ -2,6 +2,7 @@
 #define _CHECKS_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef enum { SubscriberCertificate, IntermediateCA, RootCA } CertType;
 typedef enum { PEM, DER } CertFormat;
@@ -152,7 +153,7 @@ void check_init();
 X509 *GetCert(unsigned char *data, size_t len, CertFormat format);
 CertType GetType(X509 *x509);
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
-int GetBit(uint32_t *val, int bit);
+bool GetBit(uint32_t *val, int bit);
 void check_finish();
 
 
