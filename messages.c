@@ -133,6 +133,7 @@ static const char *error_strings[] =
 	"E: Empty subject\n", /* ERR_EMPTY_SUBJECT */
 	"E: SAN is not critical\n", /* ERR_SAN_NOT_CRITICAL */
 	"E: Key usage not critical\n", /* ERR_KEY_USAGE_NOT_CRITICAL */
+	"E: Empty SAN\n", /* ERR_SAN_EMPTY */
 };
 
 static const char *warning_strings[] = {

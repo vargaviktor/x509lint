@@ -1029,6 +1029,10 @@ static void CheckSAN(X509 *x509, CertType type)
 		{
 			SetError(ERR_SAN_NOT_CRITICAL);
 		}
+		if (sk_GENERAL_NAME_num(names) == 0)
+		{
+			SetError(ERR_SAN_EMPTY);
+		}
 		for (int i = 0; i < sk_GENERAL_NAME_num(names); i++)
 		{
 			GENERAL_NAME *name = sk_GENERAL_NAME_value(names, i);
