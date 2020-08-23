@@ -99,7 +99,7 @@ static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 static ASN1_OBJECT *obj_IntelAMTvProEKU;
 
-uint32_t errors[3];
+uint32_t errors[4];
 uint32_t warnings[1];
 uint32_t info[1];
 uint32_t cert_info[1];
@@ -1157,13 +1157,13 @@ static void CheckCRL(X509 *x509)
 			DIST_POINT *dp = sk_DIST_POINT_value(crls, i);
 			if (dp->distpoint == NULL && dp->CRLissuer == NULL)
 			{
-				SetError(ERR_INVALID_CRL_DIST_POINT);
+				SetError(ERR_CRL_DIST_POINT_WITHOUT_DISTPOINT_OR_ISSUER);
 			}
 			if (dp->CRLissuer != NULL)
 			{
 				if (sk_GENERAL_NAME_num(dp->CRLissuer) == 0)
 				{
-					SetError(ERR_INVALID_CRL_DIST_POINT);
+					SetError(ERR_CRL_ISSUER_EMPTY);
 				}
 				for (int j = 0; j < sk_GENERAL_NAME_num(dp->CRLissuer); j++)
 				{
@@ -1172,7 +1172,7 @@ static void CheckCRL(X509 *x509)
 					GENERAL_NAME_get0_value(gen, &type);
 					if (type != GEN_DIRNAME)
 					{
-						SetError(ERR_INVALID_CRL_DIST_POINT);
+						SetError(ERR_CRL_ISSUER_NOT_DIRNAME);
 					}
 				}
 			}
@@ -1181,7 +1181,7 @@ static void CheckCRL(X509 *x509)
 				/* full name */
 				if (sk_GENERAL_NAME_num(dp->distpoint->name.fullname) == 0)
 				{
-					SetError(ERR_INVALID_CRL_DIST_POINT);
+					SetError(ERR_CRL_DISTPOINT_EMPTY);
 				}
 				for (int j = 0; j < sk_GENERAL_NAME_num(dp->distpoint->name.fullname); j++)
 				{
@@ -1205,7 +1205,7 @@ static void CheckCRL(X509 *x509)
 				SetWarning(WARN_CRL_RELATIVE);
 				if (dp->CRLissuer != NULL && sk_GENERAL_NAME_num(dp->CRLissuer) != 1)
 				{
-					SetError(ERR_INVALID_CRL_DIST_POINT);
+					SetError(ERR_RELATIVE_CRL_ISSUER_COUNT);
 				}
 			}
 			if (dp->reasons == NULL || dp->dp_reasons == CRLDP_ALL_REASONS)

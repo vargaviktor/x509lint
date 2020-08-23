@@ -47,7 +47,7 @@ static const char *error_strings[] =
 	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
 	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
 	"E: Duplicate extension\n", /* ERR_DUPLICATE_EXTENSION */
-	"E: Invalid CRL distribution point\n", /* ERR_INVALID_CRL_DIST_POINT */
+	"E: CRL DistributionPoint without distributionPoint or cRLIssuer\n", /* ERR_CRL_DIST_POINT_WITHOUT_DISTPOINT_OR_ISSUER */
 	"E: Invalid display text type\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
 	"E: Invalid display text length\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
 	"E: Invalid user notice type\n", /* ERR_INVALID_TYPE_USER_NOTICE */
@@ -119,6 +119,10 @@ static const char *error_strings[] =
 	"E: Key usage doesn't have keyCertSign\n", /* ERR_KEY_USAGE_NO_CERT_SIGN */
 	"E: AKID missing\n", /* ERR_AKID_MISSING */
 	"E: No CRL distpoint with all reasons\n", /* ERR_NOT_ALL_CRL_REASONS */
+	"E: CRL DistributionPoint's cRLIssuer empty\n", /* ERR_CRL_ISSUER_EMPTY */
+	"E: CRL DistributionPoint's cRLIssuer not a directoryName\n", /* ERR_CRL_ISSUER_NOT_DIRNAME */
+	"E: CRL DistributionPoint's distributionPoint empty\n", /* ERR_CRL_DISTPOINT_EMPTY */
+	"E: CRL DistributionPoint's cRLIssuer is relative, but has more than 1 entry\n", /* ERR_RELATIVE_CRL_ISSUER_COUNT */
 };
 
 static const char *warning_strings[] = {

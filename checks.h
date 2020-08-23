@@ -28,7 +28,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_COUNTRY_SIZE                      18
 #define ERR_INVALID_TIME_FORMAT               19
 #define ERR_DUPLICATE_EXTENSION               20
-#define ERR_INVALID_CRL_DIST_POINT            21
+#define ERR_CRL_DIST_POINT_WITHOUT_DISTPOINT_OR_ISSUER 21
 #define ERR_INVALID_DISPLAY_TEXT_TYPE         22
 #define ERR_INVALID_DISPLAY_TEXT_LENGTH       23
 #define ERR_INVALID_TYPE_USER_NOTICE          24
@@ -100,6 +100,10 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_KEY_USAGE_NO_CERT_SIGN            90
 #define ERR_AKID_MISSING                      91
 #define ERR_NOT_ALL_CRL_REASONS               92
+#define ERR_CRL_ISSUER_EMPTY                  93
+#define ERR_CRL_ISSUER_NOT_DIRNAME            94
+#define ERR_CRL_DISTPOINT_EMPTY               95
+#define ERR_RELATIVE_CRL_ISSUER_COUNT         96
 #define MAX_ERR                               ERR_NOT_ALL_CRL_REASONS
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
