@@ -1553,6 +1553,51 @@ static void CheckEKU(X509 *x509, CertType type)
 	while (1);
 }
 
+static void CheckBasicConstraints(X509 *x509, CertType type)
+{
+	int critical = -1;
+
+	BASIC_CONSTRAINTS *bc = X509_get_ext_d2i(x509, NID_basic_constraints, &critical, NULL);
+
+	if (bc == NULL)
+	{
+		if (critical >= 0)
+		{
+			/* Found but fails to parse */
+			SetError(ERR_INVALID);
+			return;
+		}
+		if (type != SubscriberCertificate)
+		{
+			SetError(ERR_NO_BASIC_CONSTRAINTS);
+		}
+		return;
+	}
+	if (type != SubscriberCertificate)
+	{
+		if (critical == 0)
+		{
+			SetError(ERR_BASIC_CONSTRAINTS_NOT_CRITICAL);
+		}
+		if (bc->ca == 0)
+		{
+			/* X509_check_ca() supports various old methods to detect a CA. */
+			SetError(ERR_CA_CERT_NOT_CA);
+		}
+	}
+	if (bc->pathlen != NULL)
+	{
+		if (bc->pathlen->type == V_ASN1_NEG_INTEGER)
+		{
+			SetError(ERR_BASIC_CONSTRAINTS_NEG_PATHLEN);
+		}
+		if (bc->ca == 0)
+		{
+			SetError(ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN);
+		}
+	}
+}
+
 static void CheckASN1_integer(ASN1_INTEGER *integer)
 {
 #if 0
@@ -1862,6 +1907,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckEKU(x509, type);
 	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);
+	CheckBasicConstraints(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2a */
 	if (IsNameObjPresent(subject, obj_commonName))

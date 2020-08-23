@@ -124,6 +124,11 @@ static const char *error_strings[] =
 	"E: CRL DistributionPoint's distributionPoint empty\n", /* ERR_CRL_DISTPOINT_EMPTY */
 	"E: CRL DistributionPoint's cRLIssuer is relative, but has more than 1 entry\n", /* ERR_RELATIVE_CRL_ISSUER_COUNT */
 	"E: Invalid CRL reason\n", /* ERR_INVALID_CRL_REASON */
+	"E: CA certificate without Basic Constraints\n", /* ERR_NO_BASIC_CONSTRAINTS */
+	"E: CA certificate with non-critical Basic Constraints\n", /* ERR_BASIC_CONSTRAINTS_NOT_CRITICAL */
+	"E: CA certificate with CA:false\n", /* ERR_CA_CERT_NOT_CA */
+	"E: Basic Constraints with negative length\n", /* ERR_BASIC_CONSTRAINTS_NEG_PATHLEN */
+	"E: Basic Constraints with pathlen for non-CA\n", /* ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN */
 };
 
 static const char *warning_strings[] = {

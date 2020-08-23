@@ -105,7 +105,12 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_CRL_DISTPOINT_EMPTY               95
 #define ERR_RELATIVE_CRL_ISSUER_COUNT         96
 #define ERR_INVALID_CRL_REASON                97
-#define MAX_ERR                               ERR_INVALID_CRL_REASON
+#define ERR_NO_BASIC_CONSTRAINTS              98
+#define ERR_BASIC_CONSTRAINTS_NOT_CRITICAL    99
+#define ERR_CA_CERT_NOT_CA                   100
+#define ERR_BASIC_CONSTRAINTS_NEG_PATHLEN    101
+#define ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN  102
+#define MAX_ERR                              ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
