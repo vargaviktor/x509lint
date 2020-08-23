@@ -123,6 +123,7 @@ static const char *error_strings[] =
 	"E: CRL DistributionPoint's cRLIssuer not a directoryName\n", /* ERR_CRL_ISSUER_NOT_DIRNAME */
 	"E: CRL DistributionPoint's distributionPoint empty\n", /* ERR_CRL_DISTPOINT_EMPTY */
 	"E: CRL DistributionPoint's cRLIssuer is relative, but has more than 1 entry\n", /* ERR_RELATIVE_CRL_ISSUER_COUNT */
+	"E: Invalid CRL reason\n", /* ERR_INVALID_CRL_REASON */
 };
 
 static const char *warning_strings[] = {

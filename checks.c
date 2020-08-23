@@ -1208,9 +1208,33 @@ static void CheckCRL(X509 *x509)
 					SetError(ERR_RELATIVE_CRL_ISSUER_COUNT);
 				}
 			}
-			if (dp->reasons == NULL || dp->dp_reasons == CRLDP_ALL_REASONS)
+			if (dp->reasons == NULL)
 			{
 				bHaveAllReasons = true;
+			}
+			else
+			{
+				int reason = 0;
+				if (dp->reasons->length > 0)
+				{
+					reason = dp->reasons->data[0];
+				}
+				if (dp->reasons->length > 1)
+				{
+					reason |= (dp->reasons->data[1] << 8);
+				}
+				if (dp->reasons->length > 2)
+				{
+					SetError(ERR_INVALID_CRL_REASON);
+				}
+				if ((reason & CRLDP_ALL_REASONS) != reason)
+				{
+					SetError(ERR_INVALID_CRL_REASON);
+				}
+				if (reason == CRLDP_ALL_REASONS)
+				{
+					bHaveAllReasons = true;
+				}
 			}
 		}
 		if (!bHaveAllReasons)

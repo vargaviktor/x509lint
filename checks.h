@@ -104,7 +104,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_CRL_ISSUER_NOT_DIRNAME            94
 #define ERR_CRL_DISTPOINT_EMPTY               95
 #define ERR_RELATIVE_CRL_ISSUER_COUNT         96
-#define MAX_ERR                               ERR_NOT_ALL_CRL_REASONS
+#define ERR_INVALID_CRL_REASON                97
+#define MAX_ERR                               ERR_INVALID_CRL_REASON
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
