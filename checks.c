@@ -117,6 +117,8 @@ uint32_t cert_info[1];
 #define CERT_INFO_OCSP_SIGN     10
 #define CERT_INFO_NO_EKU        11
 #define CERT_INFO_AMTVPRO_EKU   12
+#define CERT_INFO_KU_CRL_SIGN   13
+#define CERT_INFO_HAS_SAN       14
 
 const int primes[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
@@ -145,6 +147,7 @@ bool GetBit(uint32_t *val, int bit)
 #define SetWarning(bit) SetBit(warnings, bit)
 #define SetInfo(bit) SetBit(info, bit)
 #define SetCertInfo(bit) SetBit(cert_info, bit)
+#define GetCertInfo(bit) GetBit(cert_info, bit)
 
 X509 *GetCert(unsigned char *data, size_t len, CertFormat format)
 {
@@ -1022,6 +1025,10 @@ static void CheckSAN(X509 *x509, CertType type)
 			/* Not found */
 			break;
 		}
+		if (X509_NAME_entry_count(subject) == 0 && critical == 0)
+		{
+			SetError(ERR_SAN_NOT_CRITICAL);
+		}
 		for (int i = 0; i < sk_GENERAL_NAME_num(names); i++)
 		{
 			GENERAL_NAME *name = sk_GENERAL_NAME_value(names, i);
@@ -1122,6 +1129,10 @@ static void CheckSAN(X509 *x509, CertType type)
 	if (bSanFound && !bSanName)
 	{
 		SetError(ERR_SAN_WITHOUT_NAME);
+	}
+	if (bSanFound)
+	{
+		SetCertInfo(CERT_INFO_HAS_SAN);
 	}
 	if (commonName != NULL && bSanFound && !bCommonNameFound)
 	{
@@ -1457,6 +1468,10 @@ static void CheckKU(X509 *x509, CertType type)
 	if (type != SubscriberCertificate && (bits & KU_KEY_CERT_SIGN) == 0)
 	{
 		SetError(ERR_KEY_USAGE_NO_CERT_SIGN);
+	}
+	if ((bits & KU_CRL_SIGN) != 0)
+	{
+		SetCertInfo(CERT_INFO_KU_CRL_SIGN);
 	}
 	ASN1_BIT_STRING_free(usage);
 }
@@ -1830,6 +1845,10 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		return;
 	}
 	CheckDN(issuer);
+	if (X509_NAME_entry_count(issuer) == 0)
+	{
+		SetError(ERR_EMPTY_ISSUER);
+	}
 
 	CheckSerial(x509);
 	CheckTime(x509, &tm_before, &tm_after, type);
@@ -1925,6 +1944,14 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckCRL(x509);
 	CheckAIA(x509, type);
 	CheckPublicKey(x509, tm_after);
+
+	if ((type != SubscriberCertificate
+		|| GetCertInfo(CERT_INFO_KU_CRL_SIGN)
+		|| !GetCertInfo(CERT_INFO_HAS_SAN)
+		) && X509_NAME_entry_count(subject) == 0)
+	{
+		SetError(ERR_EMPTY_SUBJECT);
+	}
 
 	X509_free(x509);
 }

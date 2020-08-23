@@ -129,6 +129,9 @@ static const char *error_strings[] =
 	"E: CA certificate with CA:false\n", /* ERR_CA_CERT_NOT_CA */
 	"E: Basic Constraints with negative length\n", /* ERR_BASIC_CONSTRAINTS_NEG_PATHLEN */
 	"E: Basic Constraints with pathlen for non-CA\n", /* ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN */
+	"E: Empty issuer\n", /* ERR_EMPTY_ISSUER */
+	"E: Empty subject\n", /* ERR_EMPTY_SUBJECT */
+	"E: SAN is not critical\n", /* ERR_SAN_NOT_CRITICAL */
 };
 
 static const char *warning_strings[] = {
