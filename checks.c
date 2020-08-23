@@ -1270,7 +1270,7 @@ static void CheckAIA(X509 *x509, CertType type)
 			/* Not found */
 			break;
 		}
-		if (critical)
+		if (critical != 0)
 		{
 			SetError(ERR_AIA_CRITICAL);
 		}
@@ -1421,7 +1421,7 @@ static void CheckKU(X509 *x509, CertType type)
 		}
 		return;
 	}
-	if (!critical)
+	if (critical == 0)
 	{
 		SetWarning(WARN_KEY_USAGE_NOT_CRITICAL);
 	}
