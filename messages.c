@@ -136,6 +136,8 @@ static const char *error_strings[] =
 	"E: Empty SAN\n", /* ERR_SAN_EMPTY */
 	"E: Signature algorithm mismatch\n", /* ERR_SIG_ALG_MISMATCH */
 	"E: AKID is critical\n", /* ERR_AKID_CRITICAL */
+	"E: SKID missing\n", /* ERR_SKID_MISSING */
+	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
 };
 
 static const char *warning_strings[] = {

@@ -1773,6 +1773,26 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 	}
 }
 
+static void CheckSKID(X509 *x509, CertType type)
+{
+	int critical = -1;
+
+	ASN1_OCTET_STRING *skid = X509_get_ext_d2i(x509, NID_subject_key_identifier, &critical, NULL);
+	if (skid == NULL && critical >= 0)
+	{
+		SetError(ERR_INVALID);
+	}
+	if (skid == NULL && type != SubscriberCertificate)
+	{
+		SetError(ERR_SKID_MISSING);
+	}
+	if (skid != NULL && critical > 0)
+	{
+		SetError(ERR_SKID_CRITICAL);
+	}
+	ASN1_OCTET_STRING_free(skid);
+}
+
 CertType GetType(X509 *x509)
 {
 	int ca = X509_check_ca(x509);
@@ -1944,6 +1964,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);
 	CheckBasicConstraints(x509, type);
+	CheckSKID(x509, type);
 
 	/* Deprecated in CAB base 7.1.4.2.2a */
 	if (IsNameObjPresent(subject, obj_commonName))
