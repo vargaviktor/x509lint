@@ -1623,6 +1623,7 @@ static void CheckBasicConstraints(X509 *x509, CertType type)
 			SetError(ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN);
 		}
 	}
+	BASIC_CONSTRAINTS_free(bc);
 }
 
 static void CheckASN1_integer(ASN1_INTEGER *integer)
