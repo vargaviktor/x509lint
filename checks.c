@@ -1182,7 +1182,7 @@ static void CheckCRL(X509 *x509)
 				}
 				for (int j = 0; j < sk_GENERAL_NAME_num(dp->CRLissuer); j++)
 				{
-					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->distpoint->name.fullname, j);
+					GENERAL_NAME *gen = sk_GENERAL_NAME_value(dp->CRLissuer, j);
 					int type;
 					GENERAL_NAME_get0_value(gen, &type);
 					if (type != GEN_DIRNAME)
