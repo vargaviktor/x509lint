@@ -1965,6 +1965,13 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_EMPTY_SUBJECT);
 	}
 
+	const X509_ALGOR *sig_alg;
+	X509_get0_signature(NULL, &sig_alg, x509);
+	if (X509_ALGOR_cmp(sig_alg, X509_get0_tbs_sigalg(x509)) != 0)
+	{
+		SetError(ERR_SIG_ALG_MISMATCH);
+	}
+
 	X509_free(x509);
 }
 
