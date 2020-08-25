@@ -138,6 +138,7 @@ static const char *error_strings[] =
 	"E: AKID is critical\n", /* ERR_AKID_CRITICAL */
 	"E: SKID missing\n", /* ERR_SKID_MISSING */
 	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
+	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
 };
 
 static const char *warning_strings[] = {

@@ -1991,11 +1991,18 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_EMPTY_SUBJECT);
 	}
 
-	const X509_ALGOR *sig_alg;
+	const X509_ALGOR *sig_alg, *tbs_sig_alg;
 	X509_get0_signature(NULL, &sig_alg, x509);
-	if (X509_ALGOR_cmp(sig_alg, X509_get0_tbs_sigalg(x509)) != 0)
+	tbs_sig_alg = X509_get0_tbs_sigalg(x509);
+	if (X509_ALGOR_cmp(sig_alg, tbs_sig_alg) != 0)
 	{
 		SetError(ERR_SIG_ALG_MISMATCH);
+	}
+	if ((sig_alg->parameter != NULL && sig_alg->parameter->type != V_ASN1_NULL)
+		|| (tbs_sig_alg->parameter != NULL && tbs_sig_alg->parameter->type != V_ASN1_NULL))
+	{
+		/* I don't know any type that needs a parameter. */
+		SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
 	}
 
 	X509_free(x509);
