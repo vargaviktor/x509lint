@@ -231,6 +231,14 @@ static void CheckValidURL(const unsigned char *s, int n)
 	/* TODO: Check the rest of URL, like starting with "http://" */
 }
 
+static void CheckBitString(ASN1_BIT_STRING *s)
+{
+	if (s->length > 0 && s->data[s->length-1] == 0)
+	{
+		SetError(ERR_BIT_STRING_LEADING_0);
+	}
+}
+
 /*
  * Check that the string contains printable characters.
  * The input is in internal UCS-4 notation.
@@ -1230,6 +1238,8 @@ static void CheckCRL(X509 *x509)
 			else
 			{
 				int reason = 0;
+
+				CheckBitString(dp->reasons);
 				if (dp->reasons->length > 0)
 				{
 					reason = dp->reasons->data[0];
@@ -1452,6 +1462,7 @@ static void CheckKU(X509 *x509, CertType type)
 	{
 		SetError(ERR_KEY_USAGE_EMPTY);
 	}
+	CheckBitString(usage);
 	int bits = 0;
 	if (usage->length > 0)
 	{
@@ -1460,10 +1471,6 @@ static void CheckKU(X509 *x509, CertType type)
 	if (usage->length > 1)
 	{
 		bits |= (usage->data[1] << 8);
-		if (usage->data[1] == 0)
-		{
-			SetError(ERR_KEY_USAGE_TOO_LONG);
-		}
 	}
 	if (usage->length > 2)
 	{

@@ -121,7 +121,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_SKID_MISSING                     110
 #define ERR_SKID_CRITICAL                    111
 #define ERR_SIG_ALG_PARAMETER_NOT_NULL       112
-#define MAX_ERR                              ERR_SIG_ALG_PARAMETER_NOT_NULL
+#define ERR_BIT_STRING_LEADING_0             113
+#define MAX_ERR                              ERR_BIT_STRING_LEADING_0
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0

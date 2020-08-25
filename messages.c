@@ -139,6 +139,7 @@ static const char *error_strings[] =
 	"E: SKID missing\n", /* ERR_SKID_MISSING */
 	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
 	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Bit string with leading 0\n", /* ERR_BIT_STRING_LEADING_0 */
 };
 
 static const char *warning_strings[] = {
