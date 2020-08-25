@@ -138,8 +138,11 @@ static const char *error_strings[] =
 	"E: AKID is critical\n", /* ERR_AKID_CRITICAL */
 	"E: SKID missing\n", /* ERR_SKID_MISSING */
 	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
-	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Signature algorithm parameter missing\n", /* ERR_SIG_ALG_PARAMETER_MISSING */
 	"E: Bit string with leading 0\n", /* ERR_BIT_STRING_LEADING_0 */
+	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Unkonwn signature algorithm\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
+	"E: Signature algorithm parameter present\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
 };
 
 static const char *warning_strings[] = {

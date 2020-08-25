@@ -1839,6 +1839,53 @@ CertType GetType(X509 *x509)
 	}
 }
 
+static void CheckSigAlg(X509 *x509)
+{
+	const X509_ALGOR *sig_alg, *tbs_sig_alg;
+	X509_get0_signature(NULL, &sig_alg, x509);
+	tbs_sig_alg = X509_get0_tbs_sigalg(x509);
+	if (X509_ALGOR_cmp(sig_alg, tbs_sig_alg) != 0)
+	{
+		SetError(ERR_SIG_ALG_MISMATCH);
+	}
+	int sig_nid = OBJ_obj2nid(sig_alg->algorithm);
+	if (sig_nid == NID_undef)
+	{
+		SetError(ERR_UNKNOWN_SIGNATURE_ALGORITHM);
+		return;
+	}
+	int pkey_nid;
+	if (OBJ_find_sigid_algs(sig_nid, NULL, &pkey_nid) == 0)
+	{
+		SetError(ERR_UNKNOWN_SIGNATURE_ALGORITHM);
+		return;
+	}
+	if (pkey_nid == NID_dsa || pkey_nid == NID_dsa_2 || pkey_nid == NID_ED25519
+	   || pkey_nid == NID_ED448 || pkey_nid == NID_X9_62_id_ecPublicKey
+	   || pkey_nid == NID_id_GostR3411_94 || pkey_nid == NID_id_GostR3410_2001)
+	{
+		if (sig_alg->parameter != NULL || tbs_sig_alg->parameter != NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_PRESENT);
+		}
+	}
+	else if (pkey_nid == NID_rsaEncryption)
+	{
+		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+		}
+		else if((sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL))
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+		}
+	}
+	else
+	{
+		SetError(ERR_UNKNOWN_SIGNATURE_ALGORITHM);
+	}
+}
+
 void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
@@ -1998,19 +2045,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetError(ERR_EMPTY_SUBJECT);
 	}
 
-	const X509_ALGOR *sig_alg, *tbs_sig_alg;
-	X509_get0_signature(NULL, &sig_alg, x509);
-	tbs_sig_alg = X509_get0_tbs_sigalg(x509);
-	if (X509_ALGOR_cmp(sig_alg, tbs_sig_alg) != 0)
-	{
-		SetError(ERR_SIG_ALG_MISMATCH);
-	}
-	if ((sig_alg->parameter != NULL && sig_alg->parameter->type != V_ASN1_NULL)
-		|| (tbs_sig_alg->parameter != NULL && tbs_sig_alg->parameter->type != V_ASN1_NULL))
-	{
-		/* I don't know any type that needs a parameter. */
-		SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
-	}
+	CheckSigAlg(x509);
 
 	X509_free(x509);
 }
