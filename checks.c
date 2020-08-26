@@ -1472,6 +1472,10 @@ static void CheckKU(X509 *x509, CertType type)
 	{
 		bits |= (usage->data[1] << 8);
 	}
+	if ((bits & 0x80FF) != bits)
+	{
+		SetError(ERR_KEY_USAGE_UNKNOWN_BIT);
+	}
 	if (usage->length > 2)
 	{
 		SetError(ERR_KEY_USAGE_TOO_LONG);
