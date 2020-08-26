@@ -1769,7 +1769,7 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		EC_KEY_free(ec_key);
 	}
-	else
+	else if (EVP_PKEY_id(pkey) != EVP_PKEY_ED25519 && EVP_PKEY_id(pkey) != EVP_PKEY_ED448)
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
 	}
