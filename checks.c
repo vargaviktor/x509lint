@@ -1764,6 +1764,28 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		{
 			SetError(ERR_EC_NON_ALLOWED_CURVE);
 		}
+
+		X509_PUBKEY *pubkey = X509_get_X509_PUBKEY(x509);
+		const unsigned char *k;
+		int pklen;
+		X509_ALGOR *a;
+		X509_PUBKEY_get0_param(NULL, &k, &pklen, &a, pubkey);
+
+		int pkey_nid = OBJ_obj2nid(a->algorithm);
+		if (pkey_nid != NID_X9_62_id_ecPublicKey)
+		{
+			/* How did we get here? */
+			SetError(ERR_INVALID);
+		}
+		if (a->parameter == NULL)
+		{
+			SetError(ERR_INVALID);
+		}
+		if (a->parameter != NULL && a->parameter->type != V_ASN1_OBJECT)
+		{
+			SetError(ERR_NOT_NAMED_CURVE);
+		}
+
 		EC_POINT_free(result);
 		BN_free(order);
 		BN_CTX_free(ctx);

@@ -143,6 +143,7 @@ static const char *error_strings[] =
 	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
 	"E: Unkonwn signature algorithm\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
 	"E: Signature algorithm parameter present\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
+	"E: Not using a named curve\n", /* ERR_NOT_NAMED_CURVE */
 };
 
 static const char *warning_strings[] = {

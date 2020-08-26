@@ -125,7 +125,8 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_SIG_ALG_PARAMETER_NOT_NULL       114
 #define ERR_UNKNOWN_SIGNATURE_ALGORITHM      115
 #define ERR_SIG_ALG_PARAMETER_PRESENT        116
-#define MAX_ERR                              ERR_SIG_ALG_PARAMETER_PRESENT
+#define ERR_NOT_NAMED_CURVE                  117
+#define MAX_ERR                              ERR_NOT_NAMED_CURVE
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
