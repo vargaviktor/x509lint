@@ -119,6 +119,7 @@ uint32_t cert_info[1];
 #define CERT_INFO_AMTVPRO_EKU   12
 #define CERT_INFO_KU_CRL_SIGN   13
 #define CERT_INFO_HAS_SAN       14
+#define CERT_INFO_KU_CERT_SIGN  15
 
 const int primes[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
@@ -1496,6 +1497,10 @@ static void CheckKU(X509 *x509, CertType type)
 	{
 		SetCertInfo(CERT_INFO_KU_CRL_SIGN);
 	}
+	if ((bits & KU_KEY_CERT_SIGN) != 0)
+	{
+		SetCertInfo(CERT_INFO_KU_CERT_SIGN);
+	}
 	ASN1_BIT_STRING_free(usage);
 }
 
@@ -1632,6 +1637,10 @@ static void CheckBasicConstraints(X509 *x509, CertType type)
 		if (bc->ca == 0)
 		{
 			SetError(ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN);
+		}
+		if (!GetCertInfo(CERT_INFO_KU_CERT_SIGN))
+		{
+			SetError(ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN);
 		}
 	}
 	BASIC_CONSTRAINTS_free(bc);

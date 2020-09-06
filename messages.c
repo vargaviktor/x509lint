@@ -145,6 +145,7 @@ static const char *error_strings[] =
 	"E: Signature algorithm parameter present\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
 	"E: Not using a named curve\n", /* ERR_NOT_NAMED_CURVE */
 	"E: Key usage with unknown bit\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
+	"E: Basic Constraints with pathlen but key usage without cert sign\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
 };
 
 static const char *warning_strings[] = {
