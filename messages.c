@@ -116,7 +116,6 @@ static const char *error_strings[] =
 	"E: Key usage is empty\n", /* ERR_KEY_USAGE_EMPTY */
 	"E: Key usage is too long\n", /* ERR_KEY_USAGE_TOO_LONG */
 	"E: Key usage has keyCertSign\n", /* ERR_KEY_USAGE_HAS_CERT_SIGN */
-	"E: Key usage doesn't have keyCertSign\n", /* ERR_KEY_USAGE_NO_CERT_SIGN */
 	"E: AKID missing\n", /* ERR_AKID_MISSING */
 	"E: No CRL distpoint with all reasons\n", /* ERR_NOT_ALL_CRL_REASONS */
 	"E: CRL DistributionPoint's cRLIssuer empty\n", /* ERR_CRL_ISSUER_EMPTY */
@@ -165,6 +164,7 @@ static const char *warning_strings[] = {
 	"W: No commonName\n", /* WARN_NO_CN */
 	"W: TLS client with DNS or IP address\n", /* WARN_TLS_CLIENT_DNS */
 	"W: Key usage not critical\n", /* WARN_KEY_USAGE_NOT_CRITICAL */
+	"W: Key usage doesn't have keyCertSign or cRLSign\n", /* WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN */
 };
 
 static const char *info_strings[] = {

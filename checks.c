@@ -1489,9 +1489,9 @@ static void CheckKU(X509 *x509, CertType type)
 	{
 		SetError(ERR_KEY_USAGE_HAS_CERT_SIGN);
 	}
-	if (type != SubscriberCertificate && (bits & KU_KEY_CERT_SIGN) == 0)
+	if (type != SubscriberCertificate && (bits & (KU_KEY_CERT_SIGN|KU_CRL_SIGN)) == 0)
 	{
-		SetError(ERR_KEY_USAGE_NO_CERT_SIGN);
+		SetWarning(WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN);
 	}
 	if ((bits & KU_CRL_SIGN) != 0)
 	{
