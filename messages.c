@@ -146,6 +146,7 @@ static const char *error_strings[] =
 	"E: Not using a named curve\n", /* ERR_NOT_NAMED_CURVE */
 	"E: Key usage with unknown bit\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
 	"E: Basic Constraints with pathlen but key usage without cert sign\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
+	"E: AKID without a key identifier\n", /* ERR_AKID_WITHOUT_KEY_ID */
 };
 
 static const char *warning_strings[] = {

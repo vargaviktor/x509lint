@@ -1857,6 +1857,10 @@ CertType GetType(X509 *x509)
 	{
 		SetError(ERR_AKID_CRITICAL);
 	}
+	if (akid != NULL && akid->keyid == NULL)
+	{
+		SetError(ERR_AKID_WITHOUT_KEY_ID);
+	}
 
 	AUTHORITY_KEYID_free(akid);
 
