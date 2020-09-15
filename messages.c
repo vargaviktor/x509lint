@@ -146,6 +146,8 @@ static const char *error_strings[] =
 	"E: Key usage with unknown bit\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
 	"E: Basic Constraints with pathlen but key usage without cert sign\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
 	"E: AKID without a key identifier\n", /* ERR_AKID_WITHOUT_KEY_ID */
+	"E: Invalid general name type\n", /* ERR_INVALID_GENERAL_NAME_TYPE */
+	"E: EC key without parameters\n", /* ERR_EC_NO_PARAMETER */
 };
 
 static const char *warning_strings[] = {

@@ -1049,7 +1049,7 @@ static void CheckSAN(X509 *x509, CertType type)
 			ASN1_STRING *name_s = GENERAL_NAME_get0_value(name, &type);
 			if (type > GEN_RID || type < 0)
 			{
-				SetError(ERR_INVALID);
+				SetError(ERR_INVALID_GENERAL_NAME_TYPE);
 			}
 			else if (name_type_allowed[type] == SAN_TYPE_NOT_ALLOWED)
 			{
@@ -1792,7 +1792,7 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		}
 		if (a->parameter == NULL)
 		{
-			SetError(ERR_INVALID);
+			SetError(ERR_EC_NO_PARAMETER);
 		}
 		if (a->parameter != NULL && a->parameter->type != V_ASN1_OBJECT)
 		{
