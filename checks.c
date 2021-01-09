@@ -99,7 +99,7 @@ static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 static ASN1_OBJECT *obj_IntelAMTvProEKU;
 
-uint32_t errors[4];
+uint32_t errors[5];
 uint32_t warnings[1];
 uint32_t info[1];
 uint32_t cert_info[1];
@@ -1878,6 +1878,136 @@ CertType GetType(X509 *x509)
 	}
 }
 
+static void CheckPSSSig(const RSA_PSS_PARAMS *pss)
+{
+	int hash_nid = NID_undef, mask_nid = NID_undef, mask_hash_nid = NID_undef;
+	int64_t salt_len = 20;
+	int64_t trailer = 1;
+
+	if (pss->hashAlgorithm == NULL)
+	{
+		hash_nid = NID_sha1;
+	}
+	else
+	{
+		hash_nid = OBJ_obj2nid(pss->hashAlgorithm->algorithm);
+		if (hash_nid == NID_sha1)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+		if (pss->hashAlgorithm->parameter == NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+		}
+		else if (pss->hashAlgorithm->parameter->type != V_ASN1_NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+		}
+	}
+	if (hash_nid != NID_sha256 && hash_nid != NID_sha384 && hash_nid != NID_sha512)
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_HASH);
+	}
+
+	if (pss->maskGenAlgorithm == NULL)
+	{
+		mask_nid = NID_mgf1;
+		mask_hash_nid = NID_sha1;
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_HASH);
+	}
+	else
+	{
+		mask_nid = OBJ_obj2nid(pss->maskGenAlgorithm->algorithm);
+		if (pss->maskGenAlgorithm->parameter == NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+		}
+		else if (pss->maskGenAlgorithm->parameter->type != V_ASN1_SEQUENCE)
+		{
+			SetError(ERR_SIG_ALG_WRONG_TYPE);
+		}
+		else
+		{
+			const unsigned char *p = pss->maskGenAlgorithm->parameter->value.sequence->data;
+			X509_ALGOR *a = d2i_X509_ALGOR(NULL, &p, pss->maskGenAlgorithm->parameter->value.sequence->length);
+			if (a == NULL)
+			{
+				SetError(ERR_SIG_ALG_WRONG_TYPE);
+			}
+			else
+			{
+				mask_hash_nid = OBJ_obj2nid(a->algorithm);
+				if (a->parameter == NULL)
+				{
+					SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+				}
+				else if (a->parameter->type != V_ASN1_NULL)
+				{
+					SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+				}
+				if (mask_nid == NID_mgf1 && mask_hash_nid == NID_sha1)
+				{
+					SetError(ERR_DEFAULT_VALUE);
+				}
+				if (mask_hash_nid != NID_sha256 && mask_hash_nid != NID_sha384 && mask_hash_nid != NID_sha512)
+				{
+					/* BR 7.1.3.2.1 */
+					SetError(ERR_NOT_ALLOWED_HASH);
+				}
+				X509_ALGOR_free(a);
+			}
+		}
+	}
+	if (mask_nid != NID_mgf1)
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_MASK_ALGORITHM);
+	}
+
+	if (hash_nid != mask_hash_nid)
+	{
+		/* RFC4055 recommends them to be equal, BR 7.1.3.2.1 only allows them to be equal */
+		SetError(ERR_PSS_HASH_NOT_EQUAL);
+	}
+
+	if (pss->saltLength != NULL)
+	{
+		if (!ASN1_INTEGER_get_int64(&salt_len, pss->saltLength))
+		{
+			SetError(ERR_PSS_INVALID_SALT_LENGTH);
+		}
+		else if (salt_len == 20)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+	}
+	if ((hash_nid == NID_sha256 && salt_len != 32)
+		|| (hash_nid == NID_sha384 && salt_len != 40)
+		|| (hash_nid == NID_sha512 && salt_len != 48))
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_PSS_INVALID_SALT_LENGTH);
+	}
+
+	if (pss->trailerField != NULL)
+	{
+		if (!ASN1_INTEGER_get_int64(&trailer, pss->trailerField))
+		{
+			SetError(ERR_PSS_INVALID_TRAILER);
+		}
+		else if (trailer == 1)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+	}
+	if (trailer != 1)
+	{
+		SetError(ERR_PSS_INVALID_TRAILER);
+	}
+}
+
 static void CheckSigAlg(X509 *x509)
 {
 	const X509_ALGOR *sig_alg, *tbs_sig_alg;
@@ -1908,13 +2038,51 @@ static void CheckSigAlg(X509 *x509)
 			SetError(ERR_SIG_ALG_PARAMETER_PRESENT);
 		}
 	}
+	else if (sig_nid == NID_rsassaPss)
+	{
+		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
+		{
+			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+		}
+		else if (sig_alg->parameter->type != V_ASN1_SEQUENCE || tbs_sig_alg->parameter->type != V_ASN1_SEQUENCE)
+		{
+			SetError(ERR_SIG_ALG_WRONG_TYPE);
+		}
+		else
+		{
+			RSA_PSS_PARAMS *pss = NULL;
+			const unsigned char *p = sig_alg->parameter->value.sequence->data;
+			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
+			if (pss == NULL)
+			{
+				SetError(ERR_SIG_ALG_FAILED_DECODING);
+			}
+			else
+			{
+				CheckPSSSig(pss);
+			}
+			RSA_PSS_PARAMS_free(pss);
+
+			p = tbs_sig_alg->parameter->value.sequence->data;
+			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
+			if (pss == NULL)
+			{
+				SetError(ERR_SIG_ALG_FAILED_DECODING);
+			}
+			else
+			{
+				CheckPSSSig(pss);
+			}
+			RSA_PSS_PARAMS_free(pss);
+		}
+	}
 	else if (pkey_nid == NID_rsaEncryption)
 	{
 		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
 		{
 			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
 		}
-		else if((sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL))
+		else if (sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL)
 		{
 			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
 		}

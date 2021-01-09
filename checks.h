@@ -130,7 +130,15 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_AKID_WITHOUT_KEY_ID              119
 #define ERR_INVALID_GENERAL_NAME_TYPE        120
 #define ERR_EC_NO_PARAMETER                  121
-#define MAX_ERR                              ERR_EC_NO_PARAMETER
+#define ERR_SIG_ALG_WRONG_TYPE               122
+#define ERR_SIG_ALG_FAILED_DECODING          123
+#define ERR_DEFAULT_VALUE                    124
+#define ERR_NOT_ALLOWED_HASH                 125
+#define ERR_NOT_ALLOWED_MASK_ALGORITHM       126
+#define ERR_PSS_HASH_NOT_EQUAL               127
+#define ERR_PSS_INVALID_SALT_LENGTH          128
+#define ERR_PSS_INVALID_TRAILER              129
+#define MAX_ERR                              ERR_PSS_INVALID_TRAILER
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
