@@ -178,9 +178,9 @@ struct x509_st;
 typedef struct x509_st X509;
 
 void check_init();
-X509 *GetCert(unsigned char *data, size_t len, CertFormat format);
+X509 *GetCert(const unsigned char *data, size_t len, CertFormat format);
 CertType GetType(X509 *x509);
-void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
+void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type);
 bool GetBit(uint32_t *val, int bit);
 void check_finish();
 

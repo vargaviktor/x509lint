@@ -150,7 +150,7 @@ bool GetBit(uint32_t *val, int bit)
 #define SetCertInfo(bit) SetBit(cert_info, bit)
 #define GetCertInfo(bit) GetBit(cert_info, bit)
 
-X509 *GetCert(unsigned char *data, size_t len, CertFormat format)
+X509 *GetCert(const unsigned char *data, size_t len, CertFormat format)
 {
 	X509 *x509;
 	BIO *bio = BIO_new_mem_buf(data, len);
@@ -2092,7 +2092,7 @@ static void CheckSigAlg(X509 *x509)
 	}
 }
 
-void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
+void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
 	X509_NAME *subject;
