@@ -136,12 +136,12 @@ static BIGNUM *bn_factors;
 
 static void SetBit(uint32_t *val, int bit)
 {
-	val[bit/(sizeof(uint32_t)*8)] |= (1 << (bit % (sizeof(int)*8)));
+	val[bit/(sizeof(uint32_t)*8)] |= ((uint32_t)1 << (bit % (sizeof(uint32_t)*8)));
 }
 
 bool GetBit(uint32_t *val, int bit)
 {
-	return (val[bit/(sizeof(uint32_t)*8)] & (1 << (bit % (sizeof(uint32_t)*8)))) != 0;
+	return (val[bit/(sizeof(uint32_t)*8)] & ((uint32_t)1 << (bit % (sizeof(uint32_t)*8)))) != 0;
 }
 
 #define SetError(bit) SetBit(errors, bit)
