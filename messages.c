@@ -137,19 +137,19 @@ static const char *error_strings[] =
 	"E: AKID is critical\n", /* ERR_AKID_CRITICAL */
 	"E: SKID missing\n", /* ERR_SKID_MISSING */
 	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
-	"E: Signature algorithm parameter missing\n", /* ERR_SIG_ALG_PARAMETER_MISSING */
+	"E: Algorithm parameter missing\n", /* ERR_ALG_PARAMETER_MISSING */
 	"E: Bit string with leading 0\n", /* ERR_BIT_STRING_LEADING_0 */
-	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Algorithm parameter not NULL\n", /* ERR_ALG_PARAMETER_NOT_NULL */
 	"E: Unkonwn signature algorithm\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
-	"E: Signature algorithm parameter present\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
+	"E: Algorithm parameter present\n", /* ERR_ALG_PARAMETER_PRESENT */
 	"E: Not using a named curve\n", /* ERR_NOT_NAMED_CURVE */
 	"E: Key usage with unknown bit\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
 	"E: Basic Constraints with pathlen but key usage without cert sign\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
 	"E: AKID without a key identifier\n", /* ERR_AKID_WITHOUT_KEY_ID */
 	"E: Invalid general name type\n", /* ERR_INVALID_GENERAL_NAME_TYPE */
 	"E: EC key without parameters\n", /* ERR_EC_NO_PARAMETER */
-	"E: Signature algorithm with wrong ASN.1 type\n", /* ERR_SIG_ALG_WRONG_TYPE */
-	"E: Signature algorithm parameters failed to decode\n", /* ERR_SIG_ALG_FAILED_DECODING */
+	"E: Algorithm with wrong ASN.1 type\n", /* ERR_ALG_WRONG_TYPE */
+	"E: Algorithm parameters failed to decode\n", /* ERR_ALG_FAILED_DECODING */
 	"E: Default value written instead of ommited\n", /* ERR_DEFAULT_VALUE */
 	"E: Hash algorithm not allowed\n", /* ERR_NOT_ALLOWED_HASH */
 	"E: Mask algorithm not allowed\n", /* ERR_NOT_ALLOWED_MASK_ALGORITHM */

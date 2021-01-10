@@ -1896,11 +1896,11 @@ static void CheckPSSSig(const RSA_PSS_PARAMS *pss)
 		}
 		if (pss->hashAlgorithm->parameter == NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+			SetError(ERR_ALG_PARAMETER_MISSING);
 		}
 		else if (pss->hashAlgorithm->parameter->type != V_ASN1_NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
 		}
 	}
 	if (hash_nid != NID_sha256 && hash_nid != NID_sha384 && hash_nid != NID_sha512)
@@ -1921,11 +1921,11 @@ static void CheckPSSSig(const RSA_PSS_PARAMS *pss)
 		mask_nid = OBJ_obj2nid(pss->maskGenAlgorithm->algorithm);
 		if (pss->maskGenAlgorithm->parameter == NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+			SetError(ERR_ALG_PARAMETER_MISSING);
 		}
 		else if (pss->maskGenAlgorithm->parameter->type != V_ASN1_SEQUENCE)
 		{
-			SetError(ERR_SIG_ALG_WRONG_TYPE);
+			SetError(ERR_ALG_WRONG_TYPE);
 		}
 		else
 		{
@@ -1933,18 +1933,18 @@ static void CheckPSSSig(const RSA_PSS_PARAMS *pss)
 			X509_ALGOR *a = d2i_X509_ALGOR(NULL, &p, pss->maskGenAlgorithm->parameter->value.sequence->length);
 			if (a == NULL)
 			{
-				SetError(ERR_SIG_ALG_WRONG_TYPE);
+				SetError(ERR_ALG_WRONG_TYPE);
 			}
 			else
 			{
 				mask_hash_nid = OBJ_obj2nid(a->algorithm);
 				if (a->parameter == NULL)
 				{
-					SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+					SetError(ERR_ALG_PARAMETER_MISSING);
 				}
 				else if (a->parameter->type != V_ASN1_NULL)
 				{
-					SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+					SetError(ERR_ALG_PARAMETER_NOT_NULL);
 				}
 				if (mask_nid == NID_mgf1 && mask_hash_nid == NID_sha1)
 				{
@@ -2034,18 +2034,18 @@ static void CheckSigAlg(X509 *x509)
 	{
 		if (sig_alg->parameter != NULL || tbs_sig_alg->parameter != NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_PRESENT);
+			SetError(ERR_ALG_PARAMETER_PRESENT);
 		}
 	}
 	else if (sig_nid == NID_rsassaPss)
 	{
 		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+			SetError(ERR_ALG_PARAMETER_MISSING);
 		}
 		else if (sig_alg->parameter->type != V_ASN1_SEQUENCE || tbs_sig_alg->parameter->type != V_ASN1_SEQUENCE)
 		{
-			SetError(ERR_SIG_ALG_WRONG_TYPE);
+			SetError(ERR_ALG_WRONG_TYPE);
 		}
 		else
 		{
@@ -2054,7 +2054,7 @@ static void CheckSigAlg(X509 *x509)
 			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
 			if (pss == NULL)
 			{
-				SetError(ERR_SIG_ALG_FAILED_DECODING);
+				SetError(ERR_ALG_FAILED_DECODING);
 			}
 			else
 			{
@@ -2066,7 +2066,7 @@ static void CheckSigAlg(X509 *x509)
 			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
 			if (pss == NULL)
 			{
-				SetError(ERR_SIG_ALG_FAILED_DECODING);
+				SetError(ERR_ALG_FAILED_DECODING);
 			}
 			else
 			{
@@ -2079,11 +2079,11 @@ static void CheckSigAlg(X509 *x509)
 	{
 		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+			SetError(ERR_ALG_PARAMETER_MISSING);
 		}
 		else if (sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
 		}
 	}
 	else
