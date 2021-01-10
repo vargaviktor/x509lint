@@ -1821,7 +1821,19 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		EC_KEY_free(ec_key);
 	}
-	else if (EVP_PKEY_id(pkey) != EVP_PKEY_ED25519 && EVP_PKEY_id(pkey) != EVP_PKEY_ED448)
+	else if (EVP_PKEY_id(pkey) == EVP_PKEY_ED25519 || EVP_PKEY_id(pkey) == EVP_PKEY_ED448 || EVP_PKEY_id(pkey) == EVP_PKEY_X25519 || EVP_PKEY_id(pkey) == EVP_PKEY_X448)
+	{
+		X509_PUBKEY *pubkey = X509_get_X509_PUBKEY(x509);
+		const unsigned char *k;
+		int pklen;
+		X509_ALGOR *a;
+		X509_PUBKEY_get0_param(NULL, &k, &pklen, &a, pubkey);
+		if (a->parameter != NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_PRESENT);
+		}
+	}
+	else
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
 	}
