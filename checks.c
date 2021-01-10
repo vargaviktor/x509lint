@@ -1744,6 +1744,21 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		{
 			SetError(ERR_RSA_SMALL_FACTOR);
 		}
+
+		X509_PUBKEY *pubkey = X509_get_X509_PUBKEY(x509);
+		const unsigned char *k;
+		int pklen;
+		X509_ALGOR *a;
+		X509_PUBKEY_get0_param(NULL, &k, &pklen, &a, pubkey);
+		if (a->parameter == NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_MISSING);
+		}
+		else if (a->parameter->type != V_ASN1_NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
+		}
+
 		BN_free(i);
 		BN_CTX_free(ctx);
 		RSA_free(rsa);
