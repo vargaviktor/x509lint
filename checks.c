@@ -283,7 +283,7 @@ static bool CheckPrintableChars(const uint32_t *s, int n)
  */
 static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 {
-	char *utf8 = NULL;
+	unsigned char *utf8 = NULL;
 	size_t utf8_len;
 	bool ret = true;
 
@@ -291,14 +291,14 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	{
 		size_t n = data->length;
 		size_t utf8_size = data->length;
-		char *s = (char *)data->data;
+		unsigned char *s = data->data;
 		utf8 = malloc(utf8_size);
-		char *pu = utf8;
+		unsigned char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_utf8, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_utf8, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
+		if (iconv(iconv_utf8, (char **)&s, &n, (char **)&pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			ret = false;
 			SetError(ERR_INVALID_ENCODING);
@@ -309,14 +309,14 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	{
 		size_t n = data->length;
 		size_t utf8_size = data->length*3;		/* U+FFFF is represented with 3 UTF-8 chars */
-		char *s = (char *)data->data;
+		unsigned char *s = data->data;
 		utf8 = malloc(utf8_size);
-		char *pu = utf8;
+		unsigned char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_ucs2, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_ucs2, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
+		if (iconv(iconv_ucs2, (char **)&s, &n, (char **)&pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			ret = false;
 			SetError(ERR_INVALID_ENCODING);
@@ -436,7 +436,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 			/* reset iconv */
 			iconv(iconv_utf32, NULL, 0, NULL, 0);
 
-			char *s = utf8;
+			unsigned char *s = utf8;
 			size_t n = utf8_len;
 			if (n >= 3 && s[0] == 0xEF && s[1] == 0xBB && s[2] == 0xBF)
 			{
@@ -447,7 +447,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 			uint32_t *utf32 = malloc(utf32_size);
 			char *pu = (char *)utf32;
 
-			if (iconv(iconv_utf32, &s, &n, (char **)&pu, &utf32_size) == (size_t) -1 || n != 0)
+			if (iconv(iconv_utf32, (char **)&s, &n, (char **)&pu, &utf32_size) == (size_t) -1 || n != 0)
 			{
 				/* Shouldn't happen. */
 				SetError(ERR_INVALID_ENCODING);
