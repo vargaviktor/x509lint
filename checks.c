@@ -1683,8 +1683,10 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 	if (pkey == NULL)
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
+		return;
 	}
-	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
+
+	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
 	{
 		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
 
@@ -1809,10 +1811,7 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
 	}
 
-	if (pkey != NULL)
-	{
-		EVP_PKEY_free(pkey);
-	}
+	EVP_PKEY_free(pkey);
 }
 
 static void CheckSKID(X509 *x509, CertType type)
