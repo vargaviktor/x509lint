@@ -3,7 +3,7 @@ LD = $(CC)
 RM = rm
 
 CFLAGS = -g -Wall -O2 -std=c99
-LIBS = -lcrypto
+LIBS = -lcrypto -liconv
 
 UNAME_O := $(shell uname -o)
 ifeq ($(UNAME_O),Cygwin)

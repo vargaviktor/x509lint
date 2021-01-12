@@ -26,66 +26,66 @@
 
 static const char *error_strings[] =
 {
-	"E: Error parsing certificate\n", /* ERR_INVALID*/
-	"E: Issuer without organizationName\n", /* ERR_ISSUER_ORG_NAME*/
-	"E: Issuer without countryName\n", /* ERR_ISSUER_COUNTRY */
-	"E: Subject without organizationName, givenName or surname but with streetAddress\n", /* ERR_SUBJECT_ADDR */
-	"E: Subject with organizationName, givenName or surname but without stateOrProvince or localityName\n", /* ERR_SUBJECT_ORG_NO_PLACE */
-	"E: Subject without organizationName, givenName or surname but with stateOrProvince or localityName\n", /* ERR_SUBJECT_NO_ORG_PLACE */
-	"E: Fails decoding the characterset\n", /*ERR_INVALID_ENCODING */
-	"E: Contains a null character in the string\n", /* ERR_STRING_WITH_NUL */
-	"E: Name entry contains an invalid type\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
-	"E: The string contains non-printable control characters\n", /* ERR_NON_PRINTABLE */
-	"E: Subject with organizationName, givenName or surname but without countryName\n", /* ERR_SUBJECT_COUNTRY */
-	"E: Domain validated certificate with organizationName\n", /* ERR_DOMAIN_WITH_ORG */
-	"E: Organization validated certificate but without organizationName\n", /* ERR_ORGANIZATION_WITHOUT_ORG */
-	"E: No policy extension\n", /* ERR_NO_POLICY */
-	"E: No Subject alternative name extension\n", /* ERR_NO_SUBJECT_ALT_NAME */
-	"E: Certificate not version 3\n", /* ERR_NOT_VERSION3 */
-	"E: Error parsing URL\n", /* ERR_INVALID_URL */
-	"E: The certificate is valid for longer than 60 months\n", /* ERR_LONGER_60_MONTHS */
-	"E: countryName not 2 characters long\n", /* ERR_COUNTRY_SIZE */
-	"E: Invalid time format\n", /* ERR_INVALID_TIME_FORMAT */
-	"E: Duplicate extension\n", /* ERR_DUPLICATE_EXTENSION */
-	"E: CRL DistributionPoint without distributionPoint or cRLIssuer\n", /* ERR_CRL_DIST_POINT_WITHOUT_DISTPOINT_OR_ISSUER */
-	"E: Invalid display text type\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
-	"E: Invalid display text length\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
-	"E: Invalid user notice type\n", /* ERR_INVALID_TYPE_USER_NOTICE */
-	"E: Invalid policy qualifier id\n", /* ERR_INVALID_POLICY_QUALIFIER_ID */
-	"E: Individual without name\n", /* ERR_INDIVIDUAL_WITHOUT_NAME */
-	"E: Individual without country\n", /* ERR_INDIVIDUAL_WITHOUT_COUNTRY */
-	"E: EV certificate without organization\n", /* ERR_EV_WITHOUT_ORGANIZATION */
-	"E: EV certificate without business\n", /* ERR_EV_WITHOUT_BUSINESS */
-	"E: EV certificate without jurisdiction country\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
-	"E: EV certificate without number\n", /* ERR_EV_WITHOUT_NUMBER */
-	"E: Domain validated certificate but with streetAddress\n", /* ERR_DOMAIN_WITH_STREET */
-	"E: Domain validated certificate but with localityName\n", /* ERR_DOMAIN_WITH_LOCALITY */
-	"E: Domain validated certificate but with stateOrProvinceName\n", /* ERR_DOMAIN_WITH_STATE */
-	"E: Domain validated certificate but with postalCode\n", /* ERR_DOMAIN_WITH_POSTAL */
-	"E: Organization validated certificate but without country\n", /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
-	"E: commonName too long\n", /* ERR_COMMON_NAME_SIZE */
-	"E: localityName too long\n", /* ERR_LOCALITY_NAME_SIZE */
-	"E: stateOrProvinceName too long\n", /* ERR_STATE_NAME_SIZE */
-	"E: organizationName too long\n", /* ERR_ORGANIZATION_NAME_SIZE */
-	"E: organizationalUnitName too long\n", /* ERR_ORGANIZATIONAL_UNIT_NAME_SIZE */
-	"E: serialNumber too long\n", /* ERR_SERIAL_NUMBER_SIZE */
-	"E: postalCode too long\n", /* ERR_POSTAL_CODE_SIZE */
-	"E: emailAddress too long\n", /* ERR_EMAIL_SIZE */
-	"E: givenName too long\n", /* ERR_GIVEN_NAME_SIZE */
-	"E: surname too long\n", /* ERR_SURNAME_SIZE */
-	"E: streetAddress too long\n", /* ERR_STREET_ADDRESS_SIZE */
+	"E: Error parsing certificate (encoding)\n", /* ERR_INVALID*/
+	"E: Issuer without organizationName (x)\n", /* ERR_ISSUER_ORG_NAME*/
+	"E: Issuer without countryName (x)\n", /* ERR_ISSUER_COUNTRY */
+	"E: Subject without organizationName, givenName or surname but with streetAddress (CAB 7.1.4.2.2d)\n", /* ERR_SUBJECT_ADDR */
+	"E: Subject with organizationName, givenName or surname but without stateOrProvince or localityName (CAB 7.1.4.2.2ef)\n", /* ERR_SUBJECT_ORG_NO_PLACE */
+	"E: Subject without organizationName, givenName or surname but with stateOrProvince or localityName (CAB 7.1.4.2.2ef)\n", /* ERR_SUBJECT_NO_ORG_PLACE */
+	"E: Fails decoding the characterset (encoding)\n", /*ERR_INVALID_ENCODING */
+	"E: Contains a null character in the string (encoding)\n", /* ERR_STRING_WITH_NUL */
+	"E: Name entry contains an invalid type (RFC 5280)\n", /* ERR_INVALID_NAME_ENTRY_TYPE */
+	"E: The string contains non-printable control characters (encoding)\n", /* ERR_NON_PRINTABLE */
+	"E: Subject with organizationName, givenName or surname but without countryName (CAB 7.1.4.2.2h)\n", /* ERR_SUBJECT_COUNTRY */
+	"E: Domain validated certificate with organizationName (CAB 3.2.2.2;7.1.4.2.2b;7.1.6.4)\n", /* ERR_DOMAIN_WITH_ORG */
+	"E: Organization validated certificate but without organizationName (CAB 3.2.2.2; 7.1.4.2.2b;7.1.6.4)\n", /* ERR_ORGANIZATION_WITHOUT_ORG */
+	"E: No policy extension (CAB 7.1.2.3)\n", /* ERR_NO_POLICY */
+	"E: No Subject alternative name extension (CAB 7.1.4.2.1)\n", /* ERR_NO_SUBJECT_ALT_NAME */
+	"E: Certificate not version 3 (RFC 5280)\n", /* ERR_NOT_VERSION3 */
+	"E: Error parsing URL/Invalid URL (RFC 3986)\n", /* ERR_INVALID_URL */
+	"E: The certificate is valid for longer than 60 months (e)\n", /* ERR_LONGER_60_MONTHS */
+	"E: countryName not 2 characters long (RFC 5280;CAB 7.1.4.2.2h)\n", /* ERR_COUNTRY_SIZE */
+	"E: Invalid time format (encoding)\n", /* ERR_INVALID_TIME_FORMAT */
+	"E: Duplicate extension (x)\n", /* ERR_DUPLICATE_EXTENSION */
+	"E: CRL DistributionPoint without distributionPoint or cRLIssuer (RFC 5280)\n", /* ERR_CRL_DIST_POINT_WITHOUT_DISTPOINT_OR_ISSUER */
+	"E: Invalid display text type (RFC 5280)\n", /* ERR_INVALID_DISPLAY_TEXT_TYPE */
+	"E: Invalid display text length (RFC 5280)\n", /* ERR_INVALID_DISPLAY_TEXT_LENGTH */
+	"E: Invalid user notice type (RFC 5280;RFC 6818)\n", /* ERR_INVALID_TYPE_USER_NOTICE */
+	"E: Invalid policy qualifier id (encoding)\n", /* ERR_INVALID_POLICY_QUALIFIER_ID */
+	"E: Individual without name (CAB 7.1.6.4)\n", /* ERR_INDIVIDUAL_WITHOUT_NAME */
+	"E: Individual without country (CAB 7.1.6.4)\n", /* ERR_INDIVIDUAL_WITHOUT_COUNTRY */
+	"E: EV certificate without organization (EVGL 9.2.1)\n", /* ERR_EV_WITHOUT_ORGANIZATION */
+	"E: EV certificate without business (EVGL 9.2.4)\n", /* ERR_EV_WITHOUT_BUSINESS */
+	"E: EV certificate without jurisdiction country (EVGL 9.2.5)\n", /* ERR_EV_WITHOUT_JURISDICTION_COUNTRY */
+	"E: EV certificate without number (EVGL 9.2.6)\n", /* ERR_EV_WITHOUT_NUMBER */
+	"E: Domain validated certificate but with streetAddress (CAB 7.1.6.4)\n", /* ERR_DOMAIN_WITH_STREET */
+	"E: Domain validated certificate but with localityName (CAB 7.1.6.4)\n", /* ERR_DOMAIN_WITH_LOCALITY */
+	"E: Domain validated certificate but with stateOrProvinceName (CAB 7.1.6.4)\n", /* ERR_DOMAIN_WITH_STATE */
+	"E: Domain validated certificate but with postalCode (CAB 7.1.6.4)\n", /* ERR_DOMAIN_WITH_POSTAL */
+	"E: Organization validated certificate but without country (CAB 7.1.6.4)\n", /* ERR_ORGANIZATION_WITHOUT_COUNTRY */
+	"E: commonName too long (RFC 5280)\n", /* ERR_COMMON_NAME_SIZE */
+	"E: localityName too long (RFC 5280)\n", /* ERR_LOCALITY_NAME_SIZE */
+	"E: stateOrProvinceName too long (RFC 5280)\n", /* ERR_STATE_NAME_SIZE */
+	"E: organizationName too long (RFC 5280)\n", /* ERR_ORGANIZATION_NAME_SIZE */
+	"E: organizationalUnitName too long (RFC 5280)\n", /* ERR_ORGANIZATIONAL_UNIT_NAME_SIZE */
+	"E: serialNumber too long (RFC 5280)\n", /* ERR_SERIAL_NUMBER_SIZE */
+	"E: postalCode too long (RFC 5280)\n", /* ERR_POSTAL_CODE_SIZE */
+	"E: emailAddress too long (RFC 5280)\n", /* ERR_EMAIL_SIZE */
+	"E: givenName too long (RFC 5280)\n", /* ERR_GIVEN_NAME_SIZE */
+	"E: surname too long (RFC 5280)\n", /* ERR_SURNAME_SIZE */
+	"E: streetAddress too long (RFC 5280)\n", /* ERR_STREET_ADDRESS_SIZE */
 	"E: authorityInformationAccess is marked critical\n", /* ERR_AIA_CRITICAL */
 	"E: No OCSP over HTTP\n",  /* ERR_NO_OCSP_HTTP */
 	"E: no authorityInformationAccess extension\n", /* ERR_NO_AIA */
 	"E: Invalid type in SAN entry\n", /* ERR_SAN_TYPE */
 	"E: Invalid type in GeneralName\n", /* ERR_GEN_NAME_TYPE */
-	"E: EV certificate valid longer than 27 months\n", /* ERR_EV_LONGER_27_MONTHS */
+	"E: EV certificate valid longer than 27 months (e)\n", /* ERR_EV_LONGER_27_MONTHS */
 	"E: subjectAltName without name\n", /* ERR_SAN_WITHOUT_NAME */
 	"E: Invalid length of IP address\n", /* ERR_IP_FAMILY */
 	"E: commonName not in subjectAltName extension\n", /* ERR_CN_NOT_IN_SAN */
 	"E: Invalid length of businessCategory\n", /* ERR_BUSINESS_CATEGORY_SIZE */
 	"E: Invalid length of dnQualifier\n", /* ERR_DN_QUALIFIER_SIZE */
-	"E: URL contains a null character\n", /* ERR_URL_WITH_NUL */
+	"E: URL contains a null character (RFC3986)\n", /* ERR_URL_WITH_NUL */
 	"E: postOfficeBox too long\n", /* ERR_POST_OFFICE_BOX_SIZE */
 	"E: IP address in dns name\n", /* ERR_IP_IN_DNSNAME */
 	"E: Serial number not positive\n", /* ERR_SERIAL_NOT_POSITIVE */
@@ -95,23 +95,23 @@ static const char *error_strings[] =
 	"E: RSA public exponent not odd\n", /* ERR_RSA_EXP_NOT_ODD */
 	"E: RSA public exponent not equal to 3 or more\n", /* ERR_RSA_EXP_3 */
 	"E: RSA modulus has small factor\n", /* ERR_RSA_SMALL_FACTOR */
-	"E: EC point at infinity\n", /* ERR_EC_AT_INFINITY */
-	"E: EC point not on curve\n", /* ERR_EC_POINT_NOT_ON_CURVE */
-	"E: EC key has invalid group order\n", /* ERR_EC_INVALID_GROUP_ORDER */
-	"E: EC key has incorrect group order\n", /* ERR_EC_INCORRECT_ORDER */
-	"E: EC curve is not one of the allowed curves\n", /* ERR_EC_NON_ALLOWED_CURVE */
+	"E: EC point at infinity (encoding)\n", /* ERR_EC_AT_INFINITY */
+	"E: EC point not on curve (encoding)\n", /* ERR_EC_POINT_NOT_ON_CURVE */
+	"E: EC key has invalid group order (encoding)\n", /* ERR_EC_INVALID_GROUP_ORDER */
+	"E: EC key has incorrect group order (encoding)\n", /* ERR_EC_INCORRECT_ORDER */
+	"E: EC curve is not one of the allowed curves (encoding)\n", /* ERR_EC_NON_ALLOWED_CURVE */
 	"E: Unknown public key type\n", /* ERR_UNKNOWN_PUBLIC_KEY_TYPE */
-	"E: Subject without organizationName, givenName or surname but with postalCode\n", /* ERR_SUBJECT_POSTAL */
+	"E: Subject without organizationName, givenName or surname but with postalCode (CAB7.1.4.2.2g)\n", /* ERR_SUBJECT_POSTAL */
 	"E: Domain validated certificate but with givenName or surname\n", /* ERR_DOMAIN_WITH_NAME */
 	"E: Subject with givenName or surname but without the CAB IV policy oid\n", /* ERR_NAME_NO_IV_POLICY */
 	"E: CA root certificate with Extended Key Usage\n", /* ERR_ROOT_CA_WITH_EKU */
 	"E: Extended Key Usage without any entries\n", /* ERR_EMPTY_EKU */
 	"E: Extended Key Usage lacks a required purpose\n", /* ERR_MISSING_EKU */
-	"E: Invalid length of domainComponent\n", /* ERR_DOMAINCOMPONENT_SIZE */
-	"E: Invalid length of unstructuredName\n", /* ERR_UNSTRUCTUREDNAME_SIZE */
-	"E: Teletex string with an escape sequence\n", /* ERR_TELETEX_WITH_ESCAPE */
+	"E: Invalid length of domainComponent (encoding)\n", /* ERR_DOMAINCOMPONENT_SIZE */
+	"E: Invalid length of unstructuredName (encoding)\n", /* ERR_UNSTRUCTUREDNAME_SIZE */
+	"E: Teletex string with an escape sequence (encoding)\n", /* ERR_TELETEX_WITH_ESCAPE */
 	"E: Baseline Requirements policy present for non server authentication certificate\n", /* ERR_POLICY_BR */
-	"E: RSA modulus is negative\n", /* ERR_RSA_MODULUS_NEGATIVE */
+	"E: RSA modulus is negative (encoding)\n", /* ERR_RSA_MODULUS_NEGATIVE */
 	"E: No key usage\n", /* ERR_NO_KEY_USAGE */
 	"E: Key usage is empty\n", /* ERR_KEY_USAGE_EMPTY */
 	"E: Key usage is too long\n", /* ERR_KEY_USAGE_TOO_LONG */
@@ -129,20 +129,20 @@ static const char *error_strings[] =
 	"E: Basic Constraints with negative length\n", /* ERR_BASIC_CONSTRAINTS_NEG_PATHLEN */
 	"E: Basic Constraints with pathlen for non-CA\n", /* ERR_BASIC_CONSTRAINTS_NO_CA_PATHLEN */
 	"E: Empty issuer\n", /* ERR_EMPTY_ISSUER */
-	"E: Empty subject\n", /* ERR_EMPTY_SUBJECT */
+	"E: Empty subject \n", /* ERR_EMPTY_SUBJECT */
 	"E: SAN is not critical\n", /* ERR_SAN_NOT_CRITICAL */
 	"E: Key usage not critical\n", /* ERR_KEY_USAGE_NOT_CRITICAL */
 	"E: Empty SAN\n", /* ERR_SAN_EMPTY */
 	"E: Signature algorithm mismatch\n", /* ERR_SIG_ALG_MISMATCH */
-	"E: AKID is critical\n", /* ERR_AKID_CRITICAL */
-	"E: SKID missing\n", /* ERR_SKID_MISSING */
-	"E: SKID critical\n", /* ERR_SKID_CRITICAL */
-	"E: Signature algorithm parameter missing\n", /* ERR_SIG_ALG_PARAMETER_MISSING */
-	"E: Bit string with leading 0\n", /* ERR_BIT_STRING_LEADING_0 */
-	"E: Signature algorithm parameter not NULL\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
-	"E: Unkonwn signature algorithm\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
-	"E: Signature algorithm parameter present\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
-	"E: Not using a named curve\n", /* ERR_NOT_NAMED_CURVE */
+	"E: AKID is critical (CAB 7.1.2.3)\n", /* ERR_AKID_CRITICAL */
+	"E: SKID missing (CAB 7.1.2.3)\n", /* ERR_SKID_MISSING */
+	"E: SKID critical (CAB 7.1.2.3)\n", /* ERR_SKID_CRITICAL */
+	"E: Signature algorithm parameter missing (encoding)\n", /* ERR_SIG_ALG_PARAMETER_MISSING */
+	"E: Bit string with leading 0 (encoding)\n", /* ERR_BIT_STRING_LEADING_0 */
+	"E: Signature algorithm parameter not NULL (encoding)\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Unknown signature algorithm (encoding)\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
+	"E: Signature algorithm parameter present (encoding)\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
+	"E: Not using a named curve (encoding)\n", /* ERR_NOT_NAMED_CURVE */
 	"E: Key usage with unknown bit\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
 	"E: Basic Constraints with pathlen but key usage without cert sign\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
 	"E: AKID without a key identifier\n", /* ERR_AKID_WITHOUT_KEY_ID */
@@ -170,7 +170,7 @@ static const char *warning_strings[] = {
 };
 
 static const char *info_strings[] = {
-	"I: Subject has a deprecated CommonName\n", /* INF_SUBJECT_CN */
+	"I: Subject has a deprecated CommonName (CAB 7.1.4.2.2a)\n", /* INF_SUBJECT_CN */
 	"I: String not checked\n", /* INF_STRING_NOT_CHECKED */
 	"I: CRL is not a URL\n", /* INF_CRL_NOT_URL */
 	"I: Unknown validation policy\n", /* INF_UNKNOWN_VALIDATION */
