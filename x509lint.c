@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
 	if (argc != 2)
 	{
-		printf("Usage: x509lint <PEM_cert_file>\n");
+		printf("Usage: x509lint <cert_file>\n");
 		exit(1);
 	}
 

@@ -1,3 +1,4 @@
 *.o
 x509lint
 *.cer
+*.stackdump

@@ -74,7 +74,38 @@ static const char *OIDCabDomainValidated = "2.23.140.1.2.1";
 static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
 static const char *OIDCabIndividualIdentityValidated = "2.23.140.1.2.3";
 static const char *OIDCabExtendedValidation = "2.23.140.1.1";
+/* new oids in text form */
+/* orgID */
+static const char *OIDorganizationIdentifier ="2.5.4.97";
+static const char *OIDDocumentSigning ="1.3.6.1.4.1.311.10.3.12";
+/* qcp - ETSI */
+static const char *OIDQcpN = "0.4.0.194112.1.0";
+static const char *OIDQcpL = "0.4.0.194112.1.1";
+static const char *OIDQcpNQSCD = "0.4.0.194112.1.2";
+static const char *OIDQcpLQSCD = "0.4.0.194112.1.3";
+static const char *OIDQcpW = "0.4.0.194112.1.4";
+/* ncp, lcp, evcp - ETSI */
+//static const char *OIDNCP = "0.4.0.2042.1.1";
+//static const char *OIDLCP = "0.4.0.2042.1.3";
+static const char *OIDEVCP = "0.4.0.2042.1.4";
+static const char *OIDDVCP = "0.4.0.2042.1.6";
+static const char *OIDOVCP = "0.4.0.2042.1.7";
+static const char *OIDIVCP = "0.4.0.2042.1.8";
+/* cab */
+static const char *OIDCABFOrganizationIdentifier = "2.23.140.3.1";
+/* etsi qualfied qcStatements */
+//static const char *OIDQcCompliance = "0.4.0.1862.1.1";
+//static const char *OIDQcLimitValue = "0.4.0.1862.1.2";
+//static const char *OIDQcREtention = "0.4.0.1862.1.3";
+//static const char *OIDQcSSCD = "0.4.0.1862.1.4";
+//static const char *OIDQcPDS = "0.4.0.1862.1.5";
+//static const char *OIDQcType = "0.4.0.1862.1.6";
 
+//static const char *OIDQcTeSign = "0.4.0.1862.1.6.1";
+//static const char *OIDQcTeSeal = "0.4.0.1862.1.6.2";
+//static const char *OIDQcTWeb = "0.4.0.1862.1.6.3";
+/* need to look more after qcstatement !!! */
+/* */
 
 static ASN1_OBJECT *obj_organizationName;
 static ASN1_OBJECT *obj_organizationalUnitName;
@@ -98,7 +129,12 @@ static ASN1_OBJECT *obj_pkcs9_unstructuredName;
 static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 static ASN1_OBJECT *obj_IntelAMTvProEKU;
-
+/* new objects */
+static ASN1_OBJECT *obj_DocumentSigning; /* 1.3.6.1.4.1.311.10.3.12 */
+static ASN1_OBJECT *obj_organizationIdentifier; /* 2.5.4.97 */ 
+static ASN1_OBJECT *obj_CABFOrganizationIdentifier; /* 2.23.140.3.1 */
+//static ASN1_OBJECT *obj_SecureEmail; /* 1.3.6.1.5.5.7.3.4 */
+/*  */
 uint32_t errors[4];
 uint32_t warnings[1];
 uint32_t info[1];
@@ -120,6 +156,9 @@ uint32_t cert_info[1];
 #define CERT_INFO_KU_CRL_SIGN   13
 #define CERT_INFO_HAS_SAN       14
 #define CERT_INFO_KU_CERT_SIGN  15
+/* here comes the new categiries !!!! */
+#define CERT_INFO_QUALIFIED  	16
+#define CERT_INFO_DOCSIGN  		17
 
 const int primes[] = {
 	2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
@@ -671,6 +710,57 @@ static bool IsValidLongerThan(struct tm tm_from, struct tm tm_to, int months)
 	return false;
 }
 
+/* isvalidlongagerindays 
+static bool IsValidLongerThanDays(struct tm tm_from, struct tm tm_to, int days)
+{
+	int month_diff = (tm_to.tm_year - tm_from.tm_year) * 12
+		+ tm_to.tm_mon - tm_from.tm_mon;
+	if (month_diff > months)
+	{
+		return true;
+	}
+	if (month_diff < months)
+	{
+		return false;
+	}
+	if (tm_to.tm_mday < tm_from.tm_mday)
+	{
+		return false;
+	}
+	if (tm_to.tm_mday > tm_from.tm_mday)
+	{
+		return true;
+	}
+	if (tm_to.tm_hour < tm_from.tm_hour)
+	{
+		return false;
+	}
+	if (tm_to.tm_hour > tm_from.tm_hour)
+	{
+		return true;
+	}
+	if (tm_to.tm_min < tm_from.tm_min)
+	{
+		return false;
+	}
+	if (tm_to.tm_min > tm_from.tm_min)
+	{
+		return true;
+	}
+	if (tm_to.tm_sec < tm_from.tm_sec)
+	{
+		return false;
+	}
+	if (tm_to.tm_sec > tm_from.tm_sec)
+	{
+		return true;
+	}
+	return false;
+}
+
+ */
+
+
 static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 {
 	int idx = -1;
@@ -718,7 +808,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				{
 					DomainValidated = true;
 					SetCertInfo(CERT_INFO_DV);
-					/* Required by CAB base 7.1.6.1 */
+					/* Required by CAB base 7.1.6.4 */
 					if (IsNameObjPresent(subject, obj_organizationName))
 					{
 						SetError(ERR_DOMAIN_WITH_ORG);
@@ -768,6 +858,12 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					{
 						SetError(ERR_ORGANIZATION_WITHOUT_COUNTRY);
 					}
+					/* inserted */
+					if (!IsNameObjPresent(subject, obj_organizationIdentifier))
+					{
+						SetError(ERR_EVOV_WITHOUT_ORGID);
+					}
+					/* */
 				}
 
 				if (strcmp(oid, OIDCabIndividualIdentityValidated) == 0)
@@ -779,7 +875,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				{
 					IndividualValidated = true;
 					SetCertInfo(CERT_INFO_IV);
-					/* Required by CAB base 7.1.6.1 */
+					/* Required by CAB base 7.1.6.4 */
 					if (!IsNameObjPresent(subject, obj_organizationName)
 						&& !(IsNameObjPresent(subject, obj_givenName) && IsNameObjPresent(subject, obj_surname)))
 					{
@@ -811,6 +907,18 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 					{
 						SetError(ERR_EV_WITHOUT_ORGANIZATION);
 					}
+					
+					/* inserted */
+					if (!IsNameObjPresent(subject, obj_organizationIdentifier))
+					{
+						SetError(ERR_EVOV_WITHOUT_ORGID);
+					}
+					if (!IsNameObjPresent(subject, obj_CABFOrganizationIdentifier))
+					{
+						SetError(ERR_EV_WITHOUT_CABFORGID);
+					}
+					/* */
+					
 					/* 9.2.4 */
 					if (!IsNameObjPresent(subject, obj_businessCategory))
 					{
@@ -827,8 +935,20 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 						SetError(ERR_EV_WITHOUT_NUMBER);
 					}
 				}
+				if (strcmp(oid, OIDQcpL) == 0 || strcmp(oid, OIDQcpN) == 0 ||
+				strcmp(oid, OIDQcpNQSCD) == 0 || strcmp(oid, OIDQcpLQSCD) == 0 || strcmp(oid, OIDQcpW) == 0)
+				{
+						SetCertInfo(CERT_INFO_QUALIFIED);
+				}
+				
 			}
-
+			if (strcmp(oid, OIDIVCP) == 0 || strcmp(oid, OIDOVCP) == 0 ||
+				strcmp(oid, OIDDVCP) == 0 || strcmp(oid, OIDEVCP) == 0)
+				{
+						SetWarning(WARN_ETSI_ADV_SSL_OIDS);
+				}
+			/* no ncp or lcp yet */
+			
 			if (info->qualifiers)
 			{
 				for (int i = 0; i < sk_POLICYQUALINFO_num(info->qualifiers); i++)
@@ -904,7 +1024,7 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 
 	if (!bPolicyFound && type == SubscriberCertificate)
 	{
-		/* Required by CAB 9.3.4 */
+		/* Required by CAB 7.1.2.3 */
 		SetError(ERR_NO_POLICY);
 	}
 
@@ -1149,7 +1269,9 @@ static void CheckSAN(X509 *x509, CertType type)
 	}
 	if (commonName != NULL && bSanFound && !bCommonNameFound)
 	{
-//		SetError(ERR_CN_NOT_IN_SAN);
+		SetError(ERR_CN_NOT_IN_SAN);
+		/* possible to make it better, because the charset types */
+		
 	}
 }
 
@@ -1374,9 +1496,9 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 		if (GetBit(cert_info, CERT_INFO_EV))
 		{
 			/* EV 9.4 */
-			if (IsValidLongerThan(*tm_before, *tm_after, 27))
+			if (IsValidLongerThan(*tm_before, *tm_after, 12))
 			{
-				SetError(ERR_EV_LONGER_27_MONTHS);
+				SetError(ERR_EV_LONGER_12_MONTHS);
 			}
 			else if (IsValidLongerThan(*tm_before, *tm_after, 12))
 			{
@@ -1386,9 +1508,9 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 		else
 		{
 			/* CAB 9.4.1 */
-			if (IsValidLongerThan(*tm_before, *tm_after, 60))
+			if (IsValidLongerThan(*tm_before, *tm_after, 12))
 			{
-				SetError(ERR_LONGER_60_MONTHS);
+				SetError(ERR_LONGER_12_MONTHS);
 			}
 			else if (IsValidLongerThan(*tm_before, *tm_after, 39))
 			{
@@ -1524,15 +1646,20 @@ static void CheckEKU(X509 *x509, CertType type)
 				continue;
 			}
 			/* Not found */
+			
+			/* modification: NO EKU_ERROR */ 
+			
 			if (first)
 			{
 				SetCertInfo(CERT_INFO_NO_EKU);
-				if (type == SubscriberCertificate)
+				if ((type == SubscriberCertificate)||(type == IntermediateCA))
 				{
-					SetWarning(WARN_NO_EKU);
+					SetError(ERR_NO_EKU);
 				}
 			}
 			break;
+			
+			/* ---- */ 
 		}
 		first = false;
 
@@ -1549,6 +1676,7 @@ static void CheckEKU(X509 *x509, CertType type)
 			if (OBJ_cmp(oid, obj_anyEKU) == 0)
 			{
 				SetCertInfo(CERT_INFO_ANY_EKU);
+				
 			}
 			else if (nid == NID_server_auth)
 			{
@@ -1578,6 +1706,13 @@ static void CheckEKU(X509 *x509, CertType type)
 			{
 				SetCertInfo(CERT_INFO_AMTVPRO_EKU);
 			}
+			/* inserted */
+			else if (OBJ_cmp(oid, obj_DocumentSigning) == 0)
+			{
+				SetCertInfo(CERT_INFO_DOCSIGN);
+			}
+
+			/* */
 			else
 			{
 				SetWarning(WARN_UNKNOWN_EKU);
@@ -1591,6 +1726,21 @@ static void CheckEKU(X509 *x509, CertType type)
 		{
 			SetError(ERR_EMPTY_EKU);
 		}
+		
+		/* beszuras */
+		if (type == IntermediateCA)
+		{
+			if (GetBit(cert_info, CERT_INFO_ANY_EKU))
+			{
+				SetError(ERROR_ANY_EKU_IN_INTERMEDIATE_MOZILLA);
+			}
+		}
+		if (GetBit(cert_info, CERT_INFO_SERV_AUTH) && GetBit(cert_info, CERT_INFO_EMAIL) )
+		{
+		SetError(ERROR_INVALID_EKU_COMBO_IN_MOZILLA); 
+		}
+		/* beszuras vege */
+		
 		sk_ASN1_OBJECT_pop_free(ekus, ASN1_OBJECT_free);
 	}
 	while (1);
@@ -1710,6 +1860,11 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 				SetError(ERR_RSA_SIZE_2048);
 			}
 		}
+		if ((BN_num_bits(n)%8)> 0)
+		{
+				SetError(ERR_RSA_SIZE_DIVNON8);
+		}
+		
 		if (BN_is_negative(n))
 		{
 			SetError(ERR_RSA_MODULUS_NEGATIVE);
@@ -1826,7 +1981,7 @@ static void CheckSKID(X509 *x509, CertType type)
 	}
 	if (skid == NULL && type != SubscriberCertificate)
 	{
-		SetError(ERR_SKID_MISSING);
+		SetError(ERR_SKID_MISSING);/* is not needed also into the other ica root certs?*/
 	}
 	if (skid != NULL && critical > 0)
 	{
@@ -1983,16 +2138,22 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	CheckSerial(x509);
 	CheckTime(x509, &tm_before, &tm_after, type);
 
-	/* Required by CAB base 9.1.3 */
+	/* Required by CAB base 7.1.4.3.1 */
 	if (!IsNameObjPresent(issuer, obj_organizationName))
 	{
 		SetError(ERR_ISSUER_ORG_NAME);
 	}
 
-	/* Required by CAB base 9.1.4 */
+	/* Required by CAB base 7.1.4.3.1 */
 	if (!IsNameObjPresent(issuer, obj_countryName))
 	{
 		SetError(ERR_ISSUER_COUNTRY);
+	}
+/*added commonname check */
+	/* Required by CAB base 7.1.4.3.1 */
+	if (!IsNameObjPresent(issuer, obj_commonName))
+	{
+		SetError(ERR_ISSUER_COMMONNAME);
 	}
 
 	subject = X509_get_subject_name(x509);
@@ -2121,6 +2282,33 @@ void check_init()
 	obj_postOfficeBox = OBJ_txt2obj(OIDpostOfficeBox, 1);
 	obj_anyEKU = OBJ_txt2obj(OIDanyEKU, 1);
 	obj_IntelAMTvProEKU = OBJ_txt2obj(OIDIntelAMTvProEKU, 1);
+	
+	// sajat oidekbol itt less objc	
+	
+	obj_DocumentSigning = OBJ_txt2obj(OIDDocumentSigning, 1);
+	obj_CABFOrganizationIdentifier = OBJ_txt2obj(OIDCABFOrganizationIdentifier, 1);
+	obj_organizationIdentifier = OBJ_txt2obj(OIDorganizationIdentifier, 1);
+	
+
+	/* new oids in text form */
+
+/* qcp - ETSI */
+//static const char *OIDQcpN = "0.4.0.194112.1.0";
+//static const char *OIDQcpL = "0.4.0.194112.1.1";
+//static const char *OIDQcpNQSCD = "0.4.0.194112.1.2";
+//static const char *OIDQcpLQSCD = "0.4.0.194112.1.3";
+//static const char *OIDQcpW = "0.4.0.194112.1.4";
+/* ncp, lcp, evcp - ETSI */
+//static const char *OIDNCP = "0.4.0.2042.1.1";
+//static const char *OIDLCP = "0.4.0.2042.1.3";
+//static const char *OIDEVCP = "0.4.0.2042.1.4";
+//static const char *OIDDVCP = "0.4.0.2042.1.6";
+//static const char *OIDOVCP = "0.4.0.2042.1.7";
+//static const char *OIDIVCP = "0.4.0.2042.1.8";
+/* cab */
+//static const char *OIDCABFOrganizationIdentifier = "2.23.140.3.1";
+	
+	
 
 	bn_factors = BN_new();
 

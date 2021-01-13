@@ -25,7 +25,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_NO_SUBJECT_ALT_NAME               14
 #define ERR_NOT_VERSION3                      15
 #define ERR_INVALID_URL                       16
-#define ERR_LONGER_60_MONTHS                  17
+#define ERR_LONGER_12_MONTHS                  17
 #define ERR_COUNTRY_SIZE                      18
 #define ERR_INVALID_TIME_FORMAT               19
 #define ERR_DUPLICATE_EXTENSION               20
@@ -61,7 +61,7 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_NO_AIA                            50
 #define ERR_SAN_TYPE                          51
 #define ERR_GEN_NAME_TYPE                     52
-#define ERR_EV_LONGER_27_MONTHS               53
+#define ERR_EV_LONGER_12_MONTHS               53
 #define ERR_SAN_WITHOUT_NAME                  54
 #define ERR_IP_FAMILY                         55
 #define ERR_CN_NOT_IN_SAN                     56
@@ -130,7 +130,19 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_AKID_WITHOUT_KEY_ID              119
 #define ERR_INVALID_GENERAL_NAME_TYPE        120
 #define ERR_EC_NO_PARAMETER                  121
-#define MAX_ERR                              ERR_EC_NO_PARAMETER
+/*new blocks */
+#define ERR_ISSUER_COMMONNAME                122
+#define ERR_RSA_SIZE_DIVNON8				 123
+#define ERR_LONGER_398DAYS					 124
+#define ERR_NO_EKU						     125
+#define ERROR_ANY_EKU_IN_INTERMEDIATE_MOZILLA 	126
+#define ERROR_INVALID_EKU_COMBO_IN_MOZILLA		127
+#define ERR_EVOV_WITHOUT_ORGID					128
+#define ERR_EV_WITHOUT_CABFORGID				129
+#define ERR_ORGID_FORMAT						130
+/* end block modify, when finsihed */
+#define MAX_ERR                              ERR_ORGID_FORMAT  
+/* end block modify, when finsihed */
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
 #define WARN_NON_PRINTABLE_STRING      0
@@ -149,7 +161,8 @@ typedef enum { PEM, DER } CertFormat;
 #define WARN_TLS_CLIENT_DNS           13
 #define WARN_KEY_USAGE_NOT_CRITICAL   14
 #define WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN 15
-#define MAX_WARN                      WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN
+#define WARN_ETSI_ADV_SSL_OIDS			  16
+#define MAX_WARN                      WARN_ETSI_ADV_SSL_OIDS
 
 /* Certificate is valid, but contains things like deprecated or not checked. */
 #define INF_SUBJECT_CN                    0
