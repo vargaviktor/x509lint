@@ -2,3 +2,4 @@
 x509lint
 *.cer
 *.stackdump
+~$*.*

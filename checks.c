@@ -38,6 +38,8 @@
 #include "checks.h"
 #include "asn1_time.h"
 
+#include <time.h>
+
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define EVP_PKEY_base_id(pkey) (pkey->type)
 
@@ -75,6 +77,8 @@ static const char *OIDCabOrganizationIdentityValidated = "2.23.140.1.2.2";
 static const char *OIDCabIndividualIdentityValidated = "2.23.140.1.2.3";
 static const char *OIDCabExtendedValidation = "2.23.140.1.1";
 /* new oids in text form */
+static const char *OIDCabEVCodeSign = "2.23.140.1.3";
+static const char *OIDCabNonEVCodeSign = "2.23.140.1.4.1";
 /* orgID */
 static const char *OIDorganizationIdentifier ="2.5.4.97";
 static const char *OIDDocumentSigning ="1.3.6.1.4.1.311.10.3.12";
@@ -130,10 +134,20 @@ static ASN1_OBJECT *obj_postOfficeBox;
 static ASN1_OBJECT *obj_anyEKU;
 static ASN1_OBJECT *obj_IntelAMTvProEKU;
 /* new objects */
+static ASN1_OBJECT *obj_CabEVCodeSign; /* "2.23.140.1.3" */
+static ASN1_OBJECT *obj_CabNonEVCodeSign; /* "2.23.140.1.4.1" */
+
 static ASN1_OBJECT *obj_DocumentSigning; /* 1.3.6.1.4.1.311.10.3.12 */
 static ASN1_OBJECT *obj_organizationIdentifier; /* 2.5.4.97 */ 
 static ASN1_OBJECT *obj_CABFOrganizationIdentifier; /* 2.23.140.3.1 */
 //static ASN1_OBJECT *obj_SecureEmail; /* 1.3.6.1.5.5.7.3.4 */
+static ASN1_OBJECT *obj_QcpN;
+static ASN1_OBJECT *obj_QcpL;
+static ASN1_OBJECT *obj_QcpNQSCD;
+static ASN1_OBJECT *obj_QcpLQSCD;
+static ASN1_OBJECT *obj_QcpW;
+
+
 /*  */
 uint32_t errors[4];
 uint32_t warnings[1];
@@ -238,6 +252,7 @@ static void CheckValidURL(const unsigned char *s, int n)
 	/* RFC3986 */
 	static char *reserved_chars = ":/?#[]@!$&'()*+,;=";
 	static char *unreserved_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
+
 
 	int i = 0;
 	while (i < n)
@@ -665,6 +680,8 @@ static bool IsNameObjPresent(X509_NAME *dn, ASN1_OBJECT *obj)
 
 static bool IsValidLongerThan(struct tm tm_from, struct tm tm_to, int months)
 {
+	printf ("+ Validity From: %d-%d-%d\n",tm_from.tm_year+1900,tm_from.tm_mon+1,tm_from.tm_mday );
+	printf ("+ Validity   To: %d-%d-%d\n",tm_to.tm_year+1900,tm_to.tm_mon+1,tm_to.tm_mday );	
 	int month_diff = (tm_to.tm_year - tm_from.tm_year) * 12
 		+ tm_to.tm_mon - tm_from.tm_mon;
 	if (month_diff > months)
@@ -770,6 +787,11 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 	bool IndividualValidated = false;
 	bool EVValidated = false;
 	bool CabIVPresent = false;
+	bool QCPL = false;
+	bool QCPN = false;
+	bool QCPLQSCD = false;
+	bool QCPNQSCD = false;
+	bool QCPW = false;
 
 	do
 	{
@@ -939,6 +961,8 @@ static void CheckPolicy(X509 *x509, CertType type, X509_NAME *subject)
 				strcmp(oid, OIDQcpNQSCD) == 0 || strcmp(oid, OIDQcpLQSCD) == 0 || strcmp(oid, OIDQcpW) == 0)
 				{
 						SetCertInfo(CERT_INFO_QUALIFIED);
+						SetInfo(INFO_QUALIFIED);
+						printf("+ Setcertinfo qualfied done.\n");
 				}
 				
 			}
@@ -1074,6 +1098,7 @@ static int ASN1_STRING_cmpcase(const ASN1_STRING *s1, const ASN1_STRING *s2)
 
 static void CheckSAN(X509 *x509, CertType type)
 {
+
 	int idx = -1;
 	bool bSanFound = false;
 	bool bSanName = false;
@@ -1132,6 +1157,7 @@ static void CheckSAN(X509 *x509, CertType type)
 		if (OBJ_cmp(obj_commonName, obj) == 0)
 		{
 			commonName = X509_NAME_ENTRY_get_data(ne);
+			
 			break;
 		}
 	}
@@ -1208,6 +1234,7 @@ static void CheckSAN(X509 *x509, CertType type)
 				if (ASN1_STRING_cmpcase(name_s, commonName) == 0)
 				{
 					bCommonNameFound = true;
+					
 				}
 			}
 			if (type == GEN_IPADD)
@@ -1490,17 +1517,21 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 		SetError(ERR_INVALID_TIME_FORMAT);
 		return;
 	}
-
+	printf("+ Before: %lu After: %lu\n", mktime(tm_before), mktime(tm_after));
+	
 	if (type == SubscriberCertificate)
 	{
 		if (GetBit(cert_info, CERT_INFO_EV))
 		{
 			/* EV 9.4 */
-			if (IsValidLongerThan(*tm_before, *tm_after, 12))
+			if (IsValidLongerThan(*tm_before, *tm_after, 13))
 			{
 				SetError(ERR_EV_LONGER_12_MONTHS);
+				// should change to 398 days !!!
 			}
-			else if (IsValidLongerThan(*tm_before, *tm_after, 12))
+			
+			
+			if (IsValidLongerThan(*tm_before, *tm_after, 12))
 			{
 				SetWarning(WARN_EV_LONGER_12_MONTHS);
 			}
@@ -1508,9 +1539,10 @@ static void CheckTime(X509 *x509, struct tm *tm_before, struct tm *tm_after, Cer
 		else
 		{
 			/* CAB 9.4.1 */
-			if (IsValidLongerThan(*tm_before, *tm_after, 12))
+			if (IsValidLongerThan(*tm_before, *tm_after, 13))
 			{
 				SetError(ERR_LONGER_12_MONTHS);
+				// should change to 398 days !!!
 			}
 			else if (IsValidLongerThan(*tm_before, *tm_after, 39))
 			{
@@ -1528,7 +1560,6 @@ static int obj_cmp(const ASN1_OBJECT * const *a, const ASN1_OBJECT * const *b)
 static void CheckDuplicateExtensions(X509 *x509)
 {
 	STACK_OF(ASN1_OBJECT) *stack = sk_ASN1_OBJECT_new(obj_cmp);
-
 	for (int i = 0; i < X509_get_ext_count(x509); i++)
 	{
 		X509_EXTENSION *ext = X509_get_ext(x509, i);
@@ -1607,13 +1638,14 @@ static void CheckKU(X509 *x509, CertType type)
 	{
 		SetError(ERR_KEY_USAGE_EMPTY);
 	}
-	if (type == SubscriberCertificate && (bits & KU_KEY_CERT_SIGN) != 0)
+	if (type == SubscriberCertificate && (bits & (KU_KEY_CERT_SIGN|KU_CRL_SIGN)) != 0)
 	{
-		SetError(ERR_KEY_USAGE_HAS_CERT_SIGN);
+		SetError(ERR_KEY_USAGE_HAS_CERT_SIGN_OR_CRL_SIGN);
 	}
 	if (type != SubscriberCertificate && (bits & (KU_KEY_CERT_SIGN|KU_CRL_SIGN)) == 0)
 	{
 		SetWarning(WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN);
+		
 	}
 	if ((bits & KU_CRL_SIGN) != 0)
 	{
@@ -1626,7 +1658,7 @@ static void CheckKU(X509 *x509, CertType type)
 	ASN1_BIT_STRING_free(usage);
 }
 
-static void CheckEKU(X509 *x509, CertType type)
+static void CheckEKU(X509 *x509, struct tm *tm_before, CertType type)
 {
 	int idx = -1;
 	bool first = true;
@@ -1648,14 +1680,21 @@ static void CheckEKU(X509 *x509, CertType type)
 			/* Not found */
 			
 			/* modification: NO EKU_ERROR */ 
+			//	2019-01-01 GMT 1546300800 
+			//	2020-07-01 GMT 1593561600 
 			
 			if (first)
 			{
 				SetCertInfo(CERT_INFO_NO_EKU);
-				if ((type == SubscriberCertificate)||(type == IntermediateCA))
+				if (type == SubscriberCertificate)
 				{
-					SetError(ERR_NO_EKU);
+					if (mktime(tm_before) >= 1593561600) SetError(ERR_NO_EKU);
 				}
+				if (type == IntermediateCA)
+				{
+					if (mktime(tm_before) >= 1546300800) SetError(ERR_NO_EKU);
+				}
+				
 			}
 			break;
 			
@@ -1701,18 +1740,24 @@ static void CheckEKU(X509 *x509, CertType type)
 			else if (nid == NID_OCSP_sign)
 			{
 				SetCertInfo(CERT_INFO_OCSP_SIGN);
+				if (sk_ASN1_OBJECT_num(ekus) > 0) 
+				{
+					SetError(ERROR_OCSP_NOT_ALONE);
+					// ocsp only alone good
+				}	
 			}
 			else if (OBJ_cmp(oid, obj_IntelAMTvProEKU) == 0)
 			{
 				SetCertInfo(CERT_INFO_AMTVPRO_EKU);
 			}
 			/* inserted */
+			/* ms docsignign eku */
 			else if (OBJ_cmp(oid, obj_DocumentSigning) == 0)
 			{
 				SetCertInfo(CERT_INFO_DOCSIGN);
 			}
-
 			/* */
+
 			else
 			{
 				SetWarning(WARN_UNKNOWN_EKU);
@@ -1727,18 +1772,46 @@ static void CheckEKU(X509 *x509, CertType type)
 			SetError(ERR_EMPTY_EKU);
 		}
 		
-		/* beszuras */
+		/* insert */
+		
+		//	2019-01-01 GMT 1546300800 
+		//	2020-07-01 GMT 1593561600 
+		
 		if (type == IntermediateCA)
 		{
 			if (GetBit(cert_info, CERT_INFO_ANY_EKU))
 			{
-				SetError(ERROR_ANY_EKU_IN_INTERMEDIATE_MOZILLA);
+			if (mktime(tm_before) >= 1546300800) SetError(ERROR_ANY_EKU_MOZILLA); 
+			
 			}
-		}
+			
 		if (GetBit(cert_info, CERT_INFO_SERV_AUTH) && GetBit(cert_info, CERT_INFO_EMAIL) )
-		{
-		SetError(ERROR_INVALID_EKU_COMBO_IN_MOZILLA); 
+			{
+			if (mktime(tm_before) >= 1546300800) SetError(ERROR_INVALID_EKU_COMBO_IN_MOZILLA);
+			}
+		
 		}
+
+		if (type == SubscriberCertificate)
+		{
+			if (GetBit(cert_info, CERT_INFO_ANY_EKU))
+			{
+			if (mktime(tm_before) >= 1593561600) SetError(ERROR_ANY_EKU_MOZILLA); 
+			
+			}
+		// if the interemediate cant combine the server and email, then, the endsuser will be the same
+		
+		if (GetBit(cert_info, CERT_INFO_SERV_AUTH) && GetBit(cert_info, CERT_INFO_EMAIL) )
+			{
+			if (mktime(tm_before) >= 1546300800) SetError(ERROR_INVALID_EKU_COMBO_IN_MOZILLA);
+			}
+		
+		
+		
+		}
+		
+		
+
 		/* beszuras vege */
 		
 		sk_ASN1_OBJECT_pop_free(ekus, ASN1_OBJECT_free);
@@ -1816,13 +1889,22 @@ static void CheckSerial(X509 *x509)
 	if (BN_is_negative(bn_serial) || BN_is_zero(bn_serial))
 	{
 		SetError(ERR_SERIAL_NOT_POSITIVE);
+		printf("++ Problematic serial length: %i \n",serial->length);
 	}
 
 	if (serial->length > 20)
 	{
 		SetError(ERR_SERIAL_TOO_LARGE);
+		printf("++ Problematic serial length: %i \n",serial->length);
 	}
 
+/* check is there enough place for random */
+	if (serial->length < 8)
+	{
+		SetError(ERR_NO64BITRANDOM);
+		printf("++ Problematic serial length: %i \n",serial->length);
+	}
+/* */
 	CheckASN1_integer(serial);
 	BN_free(bn_serial);
 }
@@ -1830,6 +1912,7 @@ static void CheckSerial(X509 *x509)
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
 {
 	EVP_PKEY *pkey = X509_get_pubkey(x509);
+
 	if (pkey == NULL)
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
@@ -1853,53 +1936,69 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 			RSA_free(rsa);
 			return;
 		}
+
 		if (!GetBit(errors, ERR_INVALID_TIME_FORMAT))
 		{
 			if (tm_after.tm_year >= 114 && BN_num_bits(n) < 2048)
 			{
 				SetError(ERR_RSA_SIZE_2048);
+				printf("++ Problematic key size: %d\n",BN_num_bits(n));
 			}
 		}
+
 		if ((BN_num_bits(n)%8)> 0)
 		{
 				SetError(ERR_RSA_SIZE_DIVNON8);
+				printf("++ Problematic key size: %d\n",BN_num_bits(n));
 		}
-		
+
 		if (BN_is_negative(n))
 		{
 			SetError(ERR_RSA_MODULUS_NEGATIVE);
 		}
+
 		if (BN_is_odd(e) == 0)
 		{
 			SetError(ERR_RSA_EXP_NOT_ODD);
 		}
 		BIGNUM *i = BN_new();
 		BN_set_word(i, 3);
+
 		if (BN_cmp(e, i) < 0)
 		{
 			SetError(ERR_RSA_EXP_3);
+			printf("+ Exponent: %d\n",e);
 		}
 		else
 		{
+
 			BN_set_word(i, 0x10001);
 			if (BN_cmp(e, i) < 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 			BN_hex2bn(&i, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+
 			if (BN_cmp(e, i) > 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 		}
+
 		BN_CTX *ctx = BN_CTX_new();
-		if (BN_gcd(i, n, bn_factors, ctx) == 0 || !BN_is_one(i))
-		{
-			SetError(ERR_RSA_SMALL_FACTOR);
-		}
+		
+//		if (BN_gcd(i, n, bn_factors, ctx) == 0 || !BN_is_one(i))
+//		{
+//			SetError(ERR_RSA_SMALL_FACTOR);
+//		}
+
+		
 		BN_free(i);
+
 		BN_CTX_free(ctx);
+
 		RSA_free(rsa);
+
 	}
 	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_EC)
 	{
@@ -2038,6 +2137,7 @@ static void CheckSigAlg(X509 *x509)
 	const X509_ALGOR *sig_alg, *tbs_sig_alg;
 	X509_get0_signature(NULL, &sig_alg, x509);
 	tbs_sig_alg = X509_get0_tbs_sigalg(x509);
+
 	if (X509_ALGOR_cmp(sig_alg, tbs_sig_alg) != 0)
 	{
 		SetError(ERR_SIG_ALG_MISMATCH);
@@ -2149,13 +2249,13 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	{
 		SetError(ERR_ISSUER_COUNTRY);
 	}
-/*added commonname check */
+	/*added commonname check */
 	/* Required by CAB base 7.1.4.3.1 */
 	if (!IsNameObjPresent(issuer, obj_commonName))
 	{
 		SetError(ERR_ISSUER_COMMONNAME);
 	}
-
+	/* */
 	subject = X509_get_subject_name(x509);
 	if (subject == NULL)
 	{
@@ -2214,7 +2314,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	}
 
 	CheckKU(x509, type);
-	CheckEKU(x509, type);
+	CheckEKU(x509,&tm_before, type);
 	CheckPolicy(x509, type, subject);
 	CheckSAN(x509, type);
 	CheckBasicConstraints(x509, type);
@@ -2223,6 +2323,7 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	/* Deprecated in CAB base 7.1.4.2.2a */
 	if (IsNameObjPresent(subject, obj_commonName))
 	{
+		
 		if (type == SubscriberCertificate)
 		{
 			SetInfo(INF_SUBJECT_CN);
@@ -2233,8 +2334,11 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetWarning(WARN_NO_CN);
 	}
 
+
 	CheckCRL(x509);
+
 	CheckAIA(x509, type);
+
 	CheckPublicKey(x509, tm_after);
 
 	if ((type != SubscriberCertificate
@@ -2289,15 +2393,14 @@ void check_init()
 	obj_CABFOrganizationIdentifier = OBJ_txt2obj(OIDCABFOrganizationIdentifier, 1);
 	obj_organizationIdentifier = OBJ_txt2obj(OIDorganizationIdentifier, 1);
 	
-
+	obj_QcpN = OBJ_txt2obj(OIDQcpN, 1);
+	obj_QcpL = OBJ_txt2obj(OIDQcpL, 1);
+	obj_QcpNQSCD = OBJ_txt2obj(OIDQcpNQSCD, 1);
+	obj_QcpLQSCD = OBJ_txt2obj(OIDQcpLQSCD, 1);
+	obj_QcpW = OBJ_txt2obj(OIDQcpW, 1);
 	/* new oids in text form */
 
-/* qcp - ETSI */
-//static const char *OIDQcpN = "0.4.0.194112.1.0";
-//static const char *OIDQcpL = "0.4.0.194112.1.1";
-//static const char *OIDQcpNQSCD = "0.4.0.194112.1.2";
-//static const char *OIDQcpLQSCD = "0.4.0.194112.1.3";
-//static const char *OIDQcpW = "0.4.0.194112.1.4";
+
 /* ncp, lcp, evcp - ETSI */
 //static const char *OIDNCP = "0.4.0.2042.1.1";
 //static const char *OIDLCP = "0.4.0.2042.1.3";
@@ -2305,8 +2408,7 @@ void check_init()
 //static const char *OIDDVCP = "0.4.0.2042.1.6";
 //static const char *OIDOVCP = "0.4.0.2042.1.7";
 //static const char *OIDIVCP = "0.4.0.2042.1.8";
-/* cab */
-//static const char *OIDCABFOrganizationIdentifier = "2.23.140.3.1";
+
 	
 	
 
@@ -2324,6 +2426,7 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_utf32);
+
 	BN_free(bn_factors);
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
 	ASN1_OBJECT_free(obj_jurisdictionLocalityName);

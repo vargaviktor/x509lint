@@ -135,13 +135,15 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_RSA_SIZE_DIVNON8				 123
 #define ERR_LONGER_398DAYS					 124
 #define ERR_NO_EKU						     125
-#define ERROR_ANY_EKU_IN_INTERMEDIATE_MOZILLA 	126
+#define ERROR_ANY_EKU_MOZILLA 				 126
 #define ERROR_INVALID_EKU_COMBO_IN_MOZILLA		127
 #define ERR_EVOV_WITHOUT_ORGID					128
 #define ERR_EV_WITHOUT_CABFORGID				129
 #define ERR_ORGID_FORMAT						130
+#define ERR_NO64BITRANDOM						131
+#define ERROR_OCSP_NOT_ALONE					132
 /* end block modify, when finsihed */
-#define MAX_ERR                              ERR_ORGID_FORMAT  
+#define MAX_ERR                              ERROR_OCSP_NOT_ALONE 
 /* end block modify, when finsihed */
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */
@@ -173,7 +175,8 @@ typedef enum { PEM, DER } CertFormat;
 #define INF_CHECKING_LEAF                 5
 #define INF_CHECKING_INTERMEDIATE_CA      6
 #define INF_CHECKING_ROOT_CA              7
-#define MAX_INF                           INF_CHECKING_ROOT_CA
+#define INFO_QUALIFIED					  8
+#define MAX_INF                           INFO_QUALIFIED
 
 extern uint32_t errors[];
 extern uint32_t warnings[];

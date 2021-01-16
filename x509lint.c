@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
 	unsigned char *buffer;
 	size_t buflen;
-
+	
 	if (argc != 2)
 	{
 		printf("Usage: x509lint <cert_file>\n");
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	}
 
 	check_init();
-	
+
 	check(buffer, buflen, PEM, GetType(x509));
 
 	char *m = get_messages();
