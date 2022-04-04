@@ -149,7 +149,7 @@ static ASN1_OBJECT *obj_QcpW;
 
 
 /*  */
-uint32_t errors[4];
+uint32_t errors[5];
 uint32_t warnings[1];
 uint32_t info[1];
 uint32_t cert_info[1];
@@ -189,12 +189,12 @@ static BIGNUM *bn_factors;
 
 static void SetBit(uint32_t *val, int bit)
 {
-	val[bit/(sizeof(uint32_t)*8)] |= (1 << (bit % (sizeof(int)*8)));
+	val[bit/(sizeof(uint32_t)*8)] |= ((uint32_t)1 << (bit % (sizeof(uint32_t)*8)));
 }
 
 bool GetBit(uint32_t *val, int bit)
 {
-	return (val[bit/(sizeof(uint32_t)*8)] & (1 << (bit % (sizeof(uint32_t)*8)))) != 0;
+	return (val[bit/(sizeof(uint32_t)*8)] & ((uint32_t)1 << (bit % (sizeof(uint32_t)*8)))) != 0;
 }
 
 #define SetError(bit) SetBit(errors, bit)
@@ -203,7 +203,7 @@ bool GetBit(uint32_t *val, int bit)
 #define SetCertInfo(bit) SetBit(cert_info, bit)
 #define GetCertInfo(bit) GetBit(cert_info, bit)
 
-X509 *GetCert(unsigned char *data, size_t len, CertFormat format)
+X509 *GetCert(const unsigned char *data, size_t len, CertFormat format)
 {
 	X509 *x509;
 	BIO *bio = BIO_new_mem_buf(data, len);
@@ -252,7 +252,6 @@ static void CheckValidURL(const unsigned char *s, int n)
 	/* RFC3986 */
 	static char *reserved_chars = ":/?#[]@!$&'()*+,;=";
 	static char *unreserved_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
-
 
 	int i = 0;
 	while (i < n)
@@ -337,7 +336,7 @@ static bool CheckPrintableChars(const uint32_t *s, int n)
  */
 static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 {
-	char *utf8 = NULL;
+	unsigned char *utf8 = NULL;
 	size_t utf8_len;
 	bool ret = true;
 
@@ -345,14 +344,14 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	{
 		size_t n = data->length;
 		size_t utf8_size = data->length;
-		char *s = (char *)data->data;
+		unsigned char *s = data->data;
 		utf8 = malloc(utf8_size);
-		char *pu = utf8;
+		unsigned char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_utf8, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_utf8, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
+		if (iconv(iconv_utf8, (char **)&s, &n, (char **)&pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			ret = false;
 			SetError(ERR_INVALID_ENCODING);
@@ -363,14 +362,14 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 	{
 		size_t n = data->length;
 		size_t utf8_size = data->length*3;		/* U+FFFF is represented with 3 UTF-8 chars */
-		char *s = (char *)data->data;
+		unsigned char *s = data->data;
 		utf8 = malloc(utf8_size);
-		char *pu = utf8;
+		unsigned char *pu = utf8;
 
 		/* reset iconv */
 		iconv(iconv_ucs2, NULL, 0, NULL, 0);
 
-		if (iconv(iconv_ucs2, &s, &n, &pu, &utf8_size) == (size_t) -1 || n != 0)
+		if (iconv(iconv_ucs2, (char **)&s, &n, (char **)&pu, &utf8_size) == (size_t) -1 || n != 0)
 		{
 			ret = false;
 			SetError(ERR_INVALID_ENCODING);
@@ -490,7 +489,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 			/* reset iconv */
 			iconv(iconv_utf32, NULL, 0, NULL, 0);
 
-			char *s = utf8;
+			unsigned char *s = utf8;
 			size_t n = utf8_len;
 			if (n >= 3 && s[0] == 0xEF && s[1] == 0xBB && s[2] == 0xBF)
 			{
@@ -501,7 +500,7 @@ static bool CheckStringValid(ASN1_STRING *data, size_t *char_len)
 			uint32_t *utf32 = malloc(utf32_size);
 			char *pu = (char *)utf32;
 
-			if (iconv(iconv_utf32, &s, &n, (char **)&pu, &utf32_size) == (size_t) -1 || n != 0)
+			if (iconv(iconv_utf32, (char **)&s, &n, (char **)&pu, &utf32_size) == (size_t) -1 || n != 0)
 			{
 				/* Shouldn't happen. */
 				SetError(ERR_INVALID_ENCODING);
@@ -774,7 +773,6 @@ static bool IsValidLongerThanDays(struct tm tm_from, struct tm tm_to, int days)
 	}
 	return false;
 }
-
  */
 
 
@@ -1098,7 +1096,6 @@ static int ASN1_STRING_cmpcase(const ASN1_STRING *s1, const ASN1_STRING *s2)
 
 static void CheckSAN(X509 *x509, CertType type)
 {
-
 	int idx = -1;
 	bool bSanFound = false;
 	bool bSanName = false;
@@ -1157,7 +1154,6 @@ static void CheckSAN(X509 *x509, CertType type)
 		if (OBJ_cmp(obj_commonName, obj) == 0)
 		{
 			commonName = X509_NAME_ENTRY_get_data(ne);
-			
 			break;
 		}
 	}
@@ -1234,7 +1230,6 @@ static void CheckSAN(X509 *x509, CertType type)
 				if (ASN1_STRING_cmpcase(name_s, commonName) == 0)
 				{
 					bCommonNameFound = true;
-					
 				}
 			}
 			if (type == GEN_IPADD)
@@ -1560,6 +1555,7 @@ static int obj_cmp(const ASN1_OBJECT * const *a, const ASN1_OBJECT * const *b)
 static void CheckDuplicateExtensions(X509 *x509)
 {
 	STACK_OF(ASN1_OBJECT) *stack = sk_ASN1_OBJECT_new(obj_cmp);
+
 	for (int i = 0; i < X509_get_ext_count(x509); i++)
 	{
 		X509_EXTENSION *ext = X509_get_ext(x509, i);
@@ -1645,7 +1641,6 @@ static void CheckKU(X509 *x509, CertType type)
 	if (type != SubscriberCertificate && (bits & (KU_KEY_CERT_SIGN|KU_CRL_SIGN)) == 0)
 	{
 		SetWarning(WARN_KEY_USAGE_NO_CERT_OR_CRL_SIGN);
-		
 	}
 	if ((bits & KU_CRL_SIGN) != 0)
 	{
@@ -1715,7 +1710,6 @@ static void CheckEKU(X509 *x509, struct tm *tm_before, CertType type)
 			if (OBJ_cmp(oid, obj_anyEKU) == 0)
 			{
 				SetCertInfo(CERT_INFO_ANY_EKU);
-				
 			}
 			else if (nid == NID_server_auth)
 			{
@@ -1912,12 +1906,13 @@ static void CheckSerial(X509 *x509)
 static void CheckPublicKey(X509 *x509, struct tm tm_after)
 {
 	EVP_PKEY *pkey = X509_get_pubkey(x509);
-
 	if (pkey == NULL)
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
+		return;
 	}
-	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
+
+	if (EVP_PKEY_base_id(pkey) == EVP_PKEY_RSA)
 	{
 		RSA *rsa = EVP_PKEY_get1_RSA(pkey);
 
@@ -1936,7 +1931,6 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 			RSA_free(rsa);
 			return;
 		}
-
 		if (!GetBit(errors, ERR_INVALID_TIME_FORMAT))
 		{
 			if (tm_after.tm_year >= 114 && BN_num_bits(n) < 2048)
@@ -1956,14 +1950,12 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		{
 			SetError(ERR_RSA_MODULUS_NEGATIVE);
 		}
-
 		if (BN_is_odd(e) == 0)
 		{
 			SetError(ERR_RSA_EXP_NOT_ODD);
 		}
 		BIGNUM *i = BN_new();
 		BN_set_word(i, 3);
-
 		if (BN_cmp(e, i) < 0)
 		{
 			SetError(ERR_RSA_EXP_3);
@@ -1971,34 +1963,40 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		}
 		else
 		{
-
 			BN_set_word(i, 0x10001);
 			if (BN_cmp(e, i) < 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 			BN_hex2bn(&i, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-
 			if (BN_cmp(e, i) > 0)
 			{
 				SetWarning(WARN_RSA_EXP_RANGE);
 			}
 		}
-
 		BN_CTX *ctx = BN_CTX_new();
-		
-//		if (BN_gcd(i, n, bn_factors, ctx) == 0 || !BN_is_one(i))
-//		{
-//			SetError(ERR_RSA_SMALL_FACTOR);
-//		}
+		if (BN_gcd(i, n, bn_factors, ctx) == 0 || !BN_is_one(i))
+		{
+			SetError(ERR_RSA_SMALL_FACTOR);
+		}
 
-		
+		X509_PUBKEY *pubkey = X509_get_X509_PUBKEY(x509);
+		const unsigned char *k;
+		int pklen;
+		X509_ALGOR *a;
+		X509_PUBKEY_get0_param(NULL, &k, &pklen, &a, pubkey);
+		if (a->parameter == NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_MISSING);
+		}
+		else if (a->parameter->type != V_ASN1_NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
+		}
+
 		BN_free(i);
-
 		BN_CTX_free(ctx);
-
 		RSA_free(rsa);
-
 	}
 	else if (EVP_PKEY_base_id(pkey) == EVP_PKEY_EC)
 	{
@@ -2058,15 +2056,24 @@ static void CheckPublicKey(X509 *x509, struct tm tm_after)
 		BN_CTX_free(ctx);
 		EC_KEY_free(ec_key);
 	}
-	else if (EVP_PKEY_id(pkey) != EVP_PKEY_ED25519 && EVP_PKEY_id(pkey) != EVP_PKEY_ED448)
+	else if (EVP_PKEY_id(pkey) == EVP_PKEY_ED25519 || EVP_PKEY_id(pkey) == EVP_PKEY_ED448 || EVP_PKEY_id(pkey) == EVP_PKEY_X25519 || EVP_PKEY_id(pkey) == EVP_PKEY_X448)
+	{
+		X509_PUBKEY *pubkey = X509_get_X509_PUBKEY(x509);
+		const unsigned char *k;
+		int pklen;
+		X509_ALGOR *a;
+		X509_PUBKEY_get0_param(NULL, &k, &pklen, &a, pubkey);
+		if (a->parameter != NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_PRESENT);
+		}
+	}
+	else
 	{
 		SetError(ERR_UNKNOWN_PUBLIC_KEY_TYPE);
 	}
 
-	if (pkey != NULL)
-	{
-		EVP_PKEY_free(pkey);
-	}
+	EVP_PKEY_free(pkey);
 }
 
 static void CheckSKID(X509 *x509, CertType type)
@@ -2132,12 +2139,141 @@ CertType GetType(X509 *x509)
 	}
 }
 
+static void CheckPSSSig(const RSA_PSS_PARAMS *pss)
+{
+	int hash_nid = NID_undef, mask_nid = NID_undef, mask_hash_nid = NID_undef;
+	int64_t salt_len = 20;
+	int64_t trailer = 1;
+
+	if (pss->hashAlgorithm == NULL)
+	{
+		hash_nid = NID_sha1;
+	}
+	else
+	{
+		hash_nid = OBJ_obj2nid(pss->hashAlgorithm->algorithm);
+		if (hash_nid == NID_sha1)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+		if (pss->hashAlgorithm->parameter == NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_MISSING);
+		}
+		else if (pss->hashAlgorithm->parameter->type != V_ASN1_NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
+		}
+	}
+	if (hash_nid != NID_sha256 && hash_nid != NID_sha384 && hash_nid != NID_sha512)
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_HASH);
+	}
+
+	if (pss->maskGenAlgorithm == NULL)
+	{
+		mask_nid = NID_mgf1;
+		mask_hash_nid = NID_sha1;
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_HASH);
+	}
+	else
+	{
+		mask_nid = OBJ_obj2nid(pss->maskGenAlgorithm->algorithm);
+		if (pss->maskGenAlgorithm->parameter == NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_MISSING);
+		}
+		else if (pss->maskGenAlgorithm->parameter->type != V_ASN1_SEQUENCE)
+		{
+			SetError(ERR_ALG_WRONG_TYPE);
+		}
+		else
+		{
+			const unsigned char *p = pss->maskGenAlgorithm->parameter->value.sequence->data;
+			X509_ALGOR *a = d2i_X509_ALGOR(NULL, &p, pss->maskGenAlgorithm->parameter->value.sequence->length);
+			if (a == NULL)
+			{
+				SetError(ERR_ALG_WRONG_TYPE);
+			}
+			else
+			{
+				mask_hash_nid = OBJ_obj2nid(a->algorithm);
+				if (a->parameter == NULL)
+				{
+					SetError(ERR_ALG_PARAMETER_MISSING);
+				}
+				else if (a->parameter->type != V_ASN1_NULL)
+				{
+					SetError(ERR_ALG_PARAMETER_NOT_NULL);
+				}
+				if (mask_nid == NID_mgf1 && mask_hash_nid == NID_sha1)
+				{
+					SetError(ERR_DEFAULT_VALUE);
+				}
+				if (mask_hash_nid != NID_sha256 && mask_hash_nid != NID_sha384 && mask_hash_nid != NID_sha512)
+				{
+					/* BR 7.1.3.2.1 */
+					SetError(ERR_NOT_ALLOWED_HASH);
+				}
+				X509_ALGOR_free(a);
+			}
+		}
+	}
+	if (mask_nid != NID_mgf1)
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_NOT_ALLOWED_MASK_ALGORITHM);
+	}
+
+	if (hash_nid != mask_hash_nid)
+	{
+		/* RFC4055 recommends them to be equal, BR 7.1.3.2.1 only allows them to be equal */
+		SetError(ERR_PSS_HASH_NOT_EQUAL);
+	}
+
+	if (pss->saltLength != NULL)
+	{
+		if (!ASN1_INTEGER_get_int64(&salt_len, pss->saltLength))
+		{
+			SetError(ERR_PSS_INVALID_SALT_LENGTH);
+		}
+		else if (salt_len == 20)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+	}
+	if ((hash_nid == NID_sha256 && salt_len != 32)
+		|| (hash_nid == NID_sha384 && salt_len != 40)
+		|| (hash_nid == NID_sha512 && salt_len != 48))
+	{
+		/* BR 7.1.3.2.1 */
+		SetError(ERR_PSS_INVALID_SALT_LENGTH);
+	}
+
+	if (pss->trailerField != NULL)
+	{
+		if (!ASN1_INTEGER_get_int64(&trailer, pss->trailerField))
+		{
+			SetError(ERR_PSS_INVALID_TRAILER);
+		}
+		else if (trailer == 1)
+		{
+			SetError(ERR_DEFAULT_VALUE);
+		}
+	}
+	if (trailer != 1)
+	{
+		SetError(ERR_PSS_INVALID_TRAILER);
+	}
+}
+
 static void CheckSigAlg(X509 *x509)
 {
 	const X509_ALGOR *sig_alg, *tbs_sig_alg;
 	X509_get0_signature(NULL, &sig_alg, x509);
 	tbs_sig_alg = X509_get0_tbs_sigalg(x509);
-
 	if (X509_ALGOR_cmp(sig_alg, tbs_sig_alg) != 0)
 	{
 		SetError(ERR_SIG_ALG_MISMATCH);
@@ -2160,18 +2296,56 @@ static void CheckSigAlg(X509 *x509)
 	{
 		if (sig_alg->parameter != NULL || tbs_sig_alg->parameter != NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_PRESENT);
+			SetError(ERR_ALG_PARAMETER_PRESENT);
+		}
+	}
+	else if (sig_nid == NID_rsassaPss)
+	{
+		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
+		{
+			SetError(ERR_ALG_PARAMETER_MISSING);
+		}
+		else if (sig_alg->parameter->type != V_ASN1_SEQUENCE || tbs_sig_alg->parameter->type != V_ASN1_SEQUENCE)
+		{
+			SetError(ERR_ALG_WRONG_TYPE);
+		}
+		else
+		{
+			RSA_PSS_PARAMS *pss = NULL;
+			const unsigned char *p = sig_alg->parameter->value.sequence->data;
+			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
+			if (pss == NULL)
+			{
+				SetError(ERR_ALG_FAILED_DECODING);
+			}
+			else
+			{
+				CheckPSSSig(pss);
+			}
+			RSA_PSS_PARAMS_free(pss);
+
+			p = tbs_sig_alg->parameter->value.sequence->data;
+			pss = d2i_RSA_PSS_PARAMS(NULL, &p, sig_alg->parameter->value.sequence->length);
+			if (pss == NULL)
+			{
+				SetError(ERR_ALG_FAILED_DECODING);
+			}
+			else
+			{
+				CheckPSSSig(pss);
+			}
+			RSA_PSS_PARAMS_free(pss);
 		}
 	}
 	else if (pkey_nid == NID_rsaEncryption)
 	{
 		if (sig_alg->parameter == NULL || tbs_sig_alg->parameter == NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_MISSING);
+			SetError(ERR_ALG_PARAMETER_MISSING);
 		}
-		else if((sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL))
+		else if (sig_alg->parameter->type != V_ASN1_NULL || tbs_sig_alg->parameter->type != V_ASN1_NULL)
 		{
-			SetError(ERR_SIG_ALG_PARAMETER_NOT_NULL);
+			SetError(ERR_ALG_PARAMETER_NOT_NULL);
 		}
 	}
 	else
@@ -2180,7 +2354,7 @@ static void CheckSigAlg(X509 *x509)
 	}
 }
 
-void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
+void check(const unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertType type)
 {
 	X509_NAME *issuer;
 	X509_NAME *subject;
@@ -2323,7 +2497,6 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 	/* Deprecated in CAB base 7.1.4.2.2a */
 	if (IsNameObjPresent(subject, obj_commonName))
 	{
-		
 		if (type == SubscriberCertificate)
 		{
 			SetInfo(INF_SUBJECT_CN);
@@ -2334,11 +2507,8 @@ void check(unsigned char *cert_buffer, size_t cert_len, CertFormat format, CertT
 		SetWarning(WARN_NO_CN);
 	}
 
-
 	CheckCRL(x509);
-
 	CheckAIA(x509, type);
-
 	CheckPublicKey(x509, tm_after);
 
 	if ((type != SubscriberCertificate
@@ -2426,7 +2596,6 @@ void check_finish()
 	iconv_close(iconv_utf8);
 	iconv_close(iconv_ucs2);
 	iconv_close(iconv_utf32);
-
 	BN_free(bn_factors);
 	ASN1_OBJECT_free(obj_jurisdictionCountryName);
 	ASN1_OBJECT_free(obj_jurisdictionLocalityName);
@@ -2439,4 +2608,3 @@ void check_finish()
 	EVP_cleanup();
 	CRYPTO_cleanup_all_ex_data();
 }
-

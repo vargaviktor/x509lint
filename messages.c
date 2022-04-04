@@ -137,18 +137,29 @@ static const char *error_strings[] =
 	"E: AKID is critical (CAB 1.7.3 7.1.2.3)\n", /* ERR_AKID_CRITICAL */
 	"E: SKID missing (CAB 1.7.3 7.1.2.3)\n", /* ERR_SKID_MISSING */
 	"E: SKID critical (CAB 1.7.3 7.1.2.3)\n", /* ERR_SKID_CRITICAL */
-	"E: Signature algorithm parameter missing (RFC 5280 5.1.1.2)\n", /* ERR_SIG_ALG_PARAMETER_MISSING */
+    "E: Algorithm parameter missing (RFC 5280 5.1.1.2)\n", /* ERR_ALG_PARAMETER_MISSING */
 	"E: Bit string with leading 0 (ASN.1)\n", /* ERR_BIT_STRING_LEADING_0 */
-	"E: Signature algorithm parameter not NULL, where it shall (RFC 5280 5.1.1.2)\n", /* ERR_SIG_ALG_PARAMETER_NOT_NULL */
+	"E: Algorithm parameter not NULL, where it shall (RFC 5280 5.1.1.2)\n", /* ERR_ALG_PARAMETER_NOT_NULL */
 	"E: Unknown signature algorithm (RFC 5280 5.1.1.2)\n", /* ERR_UNKNOWN_SIGNATURE_ALGORITHM */
-	"E: Signature algorithm parameter present, where shall not (RFC 5280 5.1.1.2)\n", /* ERR_SIG_ALG_PARAMETER_PRESENT */
+	"E: Algorithm parameter present, where shall not (RFC 5280 5.1.1.2)\n", /* ERR_ALG_PARAMETER_PRESENT */
+    
+    
 	"E: Not using a named curve (ec)\n", /* ERR_NOT_NAMED_CURVE */
 	"E: Key usage with unknown bit (RFC5280 4.2.1.3.)\n", /* ERR_KEY_USAGE_UNKNOWN_BIT */
 	"E: Basic Constraints with pathlen but key usage without cert sign (RFC 5280 4.2.1.9.)\n", /* ERR_BASIC_CONSTRAINTS_NO_CERT_SIGN_PATHLEN */
 	"E: AKID without a key identifier (RFC 5280 4.2.1.1)\n", /* ERR_AKID_WITHOUT_KEY_ID */
 	"E: Invalid general name type (RFC 5280 A.2.)\n", /* ERR_INVALID_GENERAL_NAME_TYPE */
 	"E: EC key without parameters (ec)\n", /* ERR_EC_NO_PARAMETER */
-	"E: Issuer without commonName (CAB 1.7.3 7.1.4.3.1)\n", /* ERR_ISSUER_COMMONNAME*/
+    
+    "E: Algorithm with wrong ASN.1 type\n", /* ERR_ALG_WRONG_TYPE */
+	"E: Algorithm parameters failed to decode\n", /* ERR_ALG_FAILED_DECODING */
+	"E: Default value written instead of ommited\n", /* ERR_DEFAULT_VALUE */
+	"E: Hash algorithm not allowed\n", /* ERR_NOT_ALLOWED_HASH */
+	"E: Mask algorithm not allowed\n", /* ERR_NOT_ALLOWED_MASK_ALGORITHM */
+	"E: PSS hash algorithm not equal\n", /* ERR_PSS_HASH_NOT_EQUAL */
+	"E: Invalid PSS salt length\n", /* ERR_PSS_INVALID_SALT_LENGTH */
+	"E: Invalid PSS trailer\n", /* ERR_PSS_INVALID_TRAILER */
+   	"E: Issuer without commonName (CAB 1.7.3 7.1.4.3.1)\n", /* ERR_ISSUER_COMMONNAME*/
 	"E: RSA modulus divisable with other than 8 (CAB 1.7.3 6.1.5)\n", /* ERR_RSA_SIZE_DIVNON8 */
 	"E: Certificate longer than 398 days (CAB 1.7.3 6.1.5)\n", /* ERR_LONGER_398DAYS */ /* Not implemennted yet !!!*/ 
 	"E: FOR CAB ICA: ONLY AFTER 2020-08-20!!! Subscriber or intermediate certificate without Extended Key Usage(MRP 2.7 5.3; CAB 1.7.3 7.1.2.2,7.1.2.3; MSRP 4.A.18.) \n", /* ERR_NO_EKU */ /* possible false for cross certificates) */
@@ -235,4 +246,3 @@ char *get_messages()
 
 	return buffer;
 }
-
