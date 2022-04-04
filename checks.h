@@ -142,8 +142,10 @@ typedef enum { PEM, DER } CertFormat;
 #define ERR_ORGID_FORMAT						130
 #define ERR_NO64BITRANDOM						131
 #define ERROR_OCSP_NOT_ALONE					132
+#define ERR_KEY_USAGE_HAS_CERT_SIGN_OR_CRL_SIGN 	133
+
 /* end block modify, when finsihed */
-#define MAX_ERR                              ERROR_OCSP_NOT_ALONE 
+#define MAX_ERR                              ERR_KEY_USAGE_HAS_CERT_SIGN_OR_CRL_SIGN
 /* end block modify, when finsihed */
 
 /* This violates a SHOULD (or MUST with exception that can't be checked) */

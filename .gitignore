@@ -3,3 +3,5 @@ x509lint
 *.cer
 *.stackdump
 ~$*.*
+*.der
+*.pem
